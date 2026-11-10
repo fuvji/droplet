@@ -1,25 +1,25 @@
-Hydrogen Proprietary License
+Droplet Proprietary License
 
 Copyright (c) 2026 fuvji. All rights reserved.
 
-Hydrogen is proprietary software. The source is published at
+Droplet is proprietary software. The source is published at
 https://github.com/fuvji/hydrogen for transparency and inspection. Public
-availability does not make Hydrogen open source. The source, build scripts,
+availability does not make Droplet open source. The source, build scripts,
 documentation, signing material, and non-public assets remain the property of
 the copyright holder and are not licensed for copying, modification, or
 redistribution except as expressly stated below.
 
 1. Limited permission
 
-   You may use a distributed Hydrogen executable for personal, non-commercial
+   You may use a distributed Droplet executable for personal, non-commercial
    use on a device you own or control. This permission does not transfer
-   ownership of Hydrogen or grant any rights to copy, modify, or redistribute
+   ownership of Droplet or grant any rights to copy, modify, or redistribute
    its source.
 
 2. Restrictions
 
    You may not copy, modify, adapt, translate, redistribute, sublicense, sell,
-   rent, lease, publish, or incorporate Hydrogen, in whole or in part, into
+   rent, lease, publish, or incorporate Droplet, in whole or in part, into
    another product without prior written permission from the copyright holder.
    You may not remove or alter proprietary notices.
 
@@ -33,16 +33,16 @@ redistribution except as expressly stated below.
 
 4. No warranty
 
-   Hydrogen is provided "as is", without warranty of any kind, express or
+   Droplet is provided "as is", without warranty of any kind, express or
    implied, including warranties of merchantability, fitness for a particular
    purpose, and non-infringement. The copyright holder is not liable for any
-   claim, damage, or other liability arising from Hydrogen or its use.
+   claim, damage, or other liability arising from Droplet or its use.
 
 5. Termination
 
    This permission terminates automatically if you breach these terms. On
-   termination you must stop using Hydrogen and remove any copies you hold.
+   termination you must stop using Droplet and remove any copies you hold.
 
-This license does not grant permission to use Hydrogen's name, logo, or other
+This license does not grant permission to use Droplet's name, logo, or other
 brand assets except as required to describe an unmodified copy you are
 permitted to use.

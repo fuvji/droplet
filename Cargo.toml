@@ -1,12 +1,12 @@
 [package]
-name = "hydrogen"
-version = "2.5.0"
+name = "droplet"
+version = "2.6.0"
 edition = "2021"
-description = "Hydrogen - low latency Minecraft macro suite"
+description = "Droplet - low latency Minecraft macro suite"
 license = "LicenseRef-Proprietary"
 
 [[bin]]
-name = "hydrogen"
+name = "droplet"
 path = "src/main.rs"
 
 [dependencies]

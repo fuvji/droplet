@@ -1,6 +1,6 @@
 # AI and Vision Boundaries
 
-Hydrogen ships a deterministic, local timing brain. There is no LLM, camera
+Droplet ships a deterministic, local timing brain. There is no LLM, camera
 reader, WebView, screen-video model, or network AI in the runtime. This is a
 deliberate design choice, not a missing switch.
 
@@ -47,7 +47,7 @@ Do not ship a fake "AI brain" or claim 0 ms vision. Keep the local timing brain,
 optional offline profile, and short event-driven waits. A future vision or
 external-model feature requires a new design, a measured latency/CPU/size
 budget, a data-licensing review, and a separate opt-in surface. It must not
-weaken the focus gate or turn Hydrogen into a public-server cheat.
+weaken the focus gate or turn Droplet into a public-server cheat.
 
 ## Practical next step
 

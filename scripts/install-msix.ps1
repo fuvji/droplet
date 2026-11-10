@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not $Package) {
-    $Package = Join-Path $root 'apps\Hydrogen\Hydrogen.msix'
+    $Package = Join-Path $root 'apps\Droplet\Droplet.msix'
 }
 $pkg = (Resolve-Path -LiteralPath $Package).Path
 
@@ -76,7 +76,7 @@ if (-not $trusted) {
     }
 }
 
-$existing = Get-AppxPackage -Name 'HydrogenMacroSuite'
+$existing = Get-AppxPackage -Name 'DropletMacroSuite'
 $manifestVersion = [version]([xml](Get-Content -LiteralPath (Join-Path $root 'packaging\AppxManifest.xml') -Raw)).Package.Identity.Version
 $alreadyCurrent = $existing -and $existing.Version -eq $manifestVersion
 if (-not $alreadyCurrent) {
@@ -91,14 +91,14 @@ if (-not $alreadyCurrent) {
     }
 }
 
-$installed = Get-AppxPackage -Name 'HydrogenMacroSuite'
+$installed = Get-AppxPackage -Name 'DropletMacroSuite'
 if (-not $installed) {
-    throw 'Hydrogen did not register after Add-AppxPackage.'
+    throw 'Droplet did not register after Add-AppxPackage.'
 }
 
-Write-Output ('Installed Hydrogen ' + $installed.Version)
+Write-Output ('Installed Droplet ' + $installed.Version)
 Write-Output ('Package: ' + $installed.PackageFullName)
-Write-Output 'Launch Hydrogen from the Start menu. The panel starts in the tray.'
+Write-Output 'Launch Droplet from the Start menu. The panel starts in the tray.'
 if (-not $NoPause) {
     Read-Host 'Press Enter to close'
 }

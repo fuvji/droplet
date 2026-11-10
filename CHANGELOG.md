@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.6.0
+
+- Renamed the product from Hydrogen to Droplet throughout the binary, tray,
+  window class, configuration, installer, documentation, and site. Existing
+  `%LOCALAPPDATA%\Hydrogen` data is moved to `%LOCALAPPDATA%\Droplet` on first
+  launch when the new directory does not already exist.
+- Compacted the native panel from 648×432 to 624×408 and replaced the blue
+  accent picker with a fixed graphite/white palette. The Appearance card now
+  reports Graphite, Acrylic, Compact, and Soft corners. The existing Windows
+  acrylic backdrop and rounded window/DWM corners are preserved.
+- Trimmed two redundant Anchor waits while retaining the 50 ms game-tick
+  floor: one duplicate settle after the final hotbar selection and one trailing
+  busy hold. Anchor's normal path is 100 ms shorter. The timing sliders still
+  clamp every wait to at least one tick.
+- Added a monochrome Droplet site palette with neutral smoke gradients, grain,
+  updated droplet marks, compact native captures, and the new panel dimensions.
+  The site remains zero-JavaScript, zero-network, and capture-visible. Benchmark
+  and signal-bar geometry now lives in the stylesheet, so the strict CSP does
+  not block inline style attributes.
+- Release binary: 584,704 bytes. Release tests: 14/14 passing. The routing
+  benchmark remains 0.45 ns indexed versus 202.39 ns scan (445×, routing only).
+- Deliberate boundaries unchanged: no streamproof/capture-evasion mode, no
+  game-memory reads, no network calls, no anti-cheat bypass, and no zero-latency
+  or zero-delay claim. Minecraft still observes input on its 50 ms tick, and
+  live gameplay hit registration is unverified.
+
 ## 2.5.0
 
 - Replaced the per-event binding scan with a prebuilt event-to-action index.
@@ -60,7 +86,7 @@
 
 - Removed Air Anchor and all toggle/loop machinery.
 - Made Anchor the sole anchored sequence with distinct-slot validation.
-- Added the static Hydrogen product site.
+- Added the static Droplet product site.
 
 ## 2.3.8
 

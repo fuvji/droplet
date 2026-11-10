@@ -17,7 +17,7 @@ $mime = @{
 }
 
 $listener.Start()
-Write-Output "Hydrogen site: http://127.0.0.1:$Port/"
+Write-Output "Droplet site: http://127.0.0.1:$Port/"
 
 try {
     while ($true) {

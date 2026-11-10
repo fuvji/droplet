@@ -1,6 +1,6 @@
-# Sponsor Hydrogen
+# Sponsor Droplet
 
-Hydrogen is funded by direct sponsorships. The product site does not load a
+Droplet is funded by direct sponsorships. The product site does not load a
 third-party ad client, tracking pixel, cookie banner, or analytics script.
 
 Sponsor page: <https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/sponsors.html>
@@ -34,13 +34,13 @@ The public site does not measure traffic, so no audience counts are claimed.
 - Popups, interstitials, autoplay audio, tracking pixels, or third-party
   JavaScript.
 - Gambling, crypto speculation, adult content, or products that target minors.
-- A placement that implies Hydrogen endorses a product it does not use.
+- A placement that implies Droplet endorses a product it does not use.
 
 ## Technical boundary
 
 The sponsor page is plain HTML/CSS. A sponsor link is ordinary outbound
 navigation. Adding an ad network would require a visible change to the privacy
-and security model, and is not part of 2.5.0.
+and security model, and is not part of 2.6.0.
 
 ## Current status
 

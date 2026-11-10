@@ -1,4 +1,4 @@
-# Hydrogen website
+# Droplet website
 
 The public product page is a static site deployed through Freebuff Sites:
 
@@ -9,20 +9,20 @@ Source: <https://github.com/fuvji/hydrogen>
 ## Layout
 
 - `public/` contains the HTML, CSS, favicon, sitemap, robots file, sponsor
-  inventory, and real 2.5.0 captures from all four panel tabs.
+  inventory, and real 2.6.0 captures from all four panel tabs.
 - `worker.js` serves `env.ASSETS` and adds a strict CSP and cache policy.
 - `deploy.json` is the Freebuff Sites deployment manifest.
 - `SITE_ID.txt` records the Freebuff Sites project ID.
 
-The 2.5.0 page uses a cyan ion-lab visual system with measured trigger-routing
+The 2.6.0 page uses a cyan ion-lab visual system with measured trigger-routing
 facts, a benchmark chart, a runtime pipeline model, native capture crops,
 CSS-only motion, an audit, a hard-boundaries section, and direct sponsor
 inventory.
 
 The page has no external fonts, third-party images, analytics, ad clients,
 cookies, scripts, or network calls. The images are four distinct local captures
-at `public/assets/hydrogen-core.png`, `hydrogen-crystal.png`,
-`hydrogen-assist.png`, and `hydrogen-system.png`. `sponsors.html` uses the same
+at `public/assets/droplet-core.png`, `droplet-crystal.png`,
+`droplet-assist.png`, and `droplet-system.png`. `sponsors.html` uses the same
 stylesheet and no external resources.
 
 The capture lab deliberately does not present fabricated gameplay footage. The
@@ -30,9 +30,9 @@ page explains that live Minecraft hit registration is still unverified and
 invites a real clip through the issue link. The motion preview is a CSS study of
 the native Assist-tab capture; the preview tabs are four separate screenshots.
 
-Hydrogen is proprietary. The source and build scripts are published in the
+Droplet is proprietary. The source and build scripts are published in the
 public GitHub repository for transparency, but public availability is not an
-open-source grant. The site does not present Hydrogen as open source or as
+open-source grant. The site does not present Droplet as open source or as
 streamproof.
 
 ## Deploy

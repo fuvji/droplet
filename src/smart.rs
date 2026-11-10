@@ -96,7 +96,7 @@ fn parse_profile(text: &str) -> Vec<(usize, i32)> {
     out
 }
 
-/// Load `%LOCALAPPDATA%\Hydrogen\combat.profile` once at startup. Missing or
+/// Load `%LOCALAPPDATA%\Droplet\combat.profile` once at startup. Missing or
 /// invalid files leave the existing local cadence brain unchanged.
 pub fn load_profile() {
     let path = crate::config::data_dir_path().join("combat.profile");

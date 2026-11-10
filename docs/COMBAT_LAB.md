@@ -1,6 +1,6 @@
 # Combat Lab
 
-Hydrogen's combat lab is an offline, zero-dependency way to turn timestamped
+Droplet's combat lab is an offline, zero-dependency way to turn timestamped
 hit observations from combat footage into a small **timing prior** for the
 runtime. It is not a vision model and it does not watch video or use the
 network.
@@ -11,13 +11,13 @@ The lab measures the spacing between confirmed hits per module and writes the
 median interval to a compact profile:
 
 ```text
-# Hydrogen combat profile v1
+# Droplet combat profile v1
 v6=50
 v5=51
 wtap=105
 ```
 
-At startup, Hydrogen reads `%LOCALAPPDATA%\Hydrogen\combat.profile` once. The
+At startup, Droplet reads `%LOCALAPPDATA%\Droplet\combat.profile` once. The
 learned value is blended with the existing local cadence bias, then clamped to
 the module's configured Min/Max and tick floor. Delete the file to return to
 the original timing behavior. Smart timing must be enabled for the profile to
@@ -78,15 +78,15 @@ Optional arguments:
 -OutFile .\combat.profile
 ```
 
-The default output is `%LOCALAPPDATA%\Hydrogen\combat.profile`. Restart
-Hydrogen after generating it.
+The default output is `%LOCALAPPDATA%\Droplet\combat.profile`. Restart
+Droplet after generating it.
 
 ## Data and safety rules
 
 - Use your own recordings or datasets whose licenses allow this use. Do not
   commit video, images, or datasets to this repository.
 - Annotate private, consenting test servers only. Do not use the lab or
-  Hydrogen to cheat on public servers.
+  Droplet to cheat on public servers.
 - The runtime never opens the CSV, video, or combat profile over the network.
 - Profile values are clamped to the selected UI ranges and the 50 ms tick floor;
   the lab cannot bypass the focus, master, or binding safety gates.
@@ -98,7 +98,7 @@ Hydrogen after generating it.
 Unlabelled video has no action or hit label. Video-pretraining research such as
 OpenAI VPT uses an inverse-dynamics model and very large compute budgets to
 infer actions, and PvP projects such as PVP ROBO or rl-mc-pvp-bot ship Python
-training/inference stacks. None of that fits Hydrogen's zero-dependency,
+training/inference stacks. None of that fits Droplet's zero-dependency,
 offline, small-binary runtime. The lab therefore starts from the smallest
 honest signal: human-verified hit timestamps. See [AI boundaries](AI.md) for
 the research summary.

@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$exe = Join-Path $root 'target\x86_64-pc-windows-gnu\release\hydrogen.exe'
+$exe = Join-Path $root 'target\x86_64-pc-windows-gnu\release\droplet.exe'
 if (-not (Test-Path -LiteralPath $exe)) {
     throw 'Build the release executable before capturing screenshots.'
 }
@@ -17,7 +17,7 @@ Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
-public static class HydrogenTabs {
+public static class DropletTabs {
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
@@ -42,14 +42,14 @@ public static class HydrogenTabs {
 "@
 
 function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
-    $rect = New-Object HydrogenTabs+RECT
-    if (-not [HydrogenTabs]::GetWindowRect($Hwnd, [ref]$rect)) {
+    $rect = New-Object DropletTabs+RECT
+    if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
     }
     $width = $rect.Right - $rect.Left
     $height = $rect.Bottom - $rect.Top
     if ($width -le 0 -or $height -le 0) {
-        throw 'The Hydrogen panel has an empty window rectangle.'
+        throw 'The Droplet panel has an empty window rectangle.'
     }
 
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
@@ -57,7 +57,7 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
     try {
         $hdc = $graphics.GetHdc()
         try {
-            [HydrogenTabs]::PrintWindow($Hwnd, $hdc, 2) | Out-Null
+            [DropletTabs]::PrintWindow($Hwnd, $hdc, 2) | Out-Null
         } finally {
             $graphics.ReleaseHdc($hdc)
         }
@@ -70,37 +70,38 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
 
 function Click-Tab([IntPtr]$Hwnd, [int]$X, [int]$Y) {
     $lParam = [IntPtr]::new([int](($Y -shl 16) -bor ($X -band 0xFFFF)))
-    [HydrogenTabs]::PostMessage($Hwnd, 0x0201, [IntPtr]::new(1), $lParam) | Out-Null
+    [DropletTabs]::PostMessage($Hwnd, 0x0201, [IntPtr]::new(1), $lParam) | Out-Null
     Start-Sleep -Milliseconds 100
-    [HydrogenTabs]::PostMessage($Hwnd, 0x0202, [IntPtr]::Zero, $lParam) | Out-Null
+    [DropletTabs]::PostMessage($Hwnd, 0x0202, [IntPtr]::Zero, $lParam) | Out-Null
     Start-Sleep -Milliseconds 350
 }
 
 $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
 try {
     Start-Sleep -Seconds 2
-    $hwnd = [HydrogenTabs]::FindWindow('HydrogenOverlay', 'Hydrogen')
+    $hwnd = [DropletTabs]::FindWindow('DropletOverlay', 'Droplet')
     if ($hwnd -eq [IntPtr]::Zero) {
-        $hwnd = [HydrogenTabs]::FindWindow($null, 'Hydrogen')
+        $hwnd = [DropletTabs]::FindWindow($null, 'Droplet')
     }
     if ($hwnd -eq [IntPtr]::Zero) {
-        throw 'The Hydrogen panel window was not created.'
+        throw 'The Droplet panel window was not created.'
     }
 
-    [HydrogenTabs]::ShowWindow($hwnd, 5) | Out-Null
+    [DropletTabs]::ShowWindow($hwnd, 5) | Out-Null
     Start-Sleep -Milliseconds 700
 
-    $dpi = [HydrogenTabs]::GetDpiForWindow($hwnd)
+    $dpi = [DropletTabs]::GetDpiForWindow($hwnd)
     if ($dpi -le 0) { $dpi = 96 }
     $scale = $dpi / 96.0
 
-    # Rail items start at y=56 with a 40px pitch at 96 DPI. The click points
-    # are client coordinates, matching App::on_pointer's coordinate space.
+    # Rail items start at y=50 with a 34px height and 36px pitch at 96 DPI.
+    # The click points are client coordinates, matching App::on_pointer's
+    # coordinate space.
     $tabs = @(
-        @{ Name = 'hydrogen-core.png';    Y = 75;  X = 56 },
-        @{ Name = 'hydrogen-crystal.png'; Y = 115; X = 56 },
-        @{ Name = 'hydrogen-assist.png';  Y = 155; X = 56 },
-        @{ Name = 'hydrogen-system.png';  Y = 195; X = 56 }
+        @{ Name = 'droplet-core.png';    Y = 67;  X = 50 },
+        @{ Name = 'droplet-crystal.png'; Y = 103; X = 50 },
+        @{ Name = 'droplet-assist.png';  Y = 139; X = 50 },
+        @{ Name = 'droplet-system.png';  Y = 175; X = 50 }
     )
 
     foreach ($tab in $tabs) {

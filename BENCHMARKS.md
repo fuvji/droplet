@@ -1,14 +1,14 @@
-# Hydrogen benchmarks
+# Droplet benchmarks
 
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
-## 2.5.0 trigger routing
+## 2.6.0 trigger routing
 
 | Path | Time per lookup | What it does |
 | --- | ---: | --- |
 | Binding scan (2.4.1) | 202.39 ns | Hashes and scans up to 24 binding strings through the per-thread cache. |
-| Pre-indexed route (2.5.0) | 0.45 ns | Reads one slot from a prebuilt event-to-action table. |
+| Pre-indexed route (2.6.0) | 0.45 ns | Reads one slot from a prebuilt event-to-action table. |
 | Reduction | 445× | Same key event, same process, same release profile. |
 
 The table is built when settings publish, not on the input hook. It is rebuilt
@@ -44,12 +44,12 @@ trigger route: indexed=0.45 ns  scan=202.39 ns  speedup=445.2x
 - Minecraft hit registration, tick alignment, or network response.
 - A frame-rate, FPS, or “zero-latency” claim.
 
-Minecraft observes input on a 50 ms tick. Hydrogen reduces its own routing
+Minecraft observes input on a 50 ms tick. Droplet reduces its own routing
 work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Portable executable: **585,728 bytes**
+- Portable executable: **584,704 bytes**
 - Release tests: **14 / 14**
 - Runtime dependencies: **0**
 - Network calls: **0**

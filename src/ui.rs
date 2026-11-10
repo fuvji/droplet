@@ -6,17 +6,17 @@
 use crate::config::Settings;
 use crate::gp::{Canvas, Fonts};
 
-pub const WIN_W: f32 = 648.0;
-pub const WIN_H: f32 = 432.0;
+pub const WIN_W: f32 = 624.0;
+pub const WIN_H: f32 = 408.0;
 
-pub const HEADER_H: f32 = 48.0;
-const RAIL_W: f32 = 112.0;
-const FOOTER_H: f32 = 24.0;
-const CARD_TITLE: f32 = 24.0;
-const ROW_H: f32 = 22.0;
-const CARD_PAD: f32 = 6.0;
-const GAP: f32 = 10.0;
-const PAD: f32 = 12.0;
+pub const HEADER_H: f32 = 44.0;
+const RAIL_W: f32 = 100.0;
+const FOOTER_H: f32 = 22.0;
+const CARD_TITLE: f32 = 22.0;
+const ROW_H: f32 = 21.0;
+const CARD_PAD: f32 = 5.0;
+const GAP: f32 = 8.0;
+const PAD: f32 = 10.0;
 const COL_W: f32 = (WIN_W - RAIL_W - PAD * 2.0 - GAP) / 2.0;
 
 // Shared domains for the three fast timing modules. The default is 47/53;
@@ -116,24 +116,25 @@ pub struct Theme {
 }
 
 impl Theme {
-    pub fn new(s: &Settings) -> Theme {
-        let (r, g, b) = s.theme_rgb();
-        let accent = 0xFF00_0000 | ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
+    pub fn new(_s: &Settings) -> Theme {
+        // One fixed graphite/white palette. The old RGB picker is deliberately
+        // gone: the product is monochrome, so every build looks the same and the
+        // paint path does not carry a second color system.
         Theme {
-            bg: 0xFF0A_0A0C,
-            rail: 0xFF0E_0E11,
-            card: 0xFF12_1215,
-            card_on: 0xFF17_171B,
-            border: 0x14FF_FFFF,
-            border_on: 0x1FFF_FFFF,
-            text: 0xFFF5_F5F7,
-            dim: 0xFFA6_A6AD,
-            faint: 0xFF6E_6E76,
-            accent,
-            on_accent: 0xFF0A_0A0C,
-            chip: 0xFF1B_1B1F,
-            track: 0xFF2C_2C30,
-            danger: 0xFFFF_6B6B,
+            bg: 0xFF0A_0A0B,
+            rail: 0xFF0D_0D0F,
+            card: 0xFF13_1315,
+            card_on: 0xFF19_191C,
+            border: 0x18FF_FFFF,
+            border_on: 0x2CFF_FFFF,
+            text: 0xFFF4_F4F5,
+            dim: 0xFF9D_9DA3,
+            faint: 0xFF66_666C,
+            accent: 0xFFE7_E7E9,
+            on_accent: 0xFF0A_0A0B,
+            chip: 0xFF1D_1D20,
+            track: 0xFF30_3034,
+            danger: 0xFFD2_6E6E,
         }
     }
 }
@@ -270,7 +271,7 @@ impl<'a> Ui<'a> {
             1.0,
             WIN_W * s - 2.0,
             WIN_H * s - 2.0,
-            8.0 * s,
+            12.0 * s,
             with_alpha(self.th.text, 14),
             1.0,
         );
@@ -278,17 +279,18 @@ impl<'a> Ui<'a> {
 
     fn header(&mut self) {
         let s = self.scale;
-        // No wordmark: the mark alone carries the brand, centered in the rail.
-        self.logo((RAIL_W - 24.0) * 0.5 * s, 12.0 * s, 24.0 * s);
+        // No wordmark: the droplet mark alone carries the brand, centered in
+        // the rail. The compact header keeps the title on the same optical axis.
+        self.logo((RAIL_W - 22.0) * 0.5 * s, 10.0 * s, 22.0 * s);
 
         let titles = ["Core", "Crystal", "Assist", "System"];
         self.label(
             (RAIL_W + PAD) * s,
-            12.0 * s,
+            10.0 * s,
             200.0 * s,
-            24.0 * s,
+            22.0 * s,
             titles[self.tab],
-            17.0,
+            16.0,
             false,
             self.th.text,
         );
@@ -372,32 +374,32 @@ impl<'a> Ui<'a> {
         let items = [("Core", 0usize, 0u8), ("Crystal", 1, 1), ("Assist", 2, 2), ("System", 3, 3)];
         let mut y = (HEADER_H + 8.0) * s;
         for (name, idx, kind) in items {
-            let r = Rect::new(8.0 * s, y, (RAIL_W - 16.0) * s, 38.0 * s);
+            let r = Rect::new(8.0 * s, y, (RAIL_W - 16.0) * s, 34.0 * s);
             let active = self.tab == idx;
             let hot = self.hovered(r);
             let hv = self.anim(wid(name, 2), if hot { 1.0 } else { 0.0 });
             if active {
-                self.c.round_rect(r.x, r.y, r.w, r.h, 10.0 * s, with_alpha(self.th.text, 7));
-                self.c.round_rect(r.x, r.y + 11.0 * s, 2.0 * s, r.h - 22.0 * s, 1.0 * s, self.th.accent);
+                self.c.round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 7));
+                self.c.round_rect(r.x, r.y + 10.0 * s, 2.0 * s, r.h - 20.0 * s, 1.0 * s, self.th.accent);
             } else if hot {
-                self.c.round_rect(r.x, r.y, r.w, r.h, 10.0 * s, with_alpha(self.th.text, 5));
+                self.c.round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 5));
             }
             let tint = if active { self.th.accent } else { mix(self.th.dim, self.th.text, hv * 0.35) };
-            self.icon(kind, r.x + 11.0 * s, r.y + 12.0 * s, 14.0 * s, tint);
+            self.icon(kind, r.x + 10.0 * s, r.y + 10.0 * s, 14.0 * s, tint);
             self.label(
-                r.x + 32.0 * s,
+                r.x + 30.0 * s,
                 r.y,
-                r.w - 36.0 * s,
+                r.w - 34.0 * s,
                 r.h,
                 name,
-                10.0,
+                9.5,
                 false,
                 if active { self.th.text } else { tint },
             );
             if self.pressed && hot {
                 self.acts.push(Act::Tab(idx));
             }
-            y += 40.0 * s;
+            y += 36.0 * s;
         }
     }
 
@@ -450,13 +452,13 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         let on = toggle.map(|k| self.s.bool_at(k)).unwrap_or(true);
         let active = toggle.is_none() || on;
-        self.c.round_rect(r.x, r.y, r.w, r.h, 14.0 * s, if on { self.th.card_on } else { self.th.card });
+        self.c.round_rect(r.x, r.y, r.w, r.h, 12.0 * s, if on { self.th.card_on } else { self.th.card });
         self.c.round_stroke(
             r.x,
             r.y,
             r.w,
             r.h,
-            14.0 * s,
+            12.0 * s,
             if on { self.th.border_on } else { self.th.border },
             1.0,
         );
@@ -922,13 +924,12 @@ impl<'a> Ui<'a> {
         let (x0, x1) = (self.col(0) * s, self.col(1) * s);
         let mut y = (HEADER_H + PAD) * s;
 
-        let (cr, cg, cb) = self.s.theme_rgb();
         let r = Rect::new(x0, y, w, self.card_h(4));
-        self.card(r, "Accent", None);
-        self.row_theme(r, 0, "Red", 0, cr as i32);
-        self.row_theme(r, 1, "Green", 1, cg as i32);
-        self.row_theme(r, 2, "Blue", 2, cb as i32);
-        self.row_presets(r, 3);
+        self.card(r, "Appearance", None);
+        self.row_value(r, 0, "Palette", "Graphite");
+        self.row_value(r, 1, "Finish", "Acrylic");
+        self.row_value(r, 2, "Density", "Compact");
+        self.row_value(r, 3, "Corners", "Soft");
         y += r.h + gap;
 
         let r = Rect::new(x0, y, w, self.card_h(4));
@@ -1029,8 +1030,8 @@ impl<'a> Ui<'a> {
 // ------------------------------------------------------------- header hit
 
 pub fn header_buttons(w: f32, sc: f32) -> [Rect; 3] {
-    let close = Rect::new(w - 12.0 * sc - 22.0 * sc, 13.0 * sc, 22.0 * sc, 22.0 * sc);
-    let hide = Rect::new(close.x - 4.0 * sc - 22.0 * sc, 13.0 * sc, 22.0 * sc, 22.0 * sc);
-    let master = Rect::new(hide.x - 10.0 * sc - 76.0 * sc, 12.0 * sc, 76.0 * sc, 24.0 * sc);
+    let close = Rect::new(w - 10.0 * sc - 20.0 * sc, 12.0 * sc, 20.0 * sc, 20.0 * sc);
+    let hide = Rect::new(close.x - 4.0 * sc - 20.0 * sc, 12.0 * sc, 20.0 * sc, 20.0 * sc);
+    let master = Rect::new(hide.x - 8.0 * sc - 72.0 * sc, 11.0 * sc, 72.0 * sc, 22.0 * sc);
     [master, hide, close]
 }

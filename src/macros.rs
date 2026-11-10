@@ -486,10 +486,6 @@ fn anchor(s: &Settings, _ev: Ev) {
     }
 
     normal_anchor(s, anchor, glow, totem);
-
-    // Hold the busy guard through the blast tick so a second trigger cannot
-    // start another sequence inside the same game tick.
-    input::sleep_ms(input::TICK_MS as f64);
 }
 
 /// All three Anchor slots must be valid and distinct. Sharing a slot silently
@@ -499,6 +495,11 @@ fn anchor_slots_ok(anchor: Key, glow: Key, totem: Key) -> bool {
 }
 
 /// Normal Anchor: place, one glowstone charge, switch off glowstone, detonate.
+/// Each hotbar slot gets one settle tick before its action. The old path also
+/// inserted an extra tick after the final slot and held the busy guard for a
+/// trailing blast tick; both duplicated a boundary the game had already
+/// observed. Removing those two waits trims 100 ms without going below the
+/// 50 ms tick floor.
 fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
     tap_slot(Some(anchor));
     rc_exact(s);
@@ -508,9 +509,9 @@ fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
     rc_exact(s);
     anchor_wait(s);
 
-    // Switching away from glowstone is the detonation input.
+    // Switching away from glowstone is the detonation input. tap_slot already
+    // waits one full tick for the selection before the final right-click.
     tap_slot(Some(totem));
-    anchor_wait(s);
     rc_exact(s);
 }
 
@@ -692,8 +693,8 @@ fn sprint_deadline(now: i64, qpf: i64) -> i64 {
     now.saturating_add(qpf)
 }
 
-/// Watches physical W, never Hydrogen's injected W events. Sprint is the one
-/// repeating watcher in Hydrogen: while W is genuinely held it taps the sprint
+/// Watches physical W, never Droplet's injected W events. Sprint is the one
+/// repeating watcher in Droplet: while W is genuinely held it taps the sprint
 /// binding once per second. The key is never held down between pulses, and the
 /// 16 ms watcher does no binding work until a pulse is actually due.
 pub fn sprint_tick(s: &Settings, active: bool) {

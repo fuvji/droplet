@@ -1,12 +1,12 @@
-# Hydrogen
+# Droplet
 
 [Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/hydrogen) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
 
-Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
+Droplet is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Hydrogen 2.5.0 Core panel](site/public/assets/hydrogen-core.png)
+![Droplet 2.6.0 Core panel](site/public/assets/droplet-core.png)
 
 ## Features
 
@@ -15,7 +15,8 @@ keyboard/mouse input; it does not read or modify game memory.
   up to 24 binding strings. The release microbenchmark is 0.45 ns versus
   202.39 ns for the old route, a 445× reduction in the routing decision alone.
 - Anchor: place, charge once, switch off glowstone, detonate. The three slots
-  must be distinct and each step keeps the 50 ms tick floor.
+  must be distinct and each step keeps the 50 ms tick floor. 2.6.0 removes two
+  duplicated waits from the normal path, shortening it by 100 ms.
 - Sprint: while physical W is held, pulse the sprint binding once per second.
   The key is never held down between pulses, and the watcher is lock-free.
 - W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
@@ -26,37 +27,37 @@ keyboard/mouse input; it does not read or modify game memory.
   capture-evasion mode.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
   and Hover Inventory are one-shot actions with per-module busy guards.
-- 648×432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
+- 624×408 acrylic panel, event-driven rendering, Low Latency mode, adaptive
   local timing, an optional offline combat timing profile, and AHK-compatible
   INI migration.
 - Portable x64 executable plus a signed full-trust MSIX package.
 - The panel is visible to screen capture and streaming tools. There is no
   capture exclusion, streamproof mode, process hiding, or disguise behavior.
-- The public product page uses an ion-lab visual system with measured routing
-  facts, a pipeline model, native capture previews, CSS-only motion, an audit,
-  specs, and direct sponsor inventory.
+- The public product page uses a monochrome graphite/white acrylic system with
+  measured routing facts, a pipeline model, native capture previews, CSS-only
+  motion, an audit, specs, and direct sponsor inventory.
 
 ## Performance
 
-The 2.5.0 route benchmark is documented in [BENCHMARKS.md](BENCHMARKS.md).
+The 2.6.0 route benchmark is documented in [BENCHMARKS.md](BENCHMARKS.md).
 It measures the routing decision only:
 
 | Path | Time |
 | --- | ---: |
 | Binding scan (2.4.1) | 202.39 ns |
-| Pre-indexed route (2.5.0) | 0.45 ns |
+| Pre-indexed route (2.6.0) | 0.45 ns |
 | Reduction | 445× |
 
 This is not a zero-latency claim and not an end-to-end input or game-latency
 measurement. Minecraft observes input on a 50 ms tick. The reduced work is in
-Hydrogen's own hook path.
+Droplet's own hook path.
 
 ## Combat timing profile
 
 `tools/combat-lab.ps1` turns timestamped, human-confirmed hits from combat
 footage into a compact local timing prior. `tools/combat-annotator.html` is a
-local-only video page that exports the CSV; it never uploads the clip. Hydrogen
-reads `%LOCALAPPDATA%\Hydrogen\combat.profile` once at startup, blends it with
+local-only video page that exports the CSV; it never uploads the clip. Droplet
+reads `%LOCALAPPDATA%\Droplet\combat.profile` once at startup, blends it with
 the local cadence brain, and clamps it to the configured Min/Max. Delete the
 file to disable it. The runtime never reads video or the network.
 
@@ -65,7 +66,7 @@ rules, and [docs/AI.md](docs/AI.md) for the research boundary.
 
 ## Deliberate boundaries
 
-Hydrogen is designed to stay small, auditable, and predictable:
+Droplet is designed to stay small, auditable, and predictable:
 
 - No crates, network calls, telemetry, updater, or runtime downloader.
 - No camera, WebView, game-memory access, or external AI/LLM integration.
@@ -80,9 +81,9 @@ Hydrogen is designed to stay small, auditable, and predictable:
 
 ## Distribution
 
-Hydrogen is proprietary software. The source is published at
+Droplet is proprietary software. The source is published at
 <https://github.com/fuvji/hydrogen> for transparency and inspection. Public
-availability does not make Hydrogen open source: no licence is granted to copy,
+availability does not make Droplet open source: no licence is granted to copy,
 modify, redistribute, or sublicense the source. The versioned executable remains
 the supported product. See [LICENSE](LICENSE).
 
@@ -90,7 +91,7 @@ The public product page is static documentation and media. Its source is
 published in the same repository. It has no analytics, external fonts,
 client-side JavaScript, third-party ad scripts, or network calls. It includes a
 four native panel captures, CSS motion, a benchmark chart, a runtime model, and
-an explicit capture-lab note. The 2.5.0 page adds a direct sponsor inventory at
+an explicit capture-lab note. The site includes a direct sponsor inventory at
 `site/public/sponsors.html`; sponsor links are ordinary outbound navigation.
 The Freebuff Sites project ID is recorded in `site/SITE_ID.txt`.
 
@@ -130,7 +131,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1
 
 The script stages the manifest/assets/payload, packs and signs the MSIX with the
 project-local signing tools, and writes the portable executable to
-`apps/Hydrogen/Hydrogen.exe`. `Install-Hydrogen.cmd` installs the package and
+`apps/Droplet/Droplet.exe`. `Install-Droplet.cmd` installs the package and
 launches it from the Start menu.
 
 The development certificate is self-signed. Installing the package on another
@@ -138,7 +139,7 @@ machine requires trusting that certificate in `LocalMachine\TrustedPeople`.
 
 ## Configuration
 
-Settings live in `%LOCALAPPDATA%\Hydrogen\config.ini`. Existing AHK
+Settings live in `%LOCALAPPDATA%\Droplet\config.ini`. Existing AHK
 `%TEMP%\settings.dat` files are imported once using the same `v0`/`v6` key
 names. Config writes are atomic and an invalid slot combination or an inactive
 master/focus gate prevents injection.
@@ -152,11 +153,13 @@ master/focus gate prevents injection.
 - Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
   reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `585,728` bytes, `62501b5286c97d253109dfe906c6853a1e3b7135a8f1d26149f229f813d4b022`.
-- Signed MSIX: `312,525` bytes, `119c46e213e48b743067b2bd10850268547252779a4d6f6faabd7f70d2518814`;
-  signature verified by the local trust provider.
-- Source and package: `2.5.0` / `2.5.0.0`.
-- Four native 2.5.0 tab captures live in `site/public/assets/hydrogen-{core,crystal,assist,system}.png`.
+- Release binary: `584,704` bytes, `f83259c20bb8b7b28c0f5ca7ad3c0858f79b6efc6cabc093c5a5186f3aa1271d`.
+- Signed MSIX: `308,260` bytes, `f8b05064d274377a64464b899eaacc54a0b22f39d01b7a959f6d8e6f684ba9f8`;
+  signed with the local Droplet development certificate. A fresh machine needs
+  that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
+  with a one-time UAC prompt.
+- Source and package: `2.6.0` / `2.6.0.0`.
+- Four native 2.6.0 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft
 client; input injection and timing are verified independently. The site does

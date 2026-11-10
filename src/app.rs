@@ -411,7 +411,7 @@ impl App {
             .unwrap_or(false);
         if packaged {
             // MSIX install files live in a read-only WindowsApps directory and
-            // cannot be recycled by the app. Clear only Hydrogen's own data and
+            // cannot be recycled by the app. Clear only Droplet's own data and
             // open the Windows app-removal surface instead of pretending the
             // package was deleted.
             unsafe { open_url("ms-settings:appsfeatures") };
@@ -531,7 +531,7 @@ impl App {
             nid.uFlags = win::NIF_MESSAGE | win::NIF_ICON | win::NIF_TIP;
             nid.uCallbackMessage = win::WM_APP_TRAY;
             nid.hIcon = self.tray_icon;
-            win::wide_buf("Hydrogen - waiting for Minecraft", &mut nid.szTip);
+            win::wide_buf("Droplet - waiting for Minecraft", &mut nid.szTip);
             self.tray = win::Shell_NotifyIconW(win::NIM_ADD, &nid) != 0;
         }
         self.update_tray();
@@ -551,7 +551,7 @@ impl App {
         } else {
             "waiting for Minecraft"
         };
-        let tip = format!("Hydrogen - {} - {}", game, if armed { "armed" } else { "safe" });
+        let tip = format!("Droplet - {} - {}", game, if armed { "armed" } else { "safe" });
         unsafe {
             let mut nid: win::NOTIFYICONDATAW = std::mem::zeroed();
             nid.cbSize = std::mem::size_of::<win::NOTIFYICONDATAW>() as u32;
@@ -629,7 +629,7 @@ impl App {
     }
 
     fn on_pointer(&mut self, lp: LPARAM) {
-        // Synthetic macro input must never operate Hydrogen's own controls.
+        // Synthetic macro input must never operate Droplet's own controls.
         // If the panel is open while a macro clicks, the click would otherwise
         // hover a chip and start a rebind, stealing the next trigger key.
         if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
@@ -1334,7 +1334,7 @@ pub fn run() {
     unsafe {
         win::SetProcessDpiAwarenessContext(win::DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
-        let mutex_name = win::wide("HydrogenMacroSuite");
+        let mutex_name = win::wide("DropletMacroSuite");
         win::SetLastError(0);
         let mtx = win::CreateMutexW(std::ptr::null_mut(), 1, mutex_name.as_ptr());
         if mtx != 0 && win::GetLastError() == win::ERROR_ALREADY_EXISTS {
@@ -1366,7 +1366,7 @@ pub fn run() {
         };
 
         let hinst = win::GetModuleHandleW(std::ptr::null());
-        let class = win::wide("HydrogenOverlay");
+        let class = win::wide("DropletOverlay");
         let wc = WNDCLASSEXW {
             cbSize: std::mem::size_of::<WNDCLASSEXW>() as u32,
             style: 0x0001 | 0x0002,
@@ -1385,7 +1385,7 @@ pub fn run() {
             return;
         }
 
-        let title = win::wide("Hydrogen");
+        let title = win::wide("Droplet");
         let ex_style = win::WS_EX_TOPMOST
             | win::WS_EX_TOOLWINDOW
             | win::WS_EX_NOACTIVATE
@@ -1417,7 +1417,7 @@ pub fn run() {
 
         // Rounded corners via DWM. The fallback region uses the full ellipse
         // diameter (2r), not r, so older Windows builds match the painted edge.
-        let radius = (8.0 * dpi) as i32;
+        let radius = (12.0 * dpi) as i32;
         if !round_corners(hwnd, radius) {
             let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
             win::SetWindowRgn(hwnd, rgn, 1);

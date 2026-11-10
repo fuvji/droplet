@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap uap10 rescap">
 
   <Identity
-    Name="HydrogenMacroSuite"
-    Publisher="CN=Hydrogen Macro Suite"
-    Version="2.5.0.0"
+    Name="DropletMacroSuite"
+    Publisher="CN=Droplet Macro Suite"
+    Version="2.6.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>Hydrogen</DisplayName>
-    <PublisherDisplayName>Hydrogen Macro Suite</PublisherDisplayName>
+    <DisplayName>Droplet</DisplayName>
+    <PublisherDisplayName>Droplet Macro Suite</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -31,12 +31,12 @@
 
   <Applications>
     <Application
-      Id="Hydrogen"
-      Executable="Hydrogen.exe"
+      Id="Droplet"
+      Executable="Droplet.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Hydrogen"
-        Description="Low-latency Minecraft macro overlay"
+        DisplayName="Droplet"
+        Description="Droplet - compact Minecraft macro overlay"
         BackgroundColor="transparent"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Square150x150Logo="Assets\Square150x150Logo.png">

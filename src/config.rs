@@ -384,7 +384,14 @@ pub fn data_dir_path() -> PathBuf {
     let base = std::env::var_os("LOCALAPPDATA")
         .map(PathBuf::from)
         .unwrap_or_else(std::env::temp_dir);
-    base.join("Hydrogen")
+    let current = base.join("Droplet");
+    let legacy = base.join("Hydrogen");
+    // Keep existing users' bindings when the product is renamed. Only move the
+    // directory when the new one does not exist; never overwrite a fresh config.
+    if !current.exists() && legacy.exists() {
+        let _ = std::fs::rename(&legacy, &current);
+    }
+    current
 }
 
 pub fn data_dir() -> PathBuf {
@@ -393,11 +400,11 @@ pub fn data_dir() -> PathBuf {
     dir
 }
 
-/// Remove only Hydrogen's own data directory (config, debug log, old helper
+/// Remove only Droplet's own data directory (config, debug log, old helper
 /// files). Never create it first: that would leave an empty trace behind.
 pub fn purge_data() {
     let dir = data_dir_path();
-    if dir.file_name().and_then(|n| n.to_str()) == Some("Hydrogen") {
+    if dir.file_name().and_then(|n| n.to_str()) == Some("Droplet") {
         let _ = std::fs::remove_dir_all(dir);
     }
 }

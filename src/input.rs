@@ -254,7 +254,7 @@ pub fn raw_down(e: Ev) -> bool {
 }
 
 /// Physical key/button state as seen by the hooks, excluding every synthetic
-/// event Hydrogen sends. W-Tap can therefore release W without the sprint
+/// event Droplet sends. W-Tap can therefore release W without the sprint
 /// helper thinking the user let go, and it can avoid re-pressing W if the user
 /// actually released it during the tap window.
 static PHYS_K: [AtomicU64; 4] = [const { AtomicU64::new(0) }; 4];

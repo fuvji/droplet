@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$exe = Join-Path $root 'target\x86_64-pc-windows-gnu\release\hydrogen.exe'
+$exe = Join-Path $root 'target\x86_64-pc-windows-gnu\release\droplet.exe'
 if (-not (Test-Path -LiteralPath $exe)) {
     throw 'Build the release executable before capturing screenshots.'
 }
@@ -17,7 +17,7 @@ Add-Type @"
 using System;
 using System.Runtime.InteropServices;
 
-public static class HydrogenCapture {
+public static class DropletCapture {
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
@@ -38,25 +38,25 @@ public static class HydrogenCapture {
 $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
 try {
     Start-Sleep -Seconds 2
-    $hwnd = [HydrogenCapture]::FindWindow('HydrogenOverlay', 'Hydrogen')
+    $hwnd = [DropletCapture]::FindWindow('DropletOverlay', 'Droplet')
     if ($hwnd -eq [IntPtr]::Zero) {
-        $hwnd = [HydrogenCapture]::FindWindow($null, 'Hydrogen')
+        $hwnd = [DropletCapture]::FindWindow($null, 'Droplet')
     }
     if ($hwnd -eq [IntPtr]::Zero) {
-        throw 'The Hydrogen panel window was not created.'
+        throw 'The Droplet panel window was not created.'
     }
 
-    [HydrogenCapture]::ShowWindow($hwnd, 5) | Out-Null
+    [DropletCapture]::ShowWindow($hwnd, 5) | Out-Null
     Start-Sleep -Milliseconds 700
 
-    $rect = New-Object HydrogenCapture+RECT
-    if (-not [HydrogenCapture]::GetWindowRect($hwnd, [ref]$rect)) {
+    $rect = New-Object DropletCapture+RECT
+    if (-not [DropletCapture]::GetWindowRect($hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
     }
     $width = $rect.Right - $rect.Left
     $height = $rect.Bottom - $rect.Top
     if ($width -le 0 -or $height -le 0) {
-        throw 'The Hydrogen panel has an empty window rectangle.'
+        throw 'The Droplet panel has an empty window rectangle.'
     }
 
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
@@ -64,11 +64,11 @@ try {
     try {
         $hdc = $graphics.GetHdc()
         try {
-            [HydrogenCapture]::PrintWindow($hwnd, $hdc, 2) | Out-Null
+            [DropletCapture]::PrintWindow($hwnd, $hdc, 2) | Out-Null
         } finally {
             $graphics.ReleaseHdc($hdc)
         }
-        $bitmap.Save((Join-Path $out 'hydrogen-core.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+        $bitmap.Save((Join-Path $out 'droplet-core.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     } finally {
         $graphics.Dispose()
         $bitmap.Dispose()
