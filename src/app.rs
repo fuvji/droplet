@@ -1445,9 +1445,10 @@ pub fn run() {
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
         // DWM can return success for a layered popup while leaving its square
-        // frame visible. Enforce the same radius with a region after the
+        // frame visible. Enforce the radius with a region after the
         // acrylic/alpha path so every Windows build clips the four corners.
-        let radius = (14.0 * dpi).round() as i32;
+        // The same logical radius paints the hairline in ui::frame.
+        let radius = (ui::CORNER_RADIUS * dpi).round() as i32;
         let _ = round_corners(hwnd, radius);
         let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
         if rgn != 0 {

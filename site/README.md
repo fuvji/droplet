@@ -2,7 +2,7 @@
 
 The public product page is a static site deployed through Freebuff Sites:
 
-<https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page>
+<https://fuvji.github.io/droplet/>
 
 Source: <https://github.com/fuvji/droplet>
 
@@ -15,11 +15,12 @@ Source: <https://github.com/fuvji/droplet>
 - `deploy.json` is the Freebuff Sites deployment manifest.
 - `SITE_ID.txt` records the Freebuff Sites project ID.
 
-The 2.7.0 page uses a graphite/white acrylic visual system with measured
-trigger-routing facts, a benchmark chart, a runtime pipeline model, native
-capture crops, a silent four-tab CSS crossfade, the RGB Color card and
-Hold/Toggle chips, an audit, a hard-boundaries section, and direct sponsor
-inventory.
+The 2.8.0 page uses a graphite/white acrylic visual system with measured
+trigger-routing facts, a benchmark chart and measurement table, a runtime
+pipeline model, native capture crops, a silent four-tab CSS crossfade, panel
+anatomy notes, the RGB Color card and Hold/Toggle chips, an audit, a
+hard-boundaries section, and direct sponsor inventory. `refine.css` is a
+separate editorial layer over the base stylesheet.
 
 The page has no external fonts, third-party images, analytics, ad clients,
 cookies, scripts, or network calls. The images are four distinct local captures

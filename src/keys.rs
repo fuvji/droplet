@@ -284,9 +284,14 @@ pub fn name_of_vk(vk: u32) -> String {
 }
 
 pub fn display(binding: &str) -> String {
+    display_ref(binding).to_string()
+}
+
+/// Paint-path variant: no allocation for labels that are already stored.
+pub fn display_ref(binding: &str) -> &str {
     if binding.is_empty() {
-        "...".into()
+        "..."
     } else {
-        binding.to_string()
+        binding
     }
 }

@@ -12,7 +12,7 @@ install a background service.
 | 2.6.x | Yes |
 | 2.5.x and older | No |
 
-Only builds from the [project site](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page)
+Only builds from the [project site](https://fuvji.github.io/droplet/)
 or [GitHub](https://github.com/fuvji/droplet) are supported. Verify the release
 hash before running a binary from anywhere else.
 

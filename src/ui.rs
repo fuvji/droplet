@@ -8,6 +8,10 @@ use crate::gp::{Canvas, Fonts};
 
 pub const WIN_W: f32 = 624.0;
 pub const WIN_H: f32 = 408.0;
+/// One radius for the painted hairline and the window region. The region is
+/// built from this exact value so the clip and the stroke cannot disagree at
+/// the corners; the stroke sits half a pixel inside it.
+pub const CORNER_RADIUS: f32 = 13.0;
 
 pub const HEADER_H: f32 = 44.0;
 const RAIL_W: f32 = 100.0;
@@ -274,7 +278,7 @@ impl<'a> Ui<'a> {
             1.0,
             WIN_W * s - 2.0,
             WIN_H * s - 2.0,
-            12.0 * s,
+            (CORNER_RADIUS - 0.5) * s,
             with_alpha(self.th.text, 14),
             1.0,
         );
@@ -499,7 +503,9 @@ impl<'a> Ui<'a> {
 
     fn chip(&mut self, r: Rect, key: &'static str) {
         let s = self.scale;
-        let binding = self.s.str_at(key);
+        // Borrow the stored binding directly: the paint path used to allocate a
+        // String for every visible chip on every frame.
+        let binding = self.s.binding_at(key);
         let listening = self.capture == Some(key);
         let hot = self.hovered(r);
         let hv = self.anim(wid(key, 13), if hot { 1.0 } else { 0.0 });
@@ -510,11 +516,11 @@ impl<'a> Ui<'a> {
             with_alpha(self.th.text, (5.0 + 6.0 * hv) as u8)
         };
         self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, bg);
-        let text = if listening { "press…".to_string() } else { crate::keys::display(&binding) };
+        let text = if listening { "press…" } else { crate::keys::display_ref(binding) };
         let color = if listening { self.th.accent } else { self.th.text };
         // Long binding names must not bleed into the mode chip beside them.
         self.c.clip(r.x, r.y, r.w, r.h);
-        self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, &text, 9.0, false, color);
+        self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 9.0, false, color);
         self.c.reset_clip();
         if self.pressed && hot {
             self.acts.push(Act::Capture(key));

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/sitemap.xml
+Sitemap: https://fuvji.github.io/droplet/sitemap.xml

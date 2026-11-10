@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.8.0
+
+- Unified the window silhouette on one logical 13 px radius. The painted
+  hairline, the Win32 window region, and the four site capture masks now use the
+  same value, so the clip and the border agree at the corners at every scale.
+- Removed the last per-chip allocations from the panel paint path: binding and
+  slot labels are borrowed from the settings instead of being formatted into a
+  new String for every visible chip. The release binary is 2,048 bytes smaller
+  at 594,944 bytes.
+- Added a release test that keeps the borrowed binding lookup exactly in sync
+  with the INI value for every painted chip: 19/19 passing.
+- Rebuilt the product page as a cleaner editorial layout: larger display type,
+  hairline structure, consistent spacing, restrained scroll and hover motion,
+  a measurement-detail table, panel anatomy notes, and refined preview frames.
+  The headline is now **Minecraft Zero Macro**.
+- Added `site/public/refine.css` as a separate design layer over the existing
+  stylesheet, so the base layout stays intact and the refinement is easy to
+  audit. The page still ships no JavaScript, external fonts, or video.
+- Release binary: 594,944 bytes, SHA-256
+  `57449188e2abdf7da33620cf4698e3610030edf689512a4a55e2045621bd8ad3`.
+  Signed MSIX: 312,164 bytes, SHA-256
+  `e3c23f85c31a67a0272058f8995c0df87b6d261609c9337553f9dad6d52572b3`.
+- Boundaries unchanged: no streamproof or capture-evasion mode, no game-memory
+  reads, no network calls, no anti-cheat bypass, no input-device disguise, and no
+  zero-latency claim.
+
 ## 2.7.0
 
 - Restored the accent color picker as a compact System > Color card: six

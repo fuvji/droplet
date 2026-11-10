@@ -1,6 +1,6 @@
 # Droplet
 
-[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/droplet) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
+[Website](https://fuvji.github.io/droplet/) · [Source](https://github.com/fuvji/droplet) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
 
 Droplet is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
@@ -8,12 +8,13 @@ keyboard/mouse input; it does not read or modify game memory.
 
 ## About
 
-Droplet is a compact, local Minecraft macro suite for Windows, written in Rust.
-It is built for players who want exact, repeatable input sequences without
-game-memory reads, network calls, or telemetry. The panel and every action stay
-visible to ordinary screen capture.
+Droplet — branded **Minecraft Zero Macro** — is a compact, local keyboard-and-
+mouse macro suite for Windows, written in Rust. It is built for players who
+want exact, repeatable input sequences without game-memory reads, network
+calls, or telemetry. The panel and every action stay visible to ordinary screen
+capture.
 
-![Droplet 2.7.0 Core panel](site/public/assets/droplet-core.png)
+![Droplet 2.8.0 Core panel](site/public/assets/droplet-core.png)
 
 ## Features
 
@@ -35,6 +36,11 @@ visible to ordinary screen capture.
 - RGB accent picker: System > Color offers six presets and per-channel Red,
   Green, and Blue sliders, persisted in the original `thmC` key. Accent,
   borders, switches, chips, and charts all derive from it.
+- One logical 13 px corner radius paints the panel hairline and clips the
+  window region, and the four site captures use the same mask.
+- Binding and slot chips borrow their stored labels instead of formatting a
+  new String on every paint, removing the last per-chip allocations from the
+  panel frame.
 - The local cadence brain uses a warm-up EWMA: early activations adapt quickly,
   then the step floor settles at 12.5%, always inside the configured Min/Max.
 - System > Behaviour reports `Capture: Visible`. There is no streamproof or
@@ -161,21 +167,22 @@ master/focus gate prevents injection.
 
 ## Verification
 
-- `cargo test --release`: 18 tests covering config migration, timing bounds,
-  RGB parsing, trigger-mode normalization and latch generations, Anchor slot
-  validation, W-Tap defaults/planning, Sprint scheduling, cadence-brain
-  warm-up, combat-profile parsing, and trigger-index equivalence/benchmarking.
+- `cargo test --release`: 19 tests covering config migration, timing bounds,
+  RGB parsing, trigger-mode normalization and latch generations, the
+  allocation-free binding lookup, Anchor slot validation, W-Tap
+  defaults/planning, Sprint scheduling, cadence-brain warm-up, combat-profile
+  parsing, and trigger-index equivalence/benchmarking.
 - Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
   reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `596,992` bytes, `7fff6d11c36083326bb6bd85f273a8cd153854a057664c79be580a68d04f4a3f`.
-- Signed MSIX: `313,046` bytes, `35c7973ef43564e7ba25b32ea1e42a582b73ec57036eda6ff984dc171e3af18d`;
+- Release binary: `594,944` bytes, `57449188e2abdf7da33620cf4698e3610030edf689512a4a55e2045621bd8ad3`.
+- Signed MSIX: `312,164` bytes, `e3c23f85c31a67a0272058f8995c0df87b6d261609c9337553f9dad6d52572b3`;
   signed with the local Droplet development certificate. A fresh machine needs
   that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
   with a one-time UAC prompt.
 - Sprint deadline: 100 ms, asserted by `sprint_pulses_every_hundred_ms`; the
   watcher polls every 8 ms so the deadline is not rounded up by the timer.
-- Source and package: `2.7.0` / `2.7.0.0`.
+- Source and package: `2.8.0` / `2.8.0.0`.
 - Four native 624×408 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft

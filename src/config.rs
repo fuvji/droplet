@@ -268,6 +268,60 @@ impl Settings {
     pub fn str_at(&self, key: &str) -> String {
         self.get(key)
     }
+
+    /// Borrowed lookup for every binding and slot chip in the panel. The paint
+    /// path calls this once per chip per frame; returning `&str` keeps it
+    /// allocation-free. Kept in sync with `get` by a release test.
+    pub fn binding_at(&self, key: &str) -> &str {
+        match key {
+            "vDBn" => &self.dash_key,
+            "vDB2" => &self.dash_key2,
+            "vDS1" => &self.dash_spear,
+            "vDS2" => &self.dash_restore,
+            "v1Bn" => &self.shield_key,
+            "v1B2" => &self.shield_key2,
+            "v1S1" => &self.shield_axe,
+            "v2Bn" => &self.mace_key,
+            "v2B2" => &self.mace_key2,
+            "v2S1" => &self.mace_slot,
+            "v3Bn" => &self.breach_key,
+            "v3B2" => &self.breach_key2,
+            "v3S1" => &self.breach_mace,
+            "v3S2" => &self.breach_restore,
+            "v4Bn" => &self.potion_key,
+            "v4B2" => &self.potion_key2,
+            "v4S1" => &self.potion_slot1,
+            "v4S2" => &self.potion_slot2,
+            "v4S3" => &self.potion_restore,
+            "v5Bn" => &self.crystal_key,
+            "v5B2" => &self.crystal_key2,
+            "v5S1" => &self.crystal_obsidian,
+            "v5S2" => &self.crystal_slot,
+            "v6Bn" => &self.anchor_key,
+            "v6B2" => &self.anchor_key2,
+            "v6S1" => &self.anchor_slot,
+            "v6S2" => &self.glowstone_slot,
+            "v6S3" => &self.anchor_totem,
+            "v7Bn" => &self.pearl_key,
+            "v7B2" => &self.pearl_key2,
+            "v7S1" => &self.pearl_slot,
+            "v7S3" => &self.pearl_catch,
+            "v8Bn" => &self.totem_key,
+            "v8B2" => &self.totem_key2,
+            "v8Sp" => &self.totem_swap,
+            "v8T" => &self.totem_hotbar,
+            "v8I" => &self.hover_inv_key,
+            "vABn" => &self.fastuse_key,
+            "vAB2" => &self.fastuse_key2,
+            "vWBn" => &self.autouse_key,
+            "vWB2" => &self.autouse_key2,
+            "vWS1" => &self.autouse_slot,
+            "vBBn" => &self.sprint_key,
+            "vBB2" => &self.sprint_key2,
+            "vCBn" => &self.wtap_key,
+            _ => "",
+        }
+    }
     pub fn set_bool(&mut self, key: &str, v: bool) {
         self.set(key, if v { "1" } else { "0" });
     }
@@ -613,6 +667,22 @@ mod tests {
         assert_eq!(s.theme, "0CF0FF");
         assert_eq!(s.theme_rgb(), (12, 240, 255));
         assert_eq!(s.get("thmC"), "0CF0FF");
+    }
+
+    #[test]
+    fn fast_binding_lookup_covers_every_painted_chip() {
+        let s = Settings::default();
+        let keys = [
+            "vDBn", "vDB2", "vDS1", "vDS2", "v1Bn", "v1B2", "v1S1", "v2Bn", "v2B2",
+            "v2S1", "v3Bn", "v3B2", "v3S1", "v3S2", "v4Bn", "v4B2", "v4S1", "v4S2",
+            "v4S3", "v5Bn", "v5B2", "v5S1", "v5S2", "v6Bn", "v6B2", "v6S1", "v6S2",
+            "v6S3", "v7Bn", "v7B2", "v7S1", "v7S3", "v8Bn", "v8B2", "v8Sp", "v8T",
+            "v8I", "vABn", "vAB2", "vWBn", "vWB2", "vWS1", "vBBn", "vBB2", "vCBn",
+        ];
+        for key in keys {
+            assert_eq!(s.binding_at(key), s.get(key).as_str(), "{key}");
+        }
+        assert_eq!(s.binding_at("unknown"), "");
     }
 
     #[test]

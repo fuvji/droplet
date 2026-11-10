@@ -3,7 +3,7 @@
 Droplet is funded by direct sponsorships. The product site does not load a
 third-party ad client, tracking pixel, cookie banner, or analytics script.
 
-Sponsor page: <https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/sponsors.html>
+Sponsor page: <https://fuvji.github.io/droplet/sponsors.html.html>
 
 Inquiry: <https://github.com/fuvji/droplet/issues/new?title=Sponsorship%20inquiry&body=Company%3A%0APlacement%3A%0ABudget%3A%0ALink%3A>
 

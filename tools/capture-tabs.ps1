@@ -133,7 +133,8 @@ try {
 
     foreach ($tab in $tabs) {
         Click-Tab $hwnd ([int]($tab.X * $scale)) ([int]($tab.Y * $scale))
-        Save-Panel $hwnd $tab.Name ([int](14 * $scale))
+        # Must match ui::CORNER_RADIUS so the site mask and the window agree.
+        Save-Panel $hwnd $tab.Name ([int](13 * $scale))
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

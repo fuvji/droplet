@@ -1,15 +1,16 @@
 # Droplet
 
-Canonical: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/
+Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.7.0
+Version: 2.8.0
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 
-Droplet is a small, local macro suite for Minecraft Java. It is a native Rust
-overlay with no runtime dependencies, no network calls, no telemetry, and no
-game-memory access. It injects ordinary keyboard and mouse input through Win32
-SendInput and remains visible to screen capture.
+Droplet is a small, local keyboard-and-mouse macro suite for Minecraft Java,
+branded Minecraft Zero Macro. It is a native Rust overlay with no runtime
+dependencies, no network calls, no telemetry, and no game-memory access. It
+injects ordinary keyboard and mouse input through Win32 SendInput and remains
+visible to screen capture.
 
 ## Current release
 
@@ -17,7 +18,9 @@ SendInput and remains visible to screen capture.
 - System > Color offers six accent presets plus Red, Green, and Blue sliders.
 - Every trigger card switches between Hold (one-shot) and Toggle (latched repeat).
 - Four-tab native UI preview uses a CSS crossfade of stills, not gameplay.
-- Release 2.7.0 portable executable: 596,992 bytes.
+- Release 2.8.0 portable executable: 594,944 bytes.
+- 19 release tests pass, including RGB parsing, trigger-mode latch coverage,
+  and the allocation-free binding lookup used by the panel.
 - Pre-indexed trigger routing; the release benchmark measured 0.45 ns for the
   routing lookup versus 202.39 ns for the old binding scan.
 - Anchor normal path is 100 ms shorter than 2.5.0, with every step kept at or
@@ -31,8 +34,8 @@ SendInput and remains visible to screen capture.
 
 ## Links
 
-- Product page: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/
+- Product page: https://fuvji.github.io/droplet/
 - Source: https://github.com/fuvji/droplet
 - Benchmarks: https://github.com/fuvji/droplet/blob/main/BENCHMARKS.md
 - Changelog: https://github.com/fuvji/droplet/blob/main/CHANGELOG.md
-- Sponsor page: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/sponsors
+- Sponsor page: https://fuvji.github.io/droplet/sponsors.html
