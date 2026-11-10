@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.6.1
+
+- Sprint now re-pulses every 100 ms while physical W is held instead of once
+  per second. The watcher polls every 8 ms so the 100 ms QPC deadline is not
+  rounded up by a coarse sleep, and the sprint key is still tapped rather than
+  held between pulses.
+- Added a release test for the exact 100 ms deadline and moved all current
+  source links to <https://github.com/fuvji/droplet>. The old repository URL
+  redirects there.
+- Added `SECURITY.md`, `DEVELOPING.md`, and `site/public/llms.txt` so the
+  repository and static site cover vulnerability reporting, build/package
+  steps, and machine-readable product facts.
+- Release binary: 584,704 bytes, SHA-256
+  `1bf9e99079801d4bb5b1d351cf0532aa8a792e31c5847eab0699fc149bce6d51`.
+  Signed MSIX: 308,365 bytes, SHA-256
+  `bf943f48027d9e503efebc984f57cdc165d086a2e628fd11e36e706eff529bf6`.
+- Release tests: 14/14 passing. The trigger-routing benchmark is unchanged at
+  0.45 ns indexed versus 202.39 ns scanned; live Minecraft validation remains
+  separate.
+- Boundaries unchanged: no streamproof/capture-evasion mode, no game-memory
+  reads, no network calls, no anti-cheat bypass, and no zero-latency claim.
+
 ## 2.6.0
 
 - Renamed the product from Hydrogen to Droplet throughout the binary, tray,
@@ -62,7 +84,7 @@
   diagrams, a release audit, a sitemap, and asset-aware cache headers.
 - Added a 13th release test for cadence adaptation. The release binary is
   582,656 bytes.
-- Published the 2.4.1 source tree at github.com/fuvji/hydrogen and aligned the
+- Published the 2.4.1 source tree at github.com/fuvji/droplet and aligned the
   licence, README, and site with public-source, proprietary distribution.
 
 ## 2.4.0

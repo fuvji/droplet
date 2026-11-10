@@ -1,12 +1,12 @@
 # Droplet
 
-[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/hydrogen) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
+[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/droplet) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
 
 Droplet is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Droplet 2.6.0 Core panel](site/public/assets/droplet-core.png)
+![Droplet 2.6.1 Core panel](site/public/assets/droplet-core.png)
 
 ## Features
 
@@ -15,10 +15,11 @@ keyboard/mouse input; it does not read or modify game memory.
   up to 24 binding strings. The release microbenchmark is 0.45 ns versus
   202.39 ns for the old route, a 445× reduction in the routing decision alone.
 - Anchor: place, charge once, switch off glowstone, detonate. The three slots
-  must be distinct and each step keeps the 50 ms tick floor. 2.6.0 removes two
+  must be distinct and each step keeps the 50 ms tick floor. 2.6.0 removed two
   duplicated waits from the normal path, shortening it by 100 ms.
-- Sprint: while physical W is held, pulse the sprint binding once per second.
-  The key is never held down between pulses, and the watcher is lock-free.
+- Sprint: while physical W is held, pulse the sprint binding every 100 ms. The
+  key is never held down between pulses; the watcher is lock-free and samples
+  every 8 ms so the deadline is not rounded up by a coarse poll.
 - W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
   using the old W / 100–120 ms default pair migrate once.
 - The local cadence brain uses a warm-up EWMA: early activations adapt quickly,
@@ -39,13 +40,13 @@ keyboard/mouse input; it does not read or modify game memory.
 
 ## Performance
 
-The 2.6.0 route benchmark is documented in [BENCHMARKS.md](BENCHMARKS.md).
-It measures the routing decision only:
+The trigger-routing benchmark measured in 2.6.0 is documented in
+[BENCHMARKS.md](BENCHMARKS.md). It measures the routing decision only:
 
 | Path | Time |
 | --- | ---: |
 | Binding scan (2.4.1) | 202.39 ns |
-| Pre-indexed route (2.6.0) | 0.45 ns |
+| Pre-indexed route (2.5.0+) | 0.45 ns |
 | Reduction | 445× |
 
 This is not a zero-latency claim and not an end-to-end input or game-latency
@@ -82,7 +83,7 @@ Droplet is designed to stay small, auditable, and predictable:
 ## Distribution
 
 Droplet is proprietary software. The source is published at
-<https://github.com/fuvji/hydrogen> for transparency and inspection. Public
+<https://github.com/fuvji/droplet> for transparency and inspection. Public
 availability does not make Droplet open source: no licence is granted to copy,
 modify, redistribute, or sublicense the source. The versioned executable remains
 the supported product. See [LICENSE](LICENSE).
@@ -107,10 +108,11 @@ cargo build --release
 
 The release profile uses `opt-level = 3`, fat LTO, one codegen unit, aborting
 panics, and stripped symbols. The project targets
-`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The website is a pair of
-static HTML pages with a shared CSS file, local images, no JavaScript, no
-external fonts, and no third-party requests. Its worker adds a strict CSP and
-asset-aware cache headers.
+`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The repository's
+[development guide](DEVELOPING.md) covers packaging, site preview, and the
+security model. The website is a pair of static HTML pages with a shared CSS
+file, local images, no JavaScript, no external fonts, and no third-party
+requests. Its worker adds a strict CSP and asset-aware cache headers.
 
 ### Local site preview
 
@@ -153,13 +155,15 @@ master/focus gate prevents injection.
 - Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
   reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `584,704` bytes, `f83259c20bb8b7b28c0f5ca7ad3c0858f79b6efc6cabc093c5a5186f3aa1271d`.
-- Signed MSIX: `308,260` bytes, `f8b05064d274377a64464b899eaacc54a0b22f39d01b7a959f6d8e6f684ba9f8`;
+- Release binary: `584,704` bytes, `1bf9e99079801d4bb5b1d351cf0532aa8a792e31c5847eab0699fc149bce6d51`.
+- Signed MSIX: `308,365` bytes, `bf943f48027d9e503efebc984f57cdc165d086a2e628fd11e36e706eff529bf6`;
   signed with the local Droplet development certificate. A fresh machine needs
   that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
   with a one-time UAC prompt.
-- Source and package: `2.6.0` / `2.6.0.0`.
-- Four native 2.6.0 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
+- Sprint deadline: 100 ms, asserted by `sprint_pulses_every_hundred_ms`; the
+  watcher polls every 8 ms so the deadline is not rounded up by the timer.
+- Source and package: `2.6.1` / `2.6.1.0`.
+- Four native 624×408 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft
 client; input injection and timing are verified independently. The site does

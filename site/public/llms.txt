@@ -1,0 +1,34 @@
+# Droplet
+
+Canonical: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/
+Source: https://github.com/fuvji/droplet
+Version: 2.6.1
+Platform: Windows 10/11 x64
+Licence: proprietary, public source for inspection
+
+Droplet is a small, local macro suite for Minecraft Java. It is a native Rust
+overlay with no runtime dependencies, no network calls, no telemetry, and no
+game-memory access. It injects ordinary keyboard and mouse input through Win32
+SendInput and remains visible to screen capture.
+
+## Current release
+
+- Compact 624x408 graphite/white acrylic overlay.
+- Pre-indexed trigger routing; the release benchmark measured 0.45 ns for the
+  routing lookup versus 202.39 ns for the old binding scan.
+- Anchor normal path is 100 ms shorter than 2.5.0, with every step kept at or
+  above the 50 ms Minecraft tick.
+- Sprint pulses every 100 ms while physical W is held; it is the only repeating
+  watcher and never holds the key between pulses.
+- Anchor, Crystal, Mace, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
+  W-Tap, and Hover Inventory are one-shot or bounded actions.
+- No streamproof or capture-concealment mode, no process hiding, no scan
+  evasion, no anti-cheat bypass, and no zero-latency claim.
+
+## Links
+
+- Product page: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/
+- Source: https://github.com/fuvji/droplet
+- Benchmarks: https://github.com/fuvji/droplet/blob/main/BENCHMARKS.md
+- Changelog: https://github.com/fuvji/droplet/blob/main/CHANGELOG.md
+- Sponsor page: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/sponsors

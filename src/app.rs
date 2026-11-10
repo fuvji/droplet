@@ -1118,13 +1118,14 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
         }
     });
 
-    // sprint pulse: physical W only, one tap per second
+    // Sprint pulse: physical W only, 100 ms cadence. Poll faster than the
+    // deadline so the 100 ms schedule is not rounded up by the sleep interval.
     let e = engine.clone();
     thread::spawn(move || {
         while !e.quitting.load(Ordering::Relaxed) {
             let s = e.settings();
             macros::sprint_tick(&s, e.gate.load(Ordering::Relaxed));
-            thread::sleep(Duration::from_millis(16));
+            thread::sleep(Duration::from_millis(macros::SPRINT_TICK_MS));
         }
     });
 }

@@ -37,6 +37,23 @@ The test prints:
 trigger route: indexed=0.45 ns  scan=202.39 ns  speedup=445.2x
 ```
 
+## 2.6.1 Sprint schedule
+
+Sprint is the only repeating watcher. The deadline is now **100 ms** instead
+of 1 second. The watcher samples every **8 ms**, so the next pulse is scheduled
+against a QPC deadline rather than being delayed by a full poll interval. The
+key is tapped once per pulse and is never held down.
+
+The release test `sprint_pulses_every_hundred_ms` checks that the deadline is
+`qpf / 10` and that the next deadline advances by the same amount. This is a
+scheduler test, not an end-to-end game-latency measurement.
+
+Reproduce with:
+
+```bash
+cargo test --release sprint_pulses_every_hundred_ms
+```
+
 ## What this does not measure
 
 - End-to-end input latency.
@@ -50,6 +67,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 ## Release artifact
 
 - Portable executable: **584,704 bytes**
+- SHA-256: `1bf9e99079801d4bb5b1d351cf0532aa8a792e31c5847eab0699fc149bce6d51`
+- Signed MSIX: **308,365 bytes**
+- MSIX SHA-256: `bf943f48027d9e503efebc984f57cdc165d086a2e628fd11e36e706eff529bf6`
 - Release tests: **14 / 14**
 - Runtime dependencies: **0**
 - Network calls: **0**

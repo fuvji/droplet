@@ -30,6 +30,12 @@ static AUTOUSE_BUSY: AtomicBool = AtomicBool::new(false);
 /// QPC deadline for the next Sprint pulse. Zero means "pulse on the next tick".
 static SPRINT_NEXT: AtomicI64 = AtomicI64::new(0);
 
+/// Sprint keeps a 100 ms cadence while physical W is held. The watcher polls
+/// faster than the deadline so timer granularity does not turn 100 ms into
+/// 116 ms. The key itself is still a tap, never a held synthetic key.
+pub const SPRINT_COOLDOWN_MS: i64 = 100;
+pub const SPRINT_TICK_MS: u64 = 8;
+
 /// RAII re-entrancy gate for one-shot macros. Holding the guard for the whole
 /// sequence stops repeated input events from interleaving hotbar swaps, and
 /// releasing it on every return/early-exit keeps a bad binding from wedging a
@@ -690,13 +696,14 @@ fn sprint_due(next: i64, now: i64) -> bool {
 
 #[inline]
 fn sprint_deadline(now: i64, qpf: i64) -> i64 {
-    now.saturating_add(qpf)
+    let cooldown = qpf.saturating_mul(SPRINT_COOLDOWN_MS) / 1000;
+    now.saturating_add(cooldown.max(1))
 }
 
 /// Watches physical W, never Droplet's injected W events. Sprint is the one
 /// repeating watcher in Droplet: while W is genuinely held it taps the sprint
-/// binding once per second. The key is never held down between pulses, and the
-/// 16 ms watcher does no binding work until a pulse is actually due.
+/// binding every 100 ms. The key is never held down between pulses, and the
+/// 8 ms watcher does no binding work until a pulse is actually due.
 pub fn sprint_tick(s: &Settings, active: bool) {
     let want = s.master && s.sprint && active && input::physical_down(Ev::K(0x57));
     if !want {
@@ -759,14 +766,15 @@ mod tests {
     }
 
     #[test]
-    fn sprint_pulses_once_per_second() {
+    fn sprint_pulses_every_hundred_ms() {
         let qpf = 10_000_000i64;
         let first = 123_456i64;
         let deadline = sprint_deadline(first, qpf);
+        assert_eq!(deadline - first, qpf / 10);
         assert!(!sprint_due(deadline, first));
         assert!(!sprint_due(deadline, deadline - 1));
         assert!(sprint_due(deadline, deadline));
-        assert_eq!(sprint_deadline(deadline, qpf) - deadline, qpf);
+        assert_eq!(sprint_deadline(deadline, qpf) - deadline, qpf / 10);
     }
 
     #[test]
