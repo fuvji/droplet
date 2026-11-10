@@ -1,0 +1,13 @@
+# Local tooling and credentials
+/.agents/
+/.freebuff/
+/.toolchain/
+/scripts/obsidian-*.sh
+
+# Build and package output
+/target/
+/packaging/package/
+/apps/
+
+# Runtime noise
+*.log

@@ -1,0 +1,22 @@
+[package]
+name = "hydrogen"
+version = "2.3.7"
+edition = "2021"
+description = "Hydrogen - low latency Minecraft macro suite"
+license = "MIT"
+
+[[bin]]
+name = "hydrogen"
+path = "src/main.rs"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+debug = false
+incremental = false
+overflow-checks = false
