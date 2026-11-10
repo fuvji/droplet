@@ -13,7 +13,7 @@ It is built for players who want exact, repeatable input sequences without
 game-memory reads, network calls, or telemetry. The panel and every action stay
 visible to ordinary screen capture.
 
-![Droplet 2.6.2 Core panel](site/public/assets/droplet-core.png)
+![Droplet 2.7.0 Core panel](site/public/assets/droplet-core.png)
 
 ## Features
 
@@ -29,12 +29,19 @@ visible to ordinary screen capture.
   every 8 ms so the deadline is not rounded up by a coarse poll.
 - W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
   using the old W / 100–120 ms default pair migrate once.
+- Per-trigger Hold/Toggle: every trigger card carries a mode chip. Hold keeps
+  the one-shot behavior; Toggle latches one worker per module and stops on
+  master off, module off, a mode change, a reset, or losing the game gate.
+- RGB accent picker: System > Color offers six presets and per-channel Red,
+  Green, and Blue sliders, persisted in the original `thmC` key. Accent,
+  borders, switches, chips, and charts all derive from it.
 - The local cadence brain uses a warm-up EWMA: early activations adapt quickly,
   then the step floor settles at 12.5%, always inside the configured Min/Max.
 - System > Behaviour reports `Capture: Visible`. There is no streamproof or
   capture-evasion mode.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
-  and Hover Inventory are one-shot actions with per-module busy guards.
+  and Hover Inventory run as one-shot actions with per-module busy guards;
+  Toggle repeats that same sequence instead of opening a second code path.
 - 624×408 acrylic panel, event-driven rendering, Low Latency mode, adaptive
   local timing, an optional offline combat timing profile, and AHK-compatible
   INI migration.
@@ -43,7 +50,7 @@ visible to ordinary screen capture.
   capture exclusion, streamproof mode, process hiding, or disguise behavior.
 - The public product page uses a monochrome graphite/white acrylic system with
   measured routing facts, a pipeline model, native capture previews, a silent
-  four-tab UI reel, an audit, specs, and direct sponsor inventory.
+  four-tab CSS crossfade, an audit, specs, and direct sponsor inventory.
 
 ## Performance
 
@@ -96,9 +103,8 @@ modify, redistribute, or sublicense the source. The versioned executable remains
 the supported product. See [LICENSE](LICENSE).
 
 The public product page is static documentation and media. Its source is
-published in the same repository. It has no analytics, external fonts,
-client-side JavaScript, third-party ad scripts, or network calls. It includes a
-four native panel captures, CSS motion, a benchmark chart, a runtime model, and
+published in the same repository. It has no analytics, external fonts,  client-side JavaScript, third-party ad scripts, or network calls. It includes
+  four native panel captures, CSS motion, a benchmark chart, a runtime model, and
 an explicit capture-lab note. The site includes a direct sponsor inventory at
 `site/public/sponsors.html`; sponsor links are ordinary outbound navigation.
 The Freebuff Sites project ID is recorded in `site/SITE_ID.txt`.
@@ -155,21 +161,21 @@ master/focus gate prevents injection.
 
 ## Verification
 
-- `cargo test --release`: 14 tests covering config migration, timing bounds,
-  Anchor slot validation, W-Tap defaults/planning, Sprint scheduling,
-  cadence-brain warm-up, combat-profile parsing, and trigger-index
-  equivalence/benchmarking.
+- `cargo test --release`: 18 tests covering config migration, timing bounds,
+  RGB parsing, trigger-mode normalization and latch generations, Anchor slot
+  validation, W-Tap defaults/planning, Sprint scheduling, cadence-brain
+  warm-up, combat-profile parsing, and trigger-index equivalence/benchmarking.
 - Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
   reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `581,632` bytes, `264096e17917010b500bb971ae88dd868d8b4d2cc8369c009d4aa435872422c5`.
-- Signed MSIX: `305,682` bytes, `34ba5f4ec57651fcca40cbce7111b8403efaa63bb77a50c47b838e005ea60770`;
+- Release binary: `596,992` bytes, `7fff6d11c36083326bb6bd85f273a8cd153854a057664c79be580a68d04f4a3f`.
+- Signed MSIX: `313,046` bytes, `35c7973ef43564e7ba25b32ea1e42a582b73ec57036eda6ff984dc171e3af18d`;
   signed with the local Droplet development certificate. A fresh machine needs
   that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
   with a one-time UAC prompt.
 - Sprint deadline: 100 ms, asserted by `sprint_pulses_every_hundred_ms`; the
   watcher polls every 8 ms so the deadline is not rounded up by the timer.
-- Source and package: `2.6.2` / `2.6.2.0`.
+- Source and package: `2.7.0` / `2.7.0.0`.
 - Four native 624×408 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft

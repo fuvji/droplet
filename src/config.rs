@@ -146,8 +146,22 @@ settings_schema! {
     win_x:        "winX": i32 = -1i32;
     win_y:        "winY": i32 = -1i32;
 
-    // ---- modes
+    // ---- modes / theme
     wtap_mode: "vM":   String = "S";
+    theme:     "thmC": String = "E6E8EF";
+
+    // ---- trigger modes (hold = fire on press, toggle = latch the repeat loop)
+    dash_mode:    "vDMd": String = "hold";
+    shield_mode:  "v1Md": String = "hold";
+    mace_mode:    "v2Md": String = "hold";
+    breach_mode:  "v3Md": String = "hold";
+    potion_mode:  "v4Md": String = "hold";
+    crystal_mode: "v5Md": String = "hold";
+    anchor_mode:  "v6Md": String = "hold";
+    pearl_mode:   "v7Md": String = "hold";
+    totem_mode:   "v8Md": String = "hold";
+    fastuse_mode: "vABMd": String = "hold";
+    autouse_mode: "vWMd": String = "hold";
 
     // ---- trigger binds
     dash_key:     "vDBn": String = "b";
@@ -264,6 +278,48 @@ impl Settings {
         self.set(key, v);
     }
 
+    /// Accent colour as (r, g, b); invalid values fall back to the default tint.
+    pub fn theme_rgb(&self) -> (u8, u8, u8) {
+        let hex = self.theme.trim_start_matches('#');
+        if hex.len() >= 6 {
+            if let (Ok(r), Ok(g), Ok(b)) = (
+                u8::from_str_radix(&hex[0..2], 16),
+                u8::from_str_radix(&hex[2..4], 16),
+                u8::from_str_radix(&hex[4..6], 16),
+            ) {
+                return (r, g, b);
+            }
+        }
+        (230, 232, 239)
+    }
+
+    pub fn set_theme_rgb(&mut self, r: i32, g: i32, b: i32) {
+        self.theme = format!(
+            "{:02X}{:02X}{:02X}",
+            r.clamp(0, 255),
+            g.clamp(0, 255),
+            b.clamp(0, 255)
+        );
+    }
+
+    /// Allocation-free mode lookup for the input hook and the paint path.
+    pub fn mode_is_toggle(&self, key: &str) -> bool {
+        match key {
+            "vDMd" => self.dash_mode.eq_ignore_ascii_case("toggle"),
+            "v1Md" => self.shield_mode.eq_ignore_ascii_case("toggle"),
+            "v2Md" => self.mace_mode.eq_ignore_ascii_case("toggle"),
+            "v3Md" => self.breach_mode.eq_ignore_ascii_case("toggle"),
+            "v4Md" => self.potion_mode.eq_ignore_ascii_case("toggle"),
+            "v5Md" => self.crystal_mode.eq_ignore_ascii_case("toggle"),
+            "v6Md" => self.anchor_mode.eq_ignore_ascii_case("toggle"),
+            "v7Md" => self.pearl_mode.eq_ignore_ascii_case("toggle"),
+            "v8Md" => self.totem_mode.eq_ignore_ascii_case("toggle"),
+            "vABMd" => self.fastuse_mode.eq_ignore_ascii_case("toggle"),
+            "vWMd" => self.autouse_mode.eq_ignore_ascii_case("toggle"),
+            _ => false,
+        }
+    }
+
     /// Dash cooldown is stored as a 3-stop index: 1 = 50 ms, 2 = 100 ms,
     /// 3 = 150 ms. The index keeps the config compact and the UI discrete.
     pub fn dash_cd_ms(&self) -> i32 {
@@ -299,6 +355,25 @@ impl Settings {
         }
         if !(1..=3).contains(&self.mace_delay) {
             self.mace_delay = 1;
+        }
+        for mode in [
+            &mut self.dash_mode,
+            &mut self.shield_mode,
+            &mut self.mace_mode,
+            &mut self.breach_mode,
+            &mut self.potion_mode,
+            &mut self.crystal_mode,
+            &mut self.anchor_mode,
+            &mut self.pearl_mode,
+            &mut self.totem_mode,
+            &mut self.fastuse_mode,
+            &mut self.autouse_mode,
+        ] {
+            if mode.eq_ignore_ascii_case("toggle") {
+                *mode = "toggle".into();
+            } else {
+                *mode = "hold".into();
+            }
         }
 
         // Migrate the previous shipped defaults exactly once, without
@@ -528,5 +603,28 @@ mod tests {
         s.crystal_max = 103;
         s.normalize_timing();
         assert_eq!(s.crystal_max, 103);
+    }
+
+    #[test]
+    fn rgb_accent_round_trips_and_clamps_channels() {
+        let mut s = Settings::default();
+        assert_eq!(s.theme_rgb(), (230, 232, 239));
+        s.set_theme_rgb(12, 240, 999);
+        assert_eq!(s.theme, "0CF0FF");
+        assert_eq!(s.theme_rgb(), (12, 240, 255));
+        assert_eq!(s.get("thmC"), "0CF0FF");
+    }
+
+    #[test]
+    fn trigger_modes_default_to_hold_and_normalize_known_values() {
+        let mut s = Settings::default();
+        assert!(!s.mode_is_toggle("v1Md"));
+        s.shield_mode = "TOGGLE".into();
+        s.mace_mode = "spam".into();
+        s.normalize();
+        assert!(s.mode_is_toggle("v1Md"));
+        assert!(!s.mode_is_toggle("v2Md"));
+        assert_eq!(s.shield_mode, "toggle");
+        assert_eq!(s.mace_mode, "hold");
     }
 }

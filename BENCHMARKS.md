@@ -66,12 +66,12 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.6.2**
-- Portable executable: **581,632 bytes**
-- SHA-256: `264096e17917010b500bb971ae88dd868d8b4d2cc8369c009d4aa435872422c5`
-- Signed MSIX: **305,682 bytes**
-- MSIX SHA-256: `34ba5f4ec57651fcca40cbce7111b8403efaa63bb77a50c47b838e005ea60770`
-- Release tests: **14 / 14**
+- Version: **2.7.0**
+- Portable executable: **596,992 bytes**
+- SHA-256: `7fff6d11c36083326bb6bd85f273a8cd153854a057664c79be580a68d04f4a3f`
+- Signed MSIX: **313,046 bytes**
+- MSIX SHA-256: `35c7973ef43564e7ba25b32ea1e42a582b73ec57036eda6ff984dc171e3af18d`
+- Release tests: **18 / 18**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**

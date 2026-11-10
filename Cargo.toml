@@ -1,6 +1,6 @@
 [package]
 name = "droplet"
-version = "2.6.2"
+version = "2.7.0"
 edition = "2021"
 description = "Droplet - low latency Minecraft macro suite"
 license = "LicenseRef-Proprietary"

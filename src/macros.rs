@@ -6,7 +6,7 @@
 
 #![allow(dead_code)]
 
-use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI64, AtomicU64, Ordering};
 use std::sync::Arc;
 
 use crate::config::Settings;
@@ -35,6 +35,100 @@ static SPRINT_NEXT: AtomicI64 = AtomicI64::new(0);
 /// 116 ms. The key itself is still a tap, never a held synthetic key.
 pub const SPRINT_COOLDOWN_MS: i64 = 100;
 pub const SPRINT_TICK_MS: u64 = 8;
+
+// Toggle mode is a single latched worker per module, not a thread per press.
+// A generation counter invalidates an old worker before a new latch can run,
+// so rapid double-taps can never leave two loops injecting the same module.
+const TOGGLE_SLOTS: usize = 11;
+static TOGGLE_ON: [AtomicBool; TOGGLE_SLOTS] = [const { AtomicBool::new(false) }; TOGGLE_SLOTS];
+static TOGGLE_GEN: [AtomicU64; TOGGLE_SLOTS] = [const { AtomicU64::new(0) }; TOGGLE_SLOTS];
+
+pub fn mode_module(mode_key: &str) -> &'static str {
+    match mode_key {
+        "vDMd" => "vD",
+        "v1Md" => "v1",
+        "v2Md" => "v2",
+        "v3Md" => "v3",
+        "v4Md" => "v4",
+        "v5Md" => "v5",
+        "v6Md" => "v6",
+        "v7Md" => "v7",
+        "v8Md" => "v8",
+        "vABMd" => "vA",
+        "vWMd" => "vW",
+        _ => "",
+    }
+}
+
+fn toggle_slot(module: &str) -> Option<usize> {
+    match module {
+        "vD" => Some(0),
+        "v1" => Some(1),
+        "v2" => Some(2),
+        "v3" => Some(3),
+        "v4" => Some(4),
+        "v5" => Some(5),
+        "v6" => Some(6),
+        "v7" => Some(7),
+        "v8" => Some(8),
+        "vA" => Some(9),
+        "vW" => Some(10),
+        _ => None,
+    }
+}
+
+pub fn toggle_active(module: &str) -> bool {
+    toggle_slot(module).map(|i| TOGGLE_ON[i].load(Ordering::Relaxed)).unwrap_or(false)
+}
+
+fn toggle_generation_is(module: &str, generation: u64) -> bool {
+    toggle_slot(module).map(|i| TOGGLE_GEN[i].load(Ordering::SeqCst) == generation).unwrap_or(false)
+}
+
+fn repaint() {
+    let hwnd = crate::app::main_hwnd();
+    if hwnd != 0 {
+        unsafe { crate::win::PostMessageW(hwnd, crate::win::WM_APP_TICK, 0, 0) };
+    }
+}
+
+fn start_toggle(module: &'static str) -> Option<u64> {
+    let slot = toggle_slot(module)?;
+    let generation = TOGGLE_GEN[slot].fetch_add(1, Ordering::SeqCst).wrapping_add(1);
+    if TOGGLE_ON[slot].swap(true, Ordering::SeqCst) {
+        TOGGLE_ON[slot].store(false, Ordering::SeqCst);
+        repaint();
+        None
+    } else {
+        repaint();
+        Some(generation)
+    }
+}
+
+pub fn stop_toggle(module: &str) {
+    if let Some(slot) = toggle_slot(module) {
+        if !TOGGLE_ON[slot].load(Ordering::Relaxed) {
+            return;
+        }
+        TOGGLE_GEN[slot].fetch_add(1, Ordering::SeqCst);
+        TOGGLE_ON[slot].store(false, Ordering::SeqCst);
+        repaint();
+    }
+}
+
+/// Called from the focus watcher and from every master/module/reset change.
+/// The early return keeps those settings paths from posting a repaint when no
+/// latch is live, which is the normal case.
+pub fn stop_all_toggles() {
+    if !TOGGLE_ON.iter().any(|s| s.load(Ordering::Relaxed)) {
+        return;
+    }
+    for slot in 0..TOGGLE_SLOTS {
+        TOGGLE_GEN[slot].fetch_add(1, Ordering::SeqCst);
+        TOGGLE_ON[slot].store(false, Ordering::SeqCst);
+    }
+    repaint();
+}
 
 /// RAII re-entrancy gate for one-shot macros. Holding the guard for the whole
 /// sequence stops repeated input events from interleaving hotbar swaps, and
@@ -168,12 +262,41 @@ fn hit(binding: &str, ev: Ev) -> bool {
     keys::ev(binding).map(|e| e == ev).unwrap_or(false)
 }
 
-/// One hotkey press starts exactly one macro action. Every module is a short
-/// one-shot sequence; there are no latches, toggles, or background loops to
-/// leave injecting input after the key is released.
-fn fire(s: &Arc<Settings>, ev: Ev, module: &'static str, f: fn(&Settings, Ev)) {
+/// One hotkey press starts one macro action in Hold mode. Toggle mode latches
+/// a single cadence worker per module; stop_toggle/stop_all_toggles invalidate
+/// it before settings, focus, or the master switch can leave it running.
+/// The latch flag is passed to the action so hold-gated modules (Fast Use,
+/// Potion, Pearl, Shield, Crystal) repeat instead of idling on a key that is
+/// already up by the time the worker starts.
+fn fire(s: &Arc<Settings>, ev: Ev, mode_key: &'static str, module: &'static str, f: fn(&Settings, Ev, bool)) {
     smart::on_trigger(module);
-    spawn(s.clone(), ev, f);
+    if s.mode_is_toggle(mode_key) {
+        if !s.master || !s.bool_at(module) {
+            return;
+        }
+        let Some(generation) = start_toggle(module) else { return; };
+        let s = s.clone();
+        let _ = std::thread::Builder::new()
+            .stack_size(96 * 1024)
+            .spawn(move || {
+                if s.low_latency {
+                    input::boost_thread();
+                }
+                loop {
+                    if !toggle_generation_is(module, generation) || !toggle_active(module) {
+                        break;
+                    }
+                    RUNS.fetch_add(1, Ordering::Relaxed);
+                    f(&s, ev, true);
+                    if !toggle_generation_is(module, generation) || !toggle_active(module) {
+                        break;
+                    }
+                    input::sleep_ms(55.0);
+                }
+            });
+        return;
+    }
+    spawn(s.clone(), ev, move |st, ev| f(st, ev, false));
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -273,17 +396,17 @@ impl TriggerMap {
 pub fn trigger(ev: Ev, s: &Arc<Settings>, map: &TriggerMap) {
     let Some(action) = map.get(ev) else { return; };
     match action {
-        Action::Dash => fire(s, ev, "vD", dash),
-        Action::Shield => fire(s, ev, "v1", shield),
-        Action::Mace => fire(s, ev, "v2", mace_swap),
-        Action::Breach => fire(s, ev, "v3", breach),
-        Action::Potion => fire(s, ev, "v4", potion),
-        Action::Crystal => fire(s, ev, "v5", crystal),
-        Action::Anchor => fire(s, ev, "v6", anchor),
-        Action::FastUse => fire(s, ev, "vA", fast_use),
-        Action::Pearl => fire(s, ev, "v7", pearl),
-        Action::Totem => fire(s, ev, "v8", totem_swap),
-        Action::AutoUse => fire(s, ev, "vW", auto_use),
+        Action::Dash => fire(s, ev, "vDMd", "vD", dash),
+        Action::Shield => fire(s, ev, "v1Md", "v1", shield),
+        Action::Mace => fire(s, ev, "v2Md", "v2", mace_swap),
+        Action::Breach => fire(s, ev, "v3Md", "v3", breach),
+        Action::Potion => fire(s, ev, "v4Md", "v4", potion),
+        Action::Crystal => fire(s, ev, "v5Md", "v5", crystal),
+        Action::Anchor => fire(s, ev, "v6Md", "v6", anchor),
+        Action::FastUse => fire(s, ev, "vABMd", "vA", fast_use),
+        Action::Pearl => fire(s, ev, "v7Md", "v7", pearl),
+        Action::Totem => fire(s, ev, "v8Md", "v8", totem_swap),
+        Action::AutoUse => fire(s, ev, "vWMd", "vW", auto_use),
         Action::WTap => {
             // Most clicks are ordinary attacks. Only allocate the short-lived
             // W-Tap thread when forward is actually held.
@@ -342,7 +465,7 @@ fn scan_action(s: &Settings, ev: Ev) -> Option<Action> {
 
 // ------------------------------------------------------------------- macros
 
-fn dash(s: &Settings, _ev: Ev) {
+fn dash(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.dash {
         return;
     }
@@ -359,7 +482,7 @@ fn dash(s: &Settings, _ev: Ev) {
     input::sleep_ms(s.dash_cd_ms() as f64);
 }
 
-fn shield(s: &Settings, ev: Ev) {
+fn shield(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.shield {
         return;
     }
@@ -369,8 +492,10 @@ fn shield(s: &Settings, ev: Ev) {
     };
     lc(s);
     tap(&s.shield_axe);
-    // Held past the tap window: keep breaking the shield until release.
-    if !input::wait_up(ev, 60) && s.stun {
+    // Held past the tap window: keep breaking the shield until release. A
+    // latched Toggle worker already repeats the tap, so the hold tail is only
+    // for a physically held trigger.
+    if !latched && !input::wait_up(ev, 60) && s.stun {
         while input::raw_down(ev) {
             lc(s);
             wait_smart(s, "v1", 37, 43);
@@ -378,7 +503,7 @@ fn shield(s: &Settings, ev: Ev) {
     }
 }
 
-fn mace_swap(s: &Settings, _ev: Ev) {
+fn mace_swap(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.mace {
         return;
     }
@@ -394,7 +519,7 @@ fn mace_swap(s: &Settings, _ev: Ev) {
     tap(&s.mace_slot);
 }
 
-fn breach(s: &Settings, _ev: Ev) {
+fn breach(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.breach {
         return;
     }
@@ -406,7 +531,7 @@ fn breach(s: &Settings, _ev: Ev) {
     taps(&[&s.breach_mace, &s.breach_restore, &s.breach_restore]);
 }
 
-fn potion(s: &Settings, ev: Ev) {
+fn potion(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.potion {
         return;
     }
@@ -414,7 +539,7 @@ fn potion(s: &Settings, ev: Ev) {
         Some(b) => b,
         None => return,
     };
-    if input::wait_up(ev, 100) {
+    if !latched && input::wait_up(ev, 100) {
         return;
     }
     tap(&s.potion_slot1);
@@ -426,10 +551,12 @@ fn potion(s: &Settings, ev: Ev) {
     taps(&[&s.potion_restore, &s.potion_restore]);
     wait_smart(s, "v4", 37, 43);
     rc(s);
-    input::wait_up(ev, 60_000);
+    if !latched {
+        input::wait_up(ev, 60_000);
+    }
 }
 
-fn crystal(s: &Settings, ev: Ev) {
+fn crystal(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.crystal {
         return;
     }
@@ -451,17 +578,21 @@ fn crystal(s: &Settings, ev: Ev) {
     tap_exact_key(Some(cry));
     rc(s);
 
-    while input::raw_down(ev) {
-        wait_smart(s, "v5", s.crystal_min, s.crystal_max);
-        if !input::raw_down(ev) {
-            break;
+    // A latched worker repeats the whole place-and-crystal pair on its next
+    // iteration, so the held-trigger tail is skipped to avoid double cadence.
+    if !latched {
+        while input::raw_down(ev) {
+            wait_smart(s, "v5", s.crystal_min, s.crystal_max);
+            if !input::raw_down(ev) {
+                break;
+            }
+            rc(s);
+            wait_smart(s, "v5", s.crystal_min, s.crystal_max);
+            if !input::raw_down(ev) {
+                break;
+            }
+            lc(s);
         }
-        rc(s);
-        wait_smart(s, "v5", s.crystal_min, s.crystal_max);
-        if !input::raw_down(ev) {
-            break;
-        }
-        lc(s);
     }
 }
 
@@ -473,7 +604,7 @@ fn crystal(s: &Settings, ev: Ev) {
 /// improving reach. Every step keeps the one-tick floor, and all three slot
 /// keys must be valid and distinct. The busy guard prevents a second press
 /// from interleaving hotbar swaps with the sequence already in flight.
-fn anchor(s: &Settings, _ev: Ev) {
+fn anchor(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.anchor {
         return;
     }
@@ -521,7 +652,7 @@ fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
     rc_exact(s);
 }
 
-fn fast_use(s: &Settings, ev: Ev) {
+fn fast_use(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.fastuse {
         return;
     }
@@ -529,13 +660,18 @@ fn fast_use(s: &Settings, ev: Ev) {
         Some(b) => b,
         None => return,
     };
+    if latched {
+        // The Toggle worker owns the cadence; one use per iteration.
+        rc(s);
+        return;
+    }
     while input::raw_down(ev) {
         rc(s);
         wait_smart(s, "vA", s.fastuse_min, s.fastuse_max);
     }
 }
 
-fn pearl(s: &Settings, ev: Ev) {
+fn pearl(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.pearl {
         return;
     }
@@ -545,17 +681,19 @@ fn pearl(s: &Settings, ev: Ev) {
     };
     rc(s);
     tap(&s.pearl_slot);
-    if !input::wait_up(ev, 90) {
+    if latched || !input::wait_up(ev, 90) {
         tap(&s.pearl_catch);
         tap(&s.pearl_catch);
         if s.catch_w {
             rc(s);
         }
-        input::wait_up(ev, 60_000);
+        if !latched {
+            input::wait_up(ev, 60_000);
+        }
     }
 }
 
-fn totem_swap(s: &Settings, _ev: Ev) {
+fn totem_swap(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.totem {
         return;
     }
@@ -568,7 +706,7 @@ fn totem_swap(s: &Settings, _ev: Ev) {
     tap(&s.totem_swap);
 }
 
-fn auto_use(s: &Settings, _ev: Ev) {
+fn auto_use(s: &Settings, _ev: Ev, _latched: bool) {
     if !s.master || !s.auto_use {
         return;
     }
@@ -798,6 +936,43 @@ mod tests {
         assert!(!anchor_slots_ok(a, a, c));
         assert!(!anchor_slots_ok(a, c, a));
         assert!(!anchor_slots_ok(c, b, b));
+    }
+
+    #[test]
+    fn toggle_slots_cover_every_mode_key_once() {
+        let mode_keys = [
+            "vDMd", "v1Md", "v2Md", "v3Md", "v4Md", "v5Md", "v6Md", "v7Md", "v8Md",
+            "vABMd", "vWMd",
+        ];
+        let mut slots = Vec::new();
+        for key in mode_keys {
+            let module = mode_module(key);
+            assert!(!module.is_empty(), "no module for {key}");
+            let slot = toggle_slot(module).expect("module has no toggle slot");
+            assert!(!slots.contains(&slot), "slot {slot} is shared by {key}");
+            slots.push(slot);
+        }
+        assert_eq!(slots.len(), TOGGLE_SLOTS);
+    }
+
+    #[test]
+    fn toggle_latch_flips_and_invalidates_the_old_generation() {
+        let module = "v1";
+        stop_toggle(module);
+        assert!(!toggle_active(module));
+
+        let first = start_toggle(module).expect("first press latches");
+        assert!(toggle_active(module));
+        assert!(toggle_generation_is(module, first));
+
+        // A second press must unlatch without starting a second worker.
+        assert!(start_toggle(module).is_none());
+        assert!(!toggle_active(module));
+        assert!(!toggle_generation_is(module, first));
+
+        // stop_toggle is idempotent for an already latched-off module.
+        stop_toggle(module);
+        assert!(!toggle_active(module));
     }
 
     #[test]

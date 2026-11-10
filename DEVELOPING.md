@@ -46,15 +46,16 @@ Open <http://127.0.0.1:4173/>. The production manifest is `site/deploy.json`;
 
 ## Verification
 
-The release currently carries 14 tests:
+The release currently carries 18 tests:
 
 ```powershell
 cargo test --release
 ```
 
-They cover config migration, timing bounds, Anchor slot validation, W-Tap
-planning, Sprint's 100 ms deadline, cadence adaptation, profile parsing, and
-trigger-index equivalence plus its routing benchmark.
+They cover config migration, timing bounds, RGB parsing, trigger-mode
+normalization and latch generations, Anchor slot validation, W-Tap planning,
+Sprint's 100 ms deadline, cadence adaptation, profile parsing, and trigger-index
+equivalence plus its routing benchmark.
 
 Before publishing, also check:
 

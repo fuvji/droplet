@@ -1,5 +1,35 @@
 # Changelog
 
+## 2.7.0
+
+- Restored the accent color picker as a compact System > Color card: six
+  presets plus Red/Green/Blue sliders, persisted in the same `thmC` key used by
+  the earlier theme. Accent, borders, switches, chips, and charts all follow the
+  selected color, and switch labels flip between light and dark text on a
+  perceptual luma threshold.
+- Restored per-trigger Hold/Toggle modes on all eleven trigger cards. Hold
+  keeps the existing one-shot behavior. Toggle latches one worker per module,
+  repeats that module, and stops on master off, module off, a mode change, a
+  reset, or losing the foreground gate. A generation counter invalidates the
+  old worker so a rapid double-tap cannot leave two loops injecting the same
+  module.
+- Fast Use, Potion, Pearl, Shield, and Crystal now know they are latched, so
+  hold-gated sequences repeat instead of idling on a key that is already up by
+  the time the worker starts.
+- Idle toggles no longer post repaint messages on focus loss, settings changes,
+  or resets; the stop path returns before touching the window when no latch is
+  live.
+- Added two release tests for toggle slot coverage and latch generations:
+  18/18 passing.
+- Replaced the stale 2.6.2 WebM reel with a zero-JavaScript CSS crossfade of the
+  four current native captures. The page no longer ships a video asset.
+- Release binary: 596,992 bytes, SHA-256
+  `7fff6d11c36083326bb6bd85f273a8cd153854a057664c79be580a68d04f4a3f`.
+  Signed MSIX: 313,046 bytes, SHA-256
+  `35c7973ef43564e7ba25b32ea1e42a582b73ec57036eda6ff984dc171e3af18d`.
+- Boundaries unchanged: no streamproof or capture-evasion mode, no game-memory
+  reads, no network calls, no anti-cheat bypass, and no zero-latency claim.
+
 ## 2.6.2
 
 - Fixed the native window corners: the layered popup now enforces a rounded

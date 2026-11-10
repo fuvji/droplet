@@ -2,7 +2,7 @@
 
 Canonical: https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/
 Source: https://github.com/fuvji/droplet
-Version: 2.6.2
+Version: 2.7.0
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 
@@ -14,8 +14,10 @@ SendInput and remains visible to screen capture.
 ## Current release
 
 - Compact 624x408 graphite/white acrylic overlay with a transparent droplet mark.
-- Four-tab native UI capture reel on the site; it is labelled as stills, not gameplay.
-- Release 2.6.2 portable executable: 581,632 bytes.
+- System > Color offers six accent presets plus Red, Green, and Blue sliders.
+- Every trigger card switches between Hold (one-shot) and Toggle (latched repeat).
+- Four-tab native UI preview uses a CSS crossfade of stills, not gameplay.
+- Release 2.7.0 portable executable: 596,992 bytes.
 - Pre-indexed trigger routing; the release benchmark measured 0.45 ns for the
   routing lookup versus 202.39 ns for the old binding scan.
 - Anchor normal path is 100 ms shorter than 2.5.0, with every step kept at or

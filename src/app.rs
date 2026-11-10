@@ -206,7 +206,7 @@ impl App {
         let acts;
 
         {
-            let theme = Theme::new();
+            let theme = Theme::new(&self.settings);
             let fonts = match self.fonts.as_mut() {
                 Some(f) => f,
                 None => return,
@@ -303,6 +303,13 @@ impl App {
                 Act::Toggle(k) => {
                     let v = !self.settings.bool_at(k);
                     self.settings.set_bool(k, v);
+                    if !v {
+                        if k == "v0" {
+                            macros::stop_all_toggles();
+                        } else {
+                            macros::stop_toggle(k);
+                        }
+                    }
                     if k == "vP" && !v && !self.engine.present.load(Ordering::Relaxed) {
                         self.hide_panel();
                     }
@@ -310,6 +317,33 @@ impl App {
                     if k == "v0" {
                         self.update_tray();
                     }
+                }
+                Act::Mode(k) => {
+                    macros::stop_toggle(macros::mode_module(k));
+                    let next = if self.settings.mode_is_toggle(k) { "hold" } else { "toggle" };
+                    self.settings.set_str(k, next);
+                    self.changed();
+                }
+                Act::Theme(ch, v) => {
+                    let (mut r, mut g, mut b) = self.settings.theme_rgb();
+                    match ch {
+                        0 => r = v.clamp(0, 255) as u8,
+                        1 => g = v.clamp(0, 255) as u8,
+                        _ => b = v.clamp(0, 255) as u8,
+                    }
+                    self.settings.set_theme_rgb(r as i32, g as i32, b as i32);
+                    self.changed();
+                }
+                Act::Preset(r, g, b) => {
+                    self.settings.set_theme_rgb(r, g, b);
+                    self.changed();
+                }
+                Act::Reset => {
+                    macros::stop_all_toggles();
+                    let persist = self.settings.persist;
+                    self.settings = Settings::default();
+                    self.settings.persist = persist;
+                    self.changed();
                 }
                 Act::Capture(k) => {
                     if self.capture == Some(k) {
@@ -334,12 +368,6 @@ impl App {
                 }
                 Act::SetStr(k, v) => {
                     self.settings.set_str(k, v);
-                    self.changed();
-                }
-                Act::Reset => {
-                    let persist = self.settings.persist;
-                    self.settings = Settings::default();
-                    self.settings.persist = persist;
                     self.changed();
                 }
                 Act::Discord => unsafe { open_url("https://discord.gg/fvrdYzrQjq") },
@@ -382,6 +410,9 @@ impl App {
     fn toggle_master(&mut self) {
         let v = !self.settings.bool_at("v0");
         self.settings.set_bool("v0", v);
+        if !v {
+            macros::stop_all_toggles();
+        }
         self.changed();
         self.update_tray();
     }
@@ -1076,7 +1107,11 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
 
             let s = e.settings();
             let gate = focus || !s.focus_only;
-            e.gate.store(gate, Ordering::Relaxed);
+            let was_gate = e.gate.swap(gate, Ordering::Relaxed);
+            if !gate && was_gate {
+                // A latched Toggle worker must not outlive the foreground gate.
+                macros::stop_all_toggles();
+            }
 
             if last != Some((present, focus)) {
                 e.present.store(present, Ordering::Relaxed);
