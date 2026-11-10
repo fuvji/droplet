@@ -41,7 +41,18 @@ public static class DropletTabs {
 }
 "@
 
-function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
+function New-RoundedPath([int]$Width, [int]$Height, [int]$Radius) {
+    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $d = [Math]::Max(1, $Radius * 2)
+    $path.AddArc(0, 0, $d, $d, 180, 90)
+    $path.AddArc($Width - $d, 0, $d, $d, 270, 90)
+    $path.AddArc($Width - $d, $Height - $d, $d, $d, 0, 90)
+    $path.AddArc(0, $Height - $d, $d, $d, 90, 90)
+    $path.CloseFigure()
+    return $path
+}
+
+function Save-Panel([IntPtr]$Hwnd, [string]$Name, [int]$Radius) {
     $rect = New-Object DropletTabs+RECT
     if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
@@ -61,7 +72,23 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
         } finally {
             $graphics.ReleaseHdc($hdc)
         }
-        $bitmap.Save((Join-Path $out $Name), [System.Drawing.Imaging.ImageFormat]::Png)
+        # PrintWindow returns the rectangular client backing even when the
+        # compositor has clipped the popup to a rounded region. Preserve the
+        # actual silhouette with a transparent rounded mask for the website.
+        $masked = New-Object System.Drawing.Bitmap($width, $height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+        $maskGraphics = [System.Drawing.Graphics]::FromImage($masked)
+        $maskPath = New-RoundedPath $width $height $Radius
+        try {
+            $maskGraphics.Clear([System.Drawing.Color]::Transparent)
+            $maskGraphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+            $maskGraphics.SetClip($maskPath)
+            $maskGraphics.DrawImage($bitmap, 0, 0, $width, $height)
+            $masked.Save((Join-Path $out $Name), [System.Drawing.Imaging.ImageFormat]::Png)
+        } finally {
+            $maskPath.Dispose()
+            $maskGraphics.Dispose()
+            $masked.Dispose()
+        }
     } finally {
         $graphics.Dispose()
         $bitmap.Dispose()
@@ -106,7 +133,7 @@ try {
 
     foreach ($tab in $tabs) {
         Click-Tab $hwnd ([int]($tab.X * $scale)) ([int]($tab.Y * $scale))
-        Save-Panel $hwnd $tab.Name
+        Save-Panel $hwnd $tab.Name ([int](14 * $scale))
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

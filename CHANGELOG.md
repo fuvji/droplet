@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.6.2
+
+- Fixed the native window corners: the layered popup now enforces a rounded
+  region after the acrylic path instead of trusting DWM's success result, so
+  the painted hairline and the clipped edge agree at every scale.
+- Unified the brand mark across the window, transparent package icons, the
+  favicon, and the site header. The dark plate behind the droplet is gone.
+- Added a four-slot native UI reel to the site, with a different captured tab
+  on every slide. It is explicitly labelled as UI stills, not gameplay.
+- Reframed the product page around **Minecraft Macro Suite** in the title,
+  metadata, and opening statement, and tightened the graphite visual system.
+- Removed the dead palette editor, its config key, strings, and theme actions.
+  The fixed graphite palette no longer carries unused color machinery.
+- Release binary: 581,632 bytes, SHA-256
+  `264096e17917010b500bb971ae88dd868d8b4d2cc8369c009d4aa435872422c5`.
+  Signed MSIX: 305,682 bytes, SHA-256
+  `34ba5f4ec57651fcca40cbce7111b8403efaa63bb77a50c47b838e005ea60770`.
+- Release tests: 14/14 passing. Boundaries are unchanged: no streamproof or
+  capture-evasion mode, no game-memory reads, no network calls, no anti-cheat
+  bypass, and no zero-latency claim.
+
 ## 2.6.1
 
 - Sprint now re-pulses every 100 ms while physical W is held instead of once

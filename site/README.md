@@ -8,16 +8,17 @@ Source: <https://github.com/fuvji/droplet>
 
 ## Layout
 
-- `public/` contains the HTML, CSS, favicon, sitemap, robots file, plain-text
-  `llms.txt`, sponsor inventory, and native captures from all four panel tabs.
+- `public/` contains the HTML, CSS, transparent favicon, sitemap, robots file,
+  plain-text `llms.txt`, sponsor inventory, native captures from all four panel
+  tabs, and the silent UI reel.
 - `worker.js` serves `env.ASSETS` and adds a strict CSP and cache policy.
 - `deploy.json` is the Freebuff Sites deployment manifest.
 - `SITE_ID.txt` records the Freebuff Sites project ID.
 
-The 2.6.1 page uses a graphite/white acrylic visual system with measured
+The 2.6.2 page uses a graphite/white acrylic visual system with measured
 trigger-routing facts, a benchmark chart, a runtime pipeline model, native
-capture crops, CSS-only motion, an audit, a hard-boundaries section, and direct
-sponsor inventory.
+capture crops, a silent four-tab UI reel, an audit, a hard-boundaries section,
+and direct sponsor inventory.
 
 The page has no external fonts, third-party images, analytics, ad clients,
 cookies, scripts, or network calls. The images are four distinct local captures
@@ -27,8 +28,9 @@ stylesheet and no external resources.
 
 The capture lab deliberately does not present fabricated gameplay footage. The
 page explains that live Minecraft hit registration is still unverified and
-invites a real clip through the issue link. The motion preview is a CSS study of
-the native Assist-tab capture; the preview tabs are four separate screenshots.
+invites a real clip through the issue link. The capture lab is a silent WebM reel that crossfades
+the four native tab captures; the preview tabs are the same four separate
+screenshots, never one repeated image.
 
 Droplet is proprietary. The source and build scripts are published in the
 public GitHub repository for transparency, but public availability is not an

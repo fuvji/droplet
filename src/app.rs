@@ -206,7 +206,7 @@ impl App {
         let acts;
 
         {
-            let theme = Theme::new(&self.settings);
+            let theme = Theme::new();
             let fonts = match self.fonts.as_mut() {
                 Some(f) => f,
                 None => return,
@@ -334,20 +334,6 @@ impl App {
                 }
                 Act::SetStr(k, v) => {
                     self.settings.set_str(k, v);
-                    self.changed();
-                }
-                Act::Theme(ch, v) => {
-                    let (r, g, b) = self.settings.theme_rgb();
-                    let (r, g, b) = (r as i32, g as i32, b as i32);
-                    match ch {
-                        0 => self.settings.set_theme_rgb(v, g, b),
-                        1 => self.settings.set_theme_rgb(r, v, b),
-                        _ => self.settings.set_theme_rgb(r, g, v),
-                    }
-                    self.changed();
-                }
-                Act::Preset(r, g, b) => {
-                    self.settings.set_theme_rgb(r, g, b);
                     self.changed();
                 }
                 Act::Reset => {
@@ -1299,7 +1285,7 @@ unsafe fn native_icon() -> HICON {
     let and_mask = vec![0u8; ((s / 8) * s) as usize];
     // Flat monochrome mark, matching the header droplet. A mid-light neutral
     // stays readable on both dark and light taskbars; no rim or gradient.
-    let fill = 0xFFD6_D6DCu32;
+    let fill = 0xFFF4_F3EFu32;
     for y in 0..s {
         for x in 0..s {
             // 3x3 supersampled teardrop: round bowl + taper to the apex.
@@ -1416,20 +1402,22 @@ pub fn run() {
         let (w, h) = ((ui::WIN_W * dpi) as i32, (ui::WIN_H * dpi) as i32);
         win::SetWindowPos(hwnd, 0, 0, 0, w, h, win::SWP_NOMOVE | win::SWP_NOZORDER | win::SWP_NOACTIVATE);
 
-        // Rounded corners via DWM. The fallback region uses the full ellipse
-        // diameter (2r), not r, so older Windows builds match the painted edge.
-        let radius = (12.0 * dpi) as i32;
-        if !round_corners(hwnd, radius) {
-            let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
-            win::SetWindowRgn(hwnd, rgn, 1);
-        }
-
         // Desktop acrylic is composited by DWM, so it stays off the app's
         // paint thread. The window alpha is what lets the blur read through
         // the dark panel; without it the opaque back buffer would hide it.
         let acrylic = apply_acrylic(hwnd);
         let alpha = if acrylic != "none" { ACRYLIC_ALPHA } else { 255 };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
+
+        // DWM can return success for a layered popup while leaving its square
+        // frame visible. Enforce the same radius with a region after the
+        // acrylic/alpha path so every Windows build clips the four corners.
+        let radius = (14.0 * dpi).round() as i32;
+        let _ = round_corners(hwnd, radius);
+        let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
+        if rgn != 0 {
+            win::SetWindowRgn(hwnd, rgn, 1);
+        }
 
         let icon = native_icon();
         if icon != 0 {

@@ -87,7 +87,6 @@ fn card_mono(title: &str) -> &'static str {
         "W-Tap" => "WT",
         "Sprint" => "SP",
         "Ghost Click" => "GC",
-        "Accent" => "TH",
         "Behaviour" => "BH",
         "Session" => "SE",
         "Performance" => "PF",
@@ -116,7 +115,7 @@ pub struct Theme {
 }
 
 impl Theme {
-    pub fn new(_s: &Settings) -> Theme {
+    pub fn new() -> Theme {
         // One fixed graphite/white palette. The old RGB picker is deliberately
         // gone: the product is monochrome, so every build looks the same and the
         // paint path does not carry a second color system.
@@ -149,8 +148,6 @@ pub enum Act {
     Clear(&'static str),
     SetInt(&'static str, i32),
     SetStr(&'static str, &'static str),
-    Theme(usize, i32),
-    Preset(i32, i32, i32),
     Reset,
     Discord,
     Destruct,
@@ -692,87 +689,6 @@ impl<'a> Ui<'a> {
         // 12 left + 80 value + 12 right + 6 breathing room.
         self.label(card.x + 12.0 * s, y, card.w - 110.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
         self.label_right(card.x + card.w - 12.0 * s - 80.0 * s, y, 80.0 * s, ROW_H * s, value, 9.5, self.th.text);
-    }
-
-    fn row_theme(&mut self, card: Rect, i: usize, label: &str, ch: usize, v: i32) {
-        let s = self.scale;
-        let y = self.row_y(card, i);
-        self.label(card.x + 12.0 * s, y, 72.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
-        let tx = card.x + 84.0 * s;
-        let tw = card.w - 84.0 * s - 42.0 * s;
-        let cy = y + ROW_H * 0.5 * s;
-        let t = v as f32 / 255.0;
-        let tint = match ch {
-            0 => 0xFFE0_6A6A,
-            1 => 0xFF6ADf_8A,
-            _ => 0xFF6A9AE0,
-        };
-        self.c.round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
-        self.c.round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, tint);
-        self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
-        self.label_right(card.x + card.w - 10.0 * s - 36.0 * s, y, 36.0 * s, ROW_H * s, &format!("{}", v), 8.5, self.th.dim);
-        let hit = Rect::new(tx - 8.0 * s, y, tw + 16.0 * s, ROW_H * s);
-        if self.pressed && self.hovered(hit) {
-            self.shared.drag = Some(Drag { key: "thmC", ch, x: tx, w: tw, min: 0, max: 255 });
-        }
-        if let Some(d) = self.shared.drag {
-            if d.key == "thmC" && d.ch == ch && self.down {
-                let rel = ((self.mx - d.x) / d.w).clamp(0.0, 1.0);
-                let nv = (255.0 * rel).round() as i32;
-                if nv != v {
-                    self.acts.push(Act::Theme(ch, nv));
-                }
-            }
-        }
-    }
-
-    fn row_presets(&mut self, card: Rect, i: usize) {
-        let s = self.scale;
-        let y = self.row_y(card, i);
-        let (cr, cg, cb) = self.s.theme_rgb();
-        let presets: [(u32, i32, i32, i32); 6] = [
-            (0xFFC8_C8FF, 200, 200, 255),
-            (0xFF8F_DAFF, 143, 218, 255),
-            (0xFF8CF5C8, 140, 245, 200),
-            (0xFFFFD6_8A, 255, 214, 138),
-            (0xFFFF9A_9A, 255, 154, 154),
-            (0xFFE6_E8EF, 230, 232, 239),
-        ];
-        let sw = 14.0 * s;
-        let mut x = card.x + card.w - 10.0 * s - sw * presets.len() as f32 - 4.0 * s * (presets.len() as f32 - 1.0);
-        for (color, r, g, b) in presets {
-            let rr = Rect::new(x, y + 4.0 * s, sw, sw);
-            let hot = self.hovered(rr);
-            let selected = cr as i32 == r && cg as i32 == g && cb as i32 == b;
-            self.c.round_rect(rr.x, rr.y, rr.w, rr.h, rr.w * 0.5, color);
-            if selected {
-                self.c.round_stroke(
-                    rr.x - 1.5 * s,
-                    rr.y - 1.5 * s,
-                    rr.w + 3.0 * s,
-                    rr.h + 3.0 * s,
-                    (rr.w + 3.0 * s) * 0.5,
-                    with_alpha(self.th.text, 200),
-                    1.1,
-                );
-            } else if hot {
-                self.c.round_stroke(
-                    rr.x - 1.0 * s,
-                    rr.y - 1.0 * s,
-                    rr.w + 2.0 * s,
-                    rr.h + 2.0 * s,
-                    (rr.w + 2.0 * s) * 0.5,
-                    with_alpha(self.th.text, 150),
-                    1.0,
-                );
-            }
-            if self.pressed && hot {
-                self.acts.push(Act::Preset(r, g, b));
-            }
-            x += sw + 4.0 * s;
-        }
-        let lr = Rect::new(card.x + 12.0 * s, y, 80.0 * s, ROW_H * s);
-        self.label(lr.x, lr.y, lr.w, lr.h, "Presets", 9.5, false, self.th.dim);
     }
 
     fn row_danger(&mut self, card: Rect, i: usize, text: &str) {

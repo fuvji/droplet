@@ -6,7 +6,14 @@ Droplet is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Droplet 2.6.1 Core panel](site/public/assets/droplet-core.png)
+## About
+
+Droplet is a compact, local Minecraft macro suite for Windows, written in Rust.
+It is built for players who want exact, repeatable input sequences without
+game-memory reads, network calls, or telemetry. The panel and every action stay
+visible to ordinary screen capture.
+
+![Droplet 2.6.2 Core panel](site/public/assets/droplet-core.png)
 
 ## Features
 
@@ -35,8 +42,8 @@ keyboard/mouse input; it does not read or modify game memory.
 - The panel is visible to screen capture and streaming tools. There is no
   capture exclusion, streamproof mode, process hiding, or disguise behavior.
 - The public product page uses a monochrome graphite/white acrylic system with
-  measured routing facts, a pipeline model, native capture previews, CSS-only
-  motion, an audit, specs, and direct sponsor inventory.
+  measured routing facts, a pipeline model, native capture previews, a silent
+  four-tab UI reel, an audit, specs, and direct sponsor inventory.
 
 ## Performance
 
@@ -155,14 +162,14 @@ master/focus gate prevents injection.
 - Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
   reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `584,704` bytes, `1bf9e99079801d4bb5b1d351cf0532aa8a792e31c5847eab0699fc149bce6d51`.
-- Signed MSIX: `308,365` bytes, `bf943f48027d9e503efebc984f57cdc165d086a2e628fd11e36e706eff529bf6`;
+- Release binary: `581,632` bytes, `264096e17917010b500bb971ae88dd868d8b4d2cc8369c009d4aa435872422c5`.
+- Signed MSIX: `305,682` bytes, `34ba5f4ec57651fcca40cbce7111b8403efaa63bb77a50c47b838e005ea60770`;
   signed with the local Droplet development certificate. A fresh machine needs
   that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
   with a one-time UAC prompt.
 - Sprint deadline: 100 ms, asserted by `sprint_pulses_every_hundred_ms`; the
   watcher polls every 8 ms so the deadline is not rounded up by the timer.
-- Source and package: `2.6.1` / `2.6.1.0`.
+- Source and package: `2.6.2` / `2.6.2.0`.
 - Four native 624×408 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft

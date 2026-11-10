@@ -146,9 +146,8 @@ settings_schema! {
     win_x:        "winX": i32 = -1i32;
     win_y:        "winY": i32 = -1i32;
 
-    // ---- modes / theme
+    // ---- modes
     wtap_mode: "vM":   String = "S";
-    theme:     "thmC": String = "E6E8EF";
 
     // ---- trigger binds
     dash_key:     "vDBn": String = "b";
@@ -265,21 +264,6 @@ impl Settings {
         self.set(key, v);
     }
 
-    /// Accent colour as (r, g, b); invalid values fall back to the default tint.
-    pub fn theme_rgb(&self) -> (u8, u8, u8) {
-        let hex = self.theme.trim_start_matches('#');
-        if hex.len() >= 6 {
-            if let (Ok(r), Ok(g), Ok(b)) = (
-                u8::from_str_radix(&hex[0..2], 16),
-                u8::from_str_radix(&hex[2..4], 16),
-                u8::from_str_radix(&hex[4..6], 16),
-            ) {
-                return (r, g, b);
-            }
-        }
-        (230, 232, 239)
-    }
-
     /// Dash cooldown is stored as a 3-stop index: 1 = 50 ms, 2 = 100 ms,
     /// 3 = 150 ms. The index keeps the config compact and the UI discrete.
     pub fn dash_cd_ms(&self) -> i32 {
@@ -370,14 +354,6 @@ impl Settings {
         }
     }
 
-    pub fn set_theme_rgb(&mut self, r: i32, g: i32, b: i32) {
-        self.theme = format!(
-            "{:02X}{:02X}{:02X}",
-            r.clamp(0, 255),
-            g.clamp(0, 255),
-            b.clamp(0, 255)
-        );
-    }
 }
 
 pub fn data_dir_path() -> PathBuf {
