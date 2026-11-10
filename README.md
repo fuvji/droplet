@@ -12,8 +12,20 @@ keyboard/mouse input; it does not read or modify game memory.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
   W-Tap, Sprint, and Hover Inventory modules.
 - 648x432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
-  local timing, and AHK-compatible INI migration.
+  local timing, an optional offline combat timing profile, and AHK-compatible
+  INI migration.
 - Portable x64 executable plus a signed full-trust MSIX package.
+
+## Combat timing profile
+
+`tools/combat-lab.ps1` turns timestamped, human-confirmed hits from combat
+footage into a compact local timing prior. Hydrogen reads
+`%LOCALAPPDATA%\Hydrogen\combat.profile` once at startup, blends it with the
+local cadence brain, and clamps it to the configured Min/Max. Delete the file
+to disable it. The runtime never reads video or the network.
+
+See [docs/COMBAT_LAB.md](docs/COMBAT_LAB.md) for the CSV contract and safety
+rules, and [docs/AI.md](docs/AI.md) for the research boundary.
 
 ## Deliberate boundaries
 
@@ -62,11 +74,11 @@ master/focus gate prevents injection.
 
 ## Verification
 
-- `cargo test --release`: 10 tests covering config migration, timing bounds,
-  loop generation, W-Tap planning, and Air Anchor state.
+- `cargo test --release`: 12 tests covering config migration, timing bounds,
+  loop generation, W-Tap planning, Air Anchor state, and combat-profile parsing.
 - Air Anchor live key trace: first cycle `h,g,h,r`; normal Anchor `h,g,r`.
 - Mouse trace: pop and replacement right-clicks occur at the same timestamp.
-- Current installed package: `2.3.7.0`, status `Ok`.
+- Source version: `2.3.8`; installed package: `2.3.7.0`, status `Ok`.
 
 Real in-game hit registration still needs verification in a live Minecraft
 client; input injection and timing are verified independently.
