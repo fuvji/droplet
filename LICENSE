@@ -2,15 +2,19 @@ Hydrogen Proprietary License
 
 Copyright (c) 2026 fuvji. All rights reserved.
 
-Hydrogen is proprietary software. The source code, build scripts, internal
-documentation, signing material, and non-public assets are not distributed and
-are not licensed to you.
+Hydrogen is proprietary software. The source is published at
+https://github.com/fuvji/hydrogen for transparency and inspection. Public
+availability does not make Hydrogen open source. The source, build scripts,
+documentation, signing material, and non-public assets remain the property of
+the copyright holder and are not licensed for copying, modification, or
+redistribution except as expressly stated below.
 
 1. Limited permission
 
    You may use a distributed Hydrogen executable for personal, non-commercial
    use on a device you own or control. This permission does not transfer
-   ownership of Hydrogen or grant any rights to its source code.
+   ownership of Hydrogen or grant any rights to copy, modify, or redistribute
+   its source.
 
 2. Restrictions
 
@@ -19,11 +23,13 @@ are not licensed to you.
    another product without prior written permission from the copyright holder.
    You may not remove or alter proprietary notices.
 
-3. No source grant
+3. Source availability
 
-   No source code, build scripts, internal documentation, or non-public assets
-   are provided under this license. Nothing on the public product page is a
-   source-code grant.
+   The public repository is provided for transparency and inspection only. It
+   is not an open-source grant. No source code, build scripts, internal
+   documentation, signing keys, certificates, or non-public assets are licensed
+   for reuse. Public availability does not grant permission to build or
+   distribute a competing product.
 
 4. No warranty
 

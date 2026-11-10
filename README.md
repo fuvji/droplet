@@ -1,6 +1,6 @@
 # Hydrogen
 
-[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page)
+[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/hydrogen)
 
 Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
@@ -59,20 +59,21 @@ Hydrogen is designed to stay small, auditable, and predictable:
 
 ## Distribution
 
-Hydrogen is proprietary software. The source code, build scripts, internal
-engineering notes, and non-public assets are not distributed, and no public
-source download is provided. The versioned executable is the product. See
-[LICENSE](LICENSE).
+Hydrogen is proprietary software. The source is published at
+<https://github.com/fuvji/hydrogen> for transparency and inspection. Public
+availability does not make Hydrogen open source: no licence is granted to copy,
+modify, redistribute, or sublicense the source. The versioned executable remains
+the supported product. See [LICENSE](LICENSE).
 
-The public product page is static documentation and media, not a source
-repository. It has no analytics, external fonts, client-side JavaScript, or
-network calls. Its source lives locally in `site/`, and the Freebuff Sites
-project ID is recorded in `site/SITE_ID.txt`. The 2.4.1 page adds a sitemap,
-timing diagrams, an audit panel, and a visible-capture boundary.
+The public product page is static documentation and media. Its source is
+published in the same repository. It has no analytics, external fonts,
+client-side JavaScript, or network calls. The Freebuff Sites project ID is
+recorded in `site/SITE_ID.txt`. The 2.4.1 page adds a sitemap, timing diagrams,
+an audit panel, and a visible-capture boundary.
 
 ## Development
 
-These commands are for the private development checkout:
+These commands are for the development checkout:
 
 ```bash
 rustup target add x86_64-pc-windows-gnu

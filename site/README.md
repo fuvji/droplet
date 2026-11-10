@@ -4,6 +4,8 @@ The public product page is a static site deployed through Freebuff Sites:
 
 <https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page>
 
+Source: <https://github.com/fuvji/hydrogen>
+
 ## Layout
 
 - `public/` contains the HTML, CSS, favicon, sitemap, robots file, and real
@@ -20,8 +22,9 @@ The page has no external fonts, third-party images, scripts, analytics, or
 network calls. The only image is the local panel capture at
 `public/assets/hydrogen-panel.png`.
 
-Hydrogen is proprietary. The site discloses that source code and build scripts
-are not distributed; it does not present the product as open source or as
+Hydrogen is proprietary. The source and build scripts are published in the
+public GitHub repository for transparency, but public availability is not an
+open-source grant. The site does not present Hydrogen as open source or as
 streamproof.
 
 ## Deploy

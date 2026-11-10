@@ -1253,6 +1253,12 @@ h2 em {
   line-height: 1.72;
 }
 
+.distribution-card a {
+  color: var(--accent-high);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .boundary-list {
   display: grid;
   gap: 10px;

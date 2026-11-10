@@ -11,6 +11,8 @@
   diagrams, a release audit, a sitemap, and asset-aware cache headers.
 - Added a 13th release test for cadence adaptation. The release binary is
   582,656 bytes.
+- Published the 2.4.1 source tree at github.com/fuvji/hydrogen and aligned the
+  licence, README, and site with public-source, proprietary distribution.
 
 ## 2.4.0
 
@@ -26,8 +28,8 @@
 - Added an actual 2.4.0 interface capture to the product site and README.
 - Redesigned the product site with a colder, professional slate/ice-blue
   palette.
-- Changed distribution to proprietary. Source, build scripts, and internal
-  notes are not distributed.
+- Changed distribution to proprietary. The source repository was published
+  separately in 2.4.1; see that entry.
 
 ## 2.3.9
 
