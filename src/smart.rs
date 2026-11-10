@@ -116,6 +116,21 @@ fn learned(i: usize) -> Option<i32> {
     if value > 0 { Some(value) } else { None }
 }
 
+/// A bounded EWMA with a warm-up phase. The first few samples adapt quickly;
+/// once the cadence is established, the step size settles so one long pause or
+/// one unusual activation cannot throw the next wait across the range.
+#[inline]
+fn next_gap_ms(old: i64, sample: i64, samples: u32) -> i64 {
+    let sample = sample.clamp(70, 900);
+    if old <= 0 {
+        return sample;
+    }
+    let alpha = (2.0 / (samples.min(32) as f32 + 1.0)).clamp(0.125, 0.5);
+    (old as f32 + (sample as f32 - old as f32) * alpha)
+        .round()
+        .clamp(70.0, 900.0) as i64
+}
+
 /// Called once per macro activation. The EWMA keeps a bad frame or a long
 /// pause from making the next timing decision jump around.
 pub fn on_trigger(module: &str) {
@@ -123,14 +138,14 @@ pub fn on_trigger(module: &str) {
     let now = input::now();
     let s = stats();
     let last = s.last[i].swap(now, Ordering::Relaxed);
-    s.count[i].fetch_add(1, Ordering::Relaxed);
+    let samples = s.count[i].fetch_add(1, Ordering::Relaxed).saturating_add(1);
     if last <= 0 || now <= last {
         return;
     }
     let gap_ms = ((now - last) as f64 * 1000.0 / input::qpf() as f64) as i64;
     let gap = gap_ms.clamp(70, 900);
     let old = s.gap[i].load(Ordering::Relaxed);
-    let next = if old <= 0 { gap } else { (old * 3 + gap) / 4 };
+    let next = next_gap_ms(old, gap, samples);
     s.gap[i].store(next, Ordering::Relaxed);
 }
 
@@ -197,5 +212,14 @@ mod tests {
         assert_eq!(known_slot("vC"), known_slot("wtap"));
         assert_eq!(known_slot("v5"), Some(5));
         assert_eq!(known_slot("nope"), None);
+    }
+
+    #[test]
+    fn cadence_brain_warms_up_quickly_then_stabilises() {
+        assert_eq!(next_gap_ms(0, 120, 1), 120);
+        assert_eq!(next_gap_ms(120, 220, 2), 170);
+        let settled = next_gap_ms(120, 220, 20);
+        assert!(settled > 120);
+        assert!(settled < 170);
     }
 }

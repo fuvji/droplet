@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.4.1
+
+- The local cadence brain now uses a warm-up EWMA: early activations adapt
+  quickly, then the step size settles to a 12.5% floor. The configured Min/Max
+  still clamps every selected wait.
+- System > Behaviour now reports `Capture: Visible`; there is no streamproof or
+  capture-evasion mode.
+- Rebuilt the product site around a dark violet/block system with timing
+  diagrams, a release audit, a sitemap, and asset-aware cache headers.
+- Added a 13th release test for cadence adaptation. The release binary is
+  582,656 bytes.
+
 ## 2.4.0
 
 - Sprint now pulses the configured sprint key once per second while physical W

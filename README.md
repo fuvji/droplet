@@ -6,7 +6,7 @@ Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Hydrogen 2.4.0 Core panel](site/public/assets/hydrogen-panel.png)
+![Hydrogen 2.4.1 Core panel](site/public/assets/hydrogen-panel.png)
 
 ## Features
 
@@ -16,6 +16,10 @@ keyboard/mouse input; it does not read or modify game memory.
   The key is never held down between pulses, and the watcher is lock-free.
 - W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
   using the old W / 100–120 ms default pair migrate once.
+- The local cadence brain uses a warm-up EWMA: early activations adapt quickly,
+  then the step floor settles at 12.5%, always inside the configured Min/Max.
+- System > Behaviour reports `Capture: Visible`. There is no streamproof or
+  capture-evasion mode.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
   and Hover Inventory are one-shot actions with per-module busy guards.
 - 648x432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
@@ -24,6 +28,8 @@ keyboard/mouse input; it does not read or modify game memory.
 - Portable x64 executable plus a signed full-trust MSIX package.
 - The panel is visible to screen capture and streaming tools. There is no
   capture exclusion, streamproof mode, process hiding, or disguise behavior.
+- The public product page uses a dark violet/block system, measured release
+  facts, timing diagrams, and an explicit distribution disclosure.
 
 ## Combat timing profile
 
@@ -61,7 +67,8 @@ source download is provided. The versioned executable is the product. See
 The public product page is static documentation and media, not a source
 repository. It has no analytics, external fonts, client-side JavaScript, or
 network calls. Its source lives locally in `site/`, and the Freebuff Sites
-project ID is recorded in `site/SITE_ID.txt`.
+project ID is recorded in `site/SITE_ID.txt`. The 2.4.1 page adds a sitemap,
+timing diagrams, an audit panel, and a visible-capture boundary.
 
 ## Development
 
@@ -75,7 +82,21 @@ cargo build --release
 
 The release profile uses `opt-level = 3`, fat LTO, one codegen unit, aborting
 panics, and stripped symbols. The project targets
-`x86_64-pc-windows-gnu` via `.cargo/config.toml`.
+`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The website is a single
+static HTML/CSS page with a local screenshot, no JavaScript, no external fonts,
+and no third-party requests. Its worker adds a strict CSP and asset-aware cache
+headers.
+
+### Local site preview
+
+The static page has a dependency-free preview server for the private checkout:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/serve-site.ps1
+```
+
+Open <http://127.0.0.1:4173/>. The server binds loopback only and is not part of
+the deployed site; production uses the manifest in `site/deploy.json`.
 
 ## Package and install
 
@@ -100,12 +121,12 @@ master/focus gate prevents injection.
 
 ## Verification
 
-- `cargo test --release`: 12 tests covering config migration, timing bounds,
-  Anchor slot validation, W-Tap defaults/planning, Sprint scheduling, and
-  combat-profile parsing.
+- `cargo test --release`: 13 tests covering config migration, timing bounds,
+  Anchor slot validation, W-Tap defaults/planning, Sprint scheduling,
+  cadence-brain warm-up, and combat-profile parsing.
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `582,144` bytes, down from `604,672` bytes in 2.3.8.
-- Source and installed package: `2.4.0` / `2.4.0.0`; the rebuilt MSIX signature
+- Release binary: `582,656` bytes, down from `604,672` bytes in 2.3.8.
+- Source and installed package: `2.4.1` / `2.4.1.0`; the rebuilt MSIX signature
   verified with the local development certificate.
 
 Real in-game hit registration still needs verification in a live Minecraft

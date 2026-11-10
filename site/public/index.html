@@ -4,16 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#06080e">
-  <title>Hydrogen — Low-latency Minecraft macros</title>
-  <meta name="description" content="Hydrogen is a small, local, zero-dependency macro suite for Minecraft Java. One press runs one exact sequence. Sprint pulses once a second while W is held.">
+  <meta name="theme-color" content="#08070d">
+  <title>Hydrogen 2.4.1 — Minecraft macros, measured.</title>
+  <meta name="description" content="Hydrogen 2.4.1 is a local Windows macro suite for Minecraft Java. Exact one-shot sequences, a 1 Hz Sprint pulse while W is held, and no runtime dependencies.">
   <link rel="canonical" href="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Hydrogen — Low-latency Minecraft macros">
-  <meta property="og:description" content="One press, one exact sequence. A small, local Windows macro suite with no telemetry, network calls, or game-memory access.">
+  <meta property="og:title" content="Hydrogen 2.4.1 — Minecraft macros, measured.">
+  <meta property="og:description" content="A small, local Windows macro suite. One press runs one exact sequence. No telemetry, network calls, or game-memory access.">
   <meta property="og:url" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/">
-  <meta property="og:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-panel.png">
+  <meta property="og:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-panel.png?v=2.4.1">
+  <meta property="og:image:width" content="648">
+  <meta property="og:image:height" content="432">
+  <meta property="og:image:alt" content="The Hydrogen Core panel at native 648 by 432 size.">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Hydrogen 2.4.1 — Minecraft macros, measured.">
+  <meta name="twitter:description" content="Exact sequences. A visible overlay. No game-memory access.">
+  <meta name="twitter:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-panel.png?v=2.4.1">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -25,268 +31,275 @@
       <a class="brand" href="/" aria-label="Hydrogen home">
         <span class="brand-mark" aria-hidden="true">H</span>
         <span class="brand-name">Hydrogen</span>
+        <span class="brand-version">2.4.1</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#interface">Interface</a>
-        <a href="#anchor">Anchor</a>
+        <a href="#timing">Timing</a>
         <a href="#modules">Modules</a>
+        <a href="#audit">Audit</a>
         <a href="#specs">Specs</a>
       </nav>
-      <a class="version-pill" href="#specs">
-        <span class="status-dot" aria-hidden="true"></span>
-        v2.4.0
-      </a>
+      <a class="header-action" href="#audit">Read the audit <span aria-hidden="true">↘</span></a>
     </div>
   </header>
 
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>Windows 10/11 · Rust · Proprietary</p>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Windows 10/11 <span aria-hidden="true">/</span> Rust <span aria-hidden="true">/</span> Proprietary</p>
         <h1 id="hero-title">PvP macros,<br><em>without the noise.</em></h1>
-        <p class="lede">Hydrogen is a small, local macro suite for Minecraft Java. One press runs one exact sequence. Sprint pulses once a second only while W is held.</p>
+        <p class="lede">Hydrogen is a small, local macro suite for Minecraft Java. One press runs one exact sequence. Sprint pulses once a second while W is held, then gets out of the way.</p>
         <div class="actions">
-          <a class="button button-primary" href="#interface">
-            See the interface
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5"/></svg>
-          </a>
-          <a class="button button-ghost" href="#specs">Read the specs</a>
+          <a class="button button-primary" href="#interface">See the panel <span aria-hidden="true">↓</span></a>
+          <a class="button button-quiet" href="#audit">Read the audit</a>
         </div>
-        <dl class="proof" aria-label="At a glance">
-          <div><dt>0</dt><dd>runtime deps</dd></div>
-          <div><dt>582<small>KB</small></dt><dd>release binary</dd></div>
-          <div><dt>0</dt><dd>network calls</dd></div>
+        <ul class="hero-notes" aria-label="Product boundaries">
+          <li>No runtime dependencies</li>
+          <li>No network calls</li>
+          <li>Visible to capture</li>
+        </ul>
+      </div>
+
+      <aside class="release-card" aria-label="Hydrogen 2.4.1 release card">
+        <div class="release-head">
+          <span>Release / 2.4.1</span>
+          <span class="release-state"><i aria-hidden="true"></i>Local</span>
+        </div>
+        <div class="release-main">
+          <span class="release-label">Sprint cadence</span>
+          <div class="release-value">1.000<small>Hz</small></div>
+          <p>One pulse per second while physical W is held. The key is never held between pulses.</p>
+        </div>
+        <div class="signal-bars" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="signal-caption"><span>0 ms</span><span>1000 ms</span></div>
+        <dl class="release-grid">
+          <div><dt>W-Tap</dt><dd>132–148 ms</dd></div>
+          <div><dt>Anchor floor</dt><dd>50 ms</dd></div>
+          <div><dt>Release binary</dt><dd>582,656 B</dd></div>
+          <div><dt>Test suite</dt><dd>13 / 13</dd></div>
         </dl>
-      </div>
+        <div class="release-foot">
+          <span><i aria-hidden="true"></i>Visible to capture</span>
+          <span>0 network calls</span>
+        </div>
+      </aside>
+    </section>
 
-      <div class="hero-visual">
-        <div class="preview-glow" aria-hidden="true"></div>
-        <article class="panel" aria-label="Preview of the Hydrogen control panel">
-          <div class="panel-bar">
-            <span class="panel-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="panel-title">HYDROGEN</span>
-            <span class="panel-state">ARMED</span>
-          </div>
-          <div class="panel-body">
-            <div class="panel-rail" aria-hidden="true">
-              <span class="rail-item rail-active">H</span>
-              <span class="rail-item">A</span>
-              <span class="rail-item">C</span>
-              <span class="rail-item">S</span>
-            </div>
-            <div class="panel-main">
-              <div class="panel-heading">
-                <div>
-                  <p class="panel-kicker">COMBAT / ANCHOR</p>
-                  <h2>Charge &amp; detonate</h2>
-                </div>
-                <span class="ready-badge">READY</span>
-              </div>
-
-              <div class="panel-sequence">
-                <div class="panel-step">
-                  <span class="step-index">01</span>
-                  <span class="step-copy"><b>Place</b><small>Anchor slot</small></span>
-                  <kbd>H</kbd>
-                </div>
-                <div class="panel-step">
-                  <span class="step-index">02</span>
-                  <span class="step-copy"><b>Charge</b><small>Glowstone slot</small></span>
-                  <kbd>G</kbd>
-                </div>
-                <div class="panel-step">
-                  <span class="step-index">03</span>
-                  <span class="step-copy"><b>Detonate</b><small>Switch to totem</small></span>
-                  <kbd>R</kbd>
-                </div>
-              </div>
-
-              <div class="panel-meters">
-                <div><span>Min delay</span><strong>47 ms</strong></div>
-                <div><span>Max delay</span><strong>53 ms</strong></div>
-                <div><span>Tick floor</span><strong>50 ms</strong></div>
-              </div>
-            </div>
-          </div>
-          <div class="panel-foot">
-            <span class="live-line"><i aria-hidden="true"></i>ONE PRESS · ONE SEQUENCE</span>
-            <span>v2.4.0</span>
-          </div>
-        </article>
-        <span class="float-tag float-one">visible to capture</span>
-        <span class="float-tag float-two">582 KB build</span>
-      </div>
+    <section class="proof-rail wrap" aria-label="Measured release facts">
+      <div><strong>0</strong><span>runtime dependencies</span></div>
+      <div><strong>582,656</strong><span>bytes · release exe</span></div>
+      <div><strong>13 / 13</strong><span>release tests passing</span></div>
+      <div><strong>0</strong><span>network calls</span></div>
     </section>
 
     <section class="section wrap" id="interface" aria-labelledby="interface-title">
-      <div class="section-intro-wide">
+      <div class="section-head">
         <div>
-          <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>01 / Interface</p>
-          <h2 id="interface-title">The actual panel.</h2>
+          <p class="section-tag"><span>01</span>Interface</p>
+          <h2 id="interface-title">The panel,<br><em>at native size.</em></h2>
         </div>
-        <p class="section-lede">Captured from the shipped Windows build, not a mockup. 648 × 432, keyboard-first, and composed entirely with the native Windows drawing stack.</p>
+        <p class="section-lede">Captured from the shipped Windows build, not a mockup. 648 × 432, keyboard-first, and painted with the native Windows drawing stack.</p>
       </div>
 
       <figure class="media-frame">
-        <div class="media-bar" aria-hidden="true">
-          <span class="media-lights"><i></i><i></i><i></i></span>
-          <span>HYDROGEN / CORE</span>
-          <span>LIVE CAPTURE</span>
+        <div class="media-bar">
+          <span class="media-title">CORE / 2.4.1</span>
+          <span class="media-meta">648 × 432</span>
+          <span class="media-live"><i aria-hidden="true"></i>Live capture</span>
         </div>
-        <img src="/assets/hydrogen-panel.png" width="648" height="432" alt="Hydrogen 2.4.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy">
+        <img src="/assets/hydrogen-panel.png?v=2.4.1" width="648" height="432" alt="The Hydrogen 2.4.1 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
         <figcaption class="media-caption">
-          <span>The Core tab, captured at native size from the running 2.4.0 build.</span>
-          <span>648 × 432 · Windows 11</span>
+          <span>The Core tab, captured at native size from the running build.</span>
+          <span>Windows 11 / 100% DPI</span>
         </figcaption>
       </figure>
+
+      <ul class="interface-facts" aria-label="Interface details">
+        <li><span>01</span><b>Four tabs</b><small>Core, Crystal, Assist, System</small></li>
+        <li><span>02</span><b>Event-driven paint</b><small>No always-on animation loop</small></li>
+        <li><span>03</span><b>One surface</b><small>Tray-native, no separate launcher</small></li>
+      </ul>
     </section>
 
-    <section class="section wrap" id="anchor" aria-labelledby="anchor-title">
-      <div class="section-intro">
-        <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>02 / Anchor</p>
-        <h2 id="anchor-title">The Anchor,<br><em>made deliberate.</em></h2>
-        <p class="section-lede">A charged anchor detonates when it is used without glowstone. Hydrogen runs the whole exchange as one settled sequence, then gets out of the way.</p>
+    <section class="section wrap" id="timing" aria-labelledby="timing-title">
+      <div class="section-head">
+        <div>
+          <p class="section-tag"><span>02</span>Timing</p>
+          <h2 id="timing-title">The clock<br><em>is the feature.</em></h2>
+        </div>
+        <p class="section-lede">Every sequence is bounded by the game tick and by the range you choose. Nothing here claims zero latency; the useful number is the one the client can actually observe.</p>
       </div>
 
-      <div class="anchor-layout">
-        <div class="sequence-grid">
-          <article class="sequence-card">
-            <span class="sequence-number">01</span>
-            <h3>Place</h3>
-            <p>Select the anchor slot and use it. A full tick lets the client register the placement.</p>
+      <div class="timing-layout">
+        <div class="timing-grid">
+          <article class="timing-card">
+            <div class="timing-top"><span>Sprint</span><strong>1.000 <small>Hz</small></strong></div>
+            <p>Immediate pulse on W, then one pulse every second. Physical W only; injected events never keep it running.</p>
+            <div class="ruler" aria-hidden="true">
+              <div class="ruler-line"></div>
+              <span class="tick at-0"></span><span class="tick at-25"></span><span class="tick at-50"></span><span class="tick at-75"></span><span class="tick at-100"></span>
+              <span class="tick-label at-0">0</span><span class="tick-label at-25">250</span><span class="tick-label at-50">500</span><span class="tick-label at-75">750</span><span class="tick-label at-100">1000 ms</span>
+              <span class="pulse at-0"><i></i></span><span class="pulse at-100"><i></i></span>
+            </div>
           </article>
-          <article class="sequence-card">
-            <span class="sequence-number">02</span>
-            <h3>Charge</h3>
-            <p>Select glowstone and use once. Extra charges add delay without improving reach.</p>
+
+          <article class="timing-card">
+            <div class="timing-top"><span>W-Tap</span><strong>132–148 <small>ms</small></strong></div>
+            <p>S-Tap by default. A full tick separates the release and the forward re-press, and repeat key-down events are suppressed through the tap window.</p>
+            <div class="ruler" aria-hidden="true">
+              <div class="ruler-line"></div>
+              <span class="tick at-0"></span><span class="tick at-25"></span><span class="tick at-50"></span><span class="tick at-75"></span><span class="tick at-100"></span>
+              <span class="tick-label at-0">0</span><span class="tick-label at-25">50</span><span class="tick-label at-50">100</span><span class="tick-label at-75">150</span><span class="tick-label at-100">200 ms</span>
+              <span class="window"></span>
+            </div>
           </article>
-          <article class="sequence-card">
-            <span class="sequence-number">03</span>
-            <h3>Clear</h3>
-            <p>Switch away from glowstone. That switch is the detonation input, not another use.</p>
-          </article>
-          <article class="sequence-card">
-            <span class="sequence-number">04</span>
-            <h3>Detonate</h3>
-            <p>Right-click with the totem equipped. The busy guard holds through the blast tick.</p>
+
+          <article class="timing-card">
+            <div class="timing-top"><span>Anchor</span><strong>50 <small>ms / step</small></strong></div>
+            <p>Place, charge, clear, detonate. Every step keeps the 50 ms tick floor, and a busy guard prevents overlapping swaps.</p>
+            <div class="step-ladder" aria-hidden="true">
+              <span><small>01</small>Place</span>
+              <span><small>02</small>Charge</span>
+              <span><small>03</small>Clear</span>
+              <span><small>04</small>Detonate</span>
+            </div>
           </article>
         </div>
 
-        <aside class="guardrail-card" aria-labelledby="guardrail-title">
-          <p class="panel-kicker">SEQUENCE GUARDRAILS</p>
-          <h3 id="guardrail-title">Nothing clever in the dark.</h3>
-          <ul class="guardrail-list">
-            <li>All three slots must be valid and distinct.</li>
-            <li>Every step keeps the 50 ms game-tick floor.</li>
-            <li>A busy guard prevents overlapping swaps.</li>
-            <li>Invalid slots fail closed; nothing is injected.</li>
-            <li>The master switch and focus gate still apply.</li>
-          </ul>
-          <div class="guardrail-note">
-            <span>One press</span>
-            <span class="guardrail-arrow" aria-hidden="true">→</span>
-            <span>one complete sequence</span>
-          </div>
+        <aside class="brain-card" aria-labelledby="brain-title">
+          <p class="section-tag"><span>03</span>Local brain</p>
+          <h3 id="brain-title">Adaptive on warm-up.<br>Bounded at output.</h3>
+          <p>The AI brain is a deterministic cadence estimator, not a model download. It learns how quickly you are re-triggering a module, then picks a wait inside your Min/Max.</p>
+          <ol class="brain-list">
+            <li><span>01</span><div><b>Warm-up</b><small>Early samples move the estimate quickly.</small></div></li>
+            <li><span>02</span><div><b>Settled</b><small>The step size bottoms out at 12.5%.</small></div></li>
+            <li><span>03</span><div><b>Clamped</b><small>Your configured range always wins.</small></div></li>
+          </ol>
+          <div class="brain-foot"><span>No allocation on the hot path</span><span>No network</span></div>
         </aside>
       </div>
     </section>
 
     <section class="section wrap" id="modules" aria-labelledby="modules-title">
-      <div class="section-intro section-intro-wide">
+      <div class="section-head">
         <div>
-          <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>03 / Modules</p>
+          <p class="section-tag"><span>04</span>Modules</p>
           <h2 id="modules-title">A focused kit.</h2>
         </div>
-        <p class="section-lede">Short, deliberate sequences for the situations that need speed. Every regular module is one-shot with its own busy guard. Sprint is the one bounded watcher.</p>
+        <p class="section-lede">Short, deliberate sequences for the moments that need speed. Every one-shot module has its own busy guard; Sprint is the one bounded watcher.</p>
       </div>
 
       <div class="module-grid">
-        <article class="module-card"><span class="module-index">01</span><h3>Anchor</h3><p>Place, charge, detonate.</p></article>
-        <article class="module-card"><span class="module-index">02</span><h3>Crystal</h3><p>Obsidian, then crystal.</p></article>
-        <article class="module-card"><span class="module-index">03</span><h3>Mace</h3><p>Swap with settled timing.</p></article>
-        <article class="module-card"><span class="module-index">04</span><h3>Shield</h3><p>Axe tap with stun option.</p></article>
-        <article class="module-card"><span class="module-index">05</span><h3>Dash</h3><p>Spear poke and restore.</p></article>
-        <article class="module-card"><span class="module-index">06</span><h3>Breach</h3><p>Mace swap and return.</p></article>
-        <article class="module-card"><span class="module-index">07</span><h3>Potion</h3><p>Two-slot drink and return.</p></article>
-        <article class="module-card"><span class="module-index">08</span><h3>Pearl</h3><p>Throw, catch, keep moving.</p></article>
-        <article class="module-card"><span class="module-index">09</span><h3>Totem</h3><p>Hover swap when it matters.</p></article>
-        <article class="module-card"><span class="module-index">10</span><h3>Fast Use</h3><p>Held right-click cadence.</p></article>
-        <article class="module-card"><span class="module-index">11</span><h3>Auto Use</h3><p>Use an item, swap back.</p></article>
-        <article class="module-card"><span class="module-index">12</span><h3>W-Tap</h3><p>S-Tap by default, 132–148 ms.</p></article>
-        <article class="module-card"><span class="module-index">13</span><h3>Sprint</h3><p>One pulse per second while W is held.</p></article>
-        <article class="module-card"><span class="module-index">14</span><h3>Hover Inventory</h3><p>Peek without leaving combat.</p></article>
+        <article class="module-card"><span>01</span><h3>Anchor</h3><p>Place, charge, detonate.</p></article>
+        <article class="module-card"><span>02</span><h3>Crystal</h3><p>Obsidian, then crystal.</p></article>
+        <article class="module-card"><span>03</span><h3>Mace</h3><p>Swap with settled timing.</p></article>
+        <article class="module-card"><span>04</span><h3>Shield</h3><p>Axe tap with stun option.</p></article>
+        <article class="module-card"><span>05</span><h3>Dash</h3><p>Spear poke and restore.</p></article>
+        <article class="module-card"><span>06</span><h3>Breach</h3><p>Mace swap and return.</p></article>
+        <article class="module-card"><span>07</span><h3>Potion</h3><p>Two-slot drink and return.</p></article>
+        <article class="module-card"><span>08</span><h3>Pearl</h3><p>Throw, catch, keep moving.</p></article>
+        <article class="module-card"><span>09</span><h3>Totem</h3><p>Hover swap when it matters.</p></article>
+        <article class="module-card"><span>10</span><h3>Fast Use</h3><p>Held right-click cadence.</p></article>
+        <article class="module-card"><span>11</span><h3>Auto Use</h3><p>Use an item, swap back.</p></article>
+        <article class="module-card"><span>12</span><h3>W-Tap</h3><p>S-Tap by default, 132–148 ms.</p></article>
+        <article class="module-card"><span>13</span><h3>Sprint</h3><p>One pulse per second while W is held.</p></article>
+        <article class="module-card"><span>14</span><h3>Hover Inventory</h3><p>Peek without leaving combat.</p></article>
+      </div>
+    </section>
+
+    <section class="section wrap" id="audit" aria-labelledby="audit-title">
+      <div class="audit-layout">
+        <div class="section-head audit-intro">
+          <div>
+            <p class="section-tag"><span>05</span>Audit</p>
+            <h2 id="audit-title">Small,<br><em>and checked.</em></h2>
+          </div>
+          <p class="section-lede">The boundaries are part of the product. These are source-verified or measured on the release build; live Minecraft hit registration is still a separate test.</p>
+          <div class="audit-stamp"><strong>13 / 13</strong><span>release tests passing</span></div>
+        </div>
+
+        <div class="audit-panel">
+          <div class="audit-head"><span>Release audit</span><span>2.4.1 / 2026-11-10</span></div>
+          <ul class="audit-list">
+            <li><span class="audit-name">Runtime dependencies</span><span class="audit-value">0</span><span class="audit-state is-pass">pass</span></li>
+            <li><span class="audit-name">Network calls</span><span class="audit-value">0</span><span class="audit-state is-pass">pass</span></li>
+            <li><span class="audit-name">Telemetry</span><span class="audit-value">None</span><span class="audit-state is-pass">pass</span></li>
+            <li><span class="audit-name">Game memory</span><span class="audit-value">No reads / writes</span><span class="audit-state is-pass">pass</span></li>
+            <li><span class="audit-name">Capture status</span><span class="audit-value">Visible</span><span class="audit-state is-boundary">boundary</span></li>
+            <li><span class="audit-name">Source distribution</span><span class="audit-value">Not distributed</span><span class="audit-state is-boundary">boundary</span></li>
+            <li><span class="audit-name">Release binary</span><span class="audit-value">582,656 B</span><span class="audit-state is-pass">measured</span></li>
+            <li><span class="audit-name">Live Minecraft</span><span class="audit-value">Pending</span><span class="audit-state is-open">unverified</span></li>
+          </ul>
+          <div class="audit-foot"><span>No streamproof mode. No capture exclusion.</span><span>Stable, visible desktop composition.</span></div>
+        </div>
       </div>
     </section>
 
     <section class="section wrap" id="specs" aria-labelledby="specs-title">
       <div class="spec-layout">
-        <div class="section-intro">
-          <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>04 / Specs</p>
-          <h2 id="specs-title">Small<br><em>on purpose.</em></h2>
-          <p class="section-lede">No framework, no runtime downloader, no telemetry. Just a focused Windows executable and the parts Windows already provides.</p>
+        <div>
+          <div class="section-head spec-intro">
+            <div>
+              <p class="section-tag"><span>06</span>Specs</p>
+              <h2 id="specs-title">Small<br><em>on purpose.</em></h2>
+            </div>
+            <p class="section-lede">No framework, no runtime downloader, no telemetry. Just a focused Windows executable and the parts Windows already provides.</p>
+          </div>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>Version</dt><dd>2.4.1</dd></div>
+            <div class="spec-row"><dt>Runtime</dt><dd>Rust · zero crates</dd></div>
+            <div class="spec-row"><dt>Panel</dt><dd>648 × 432 acrylic overlay</dd></div>
+            <div class="spec-row"><dt>Sprint</dt><dd>1 Hz pulse while W is held</dd></div>
+            <div class="spec-row"><dt>W-Tap</dt><dd>S-Tap · 132–148 ms</dd></div>
+            <div class="spec-row"><dt>Anchor</dt><dd>50 ms per step</dd></div>
+            <div class="spec-row"><dt>Input</dt><dd>Win32 SendInput only</dd></div>
+            <div class="spec-row"><dt>Timing</dt><dd>Local cadence brain + optional profile</dd></div>
+            <div class="spec-row"><dt>Network</dt><dd>None</dd></div>
+            <div class="spec-row"><dt>Telemetry</dt><dd>None</dd></div>
+            <div class="spec-row"><dt>Capture</dt><dd>Visible · no streamproof mode</dd></div>
+            <div class="spec-row"><dt>Licence</dt><dd>Proprietary · source not distributed</dd></div>
+          </dl>
         </div>
 
-        <dl class="spec-list">
-          <div class="spec-row"><dt>Runtime</dt><dd>Rust · zero crates</dd></div>
-          <div class="spec-row"><dt>Panel</dt><dd>648 × 432 acrylic overlay</dd></div>
-          <div class="spec-row"><dt>Anchor</dt><dd>50 ms per step</dd></div>
-          <div class="spec-row"><dt>Sprint</dt><dd>1 Hz pulse while W is held</dd></div>
-          <div class="spec-row"><dt>W-Tap</dt><dd>S-Tap · 132–148 ms</dd></div>
-          <div class="spec-row"><dt>Input</dt><dd>Win32 SendInput only</dd></div>
-          <div class="spec-row"><dt>Timing</dt><dd>Local EWMA + optional offline profile</dd></div>
-          <div class="spec-row"><dt>Network</dt><dd>None</dd></div>
-          <div class="spec-row"><dt>Telemetry</dt><dd>None</dd></div>
-          <div class="spec-row"><dt>Capture</dt><dd>Visible · no capture exclusion</dd></div>
-          <div class="spec-row"><dt>Game memory</dt><dd>No reads, no writes</dd></div>
-          <div class="spec-row"><dt>Binary</dt><dd>582 KB portable release</dd></div>
-          <div class="spec-row"><dt>Licence</dt><dd>Proprietary · source not distributed</dd></div>
-        </dl>
-      </div>
-    </section>
-
-    <section class="section wrap" id="distribution" aria-labelledby="distribution-title">
-      <div class="build-layout">
-        <div class="section-intro">
-          <p class="eyebrow"><span class="eyebrow-mark" aria-hidden="true"></span>05 / Distribution</p>
-          <h2 id="distribution-title">Closed,<br><em>plainly stated.</em></h2>
-          <p class="section-lede">Hydrogen is a proprietary Windows application. This page is product documentation, not an open-source repository. Source code, build scripts, and internal engineering notes are not distributed.</p>
-          <ul class="build-points">
+        <aside class="distribution-card" aria-labelledby="distribution-title">
+          <p class="section-tag"><span>07</span>Distribution</p>
+          <h3 id="distribution-title">Closed,<br>plainly stated.</h3>
+          <p>Hydrogen is a proprietary Windows application. This page is product documentation, not an open-source repository. Source code, build scripts, and internal engineering notes are not distributed.</p>
+          <ul class="boundary-list">
             <li>The shipped binary is the product. There is no public source download.</li>
-            <li>The panel is visible to screen capture and streaming tools; it does not hide from them.</li>
+            <li>The panel is ordinary visible desktop composition. It does not hide from capture tools.</li>
             <li>No telemetry, analytics, network calls, or game-memory access.</li>
           </ul>
-        </div>
-
-        <aside class="guardrail-card disclosure-card" aria-labelledby="disclosure-title">
-          <p class="panel-kicker">PRODUCT DISCLOSURE</p>
-          <h3 id="disclosure-title">What ships, and what does not.</h3>
-          <dl class="disclosure-list">
-            <div><dt>Licence</dt><dd>Proprietary</dd></div>
-            <div><dt>Source</dt><dd>Not distributed</dd></div>
-            <div><dt>Capture</dt><dd>Visible</dd></div>
-            <div><dt>Telemetry</dt><dd>None</dd></div>
-            <div><dt>Network</dt><dd>None</dd></div>
-            <div><dt>Game memory</dt><dd>No access</dd></div>
-          </dl>
+          <div class="release-notes">
+            <div><span>2.4.1</span><p>Adaptive cadence warm-up, visible capture status, and a tighter product page.</p></div>
+            <div><span>2.4.0</span><p>One-pulse Sprint and the new S-Tap defaults.</p></div>
+          </div>
         </aside>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap footer-inner">
+    <div class="wrap footer-top">
       <div class="footer-brand">
         <span class="brand-mark" aria-hidden="true">H</span>
-        <div>
-          <strong>Hydrogen</strong>
-          <p>Proprietary. Local by design. No telemetry, network calls, or game-memory access.</p>
-        </div>
+        <div><strong>Hydrogen</strong><p>Proprietary. Local by design.</p></div>
       </div>
-      <div class="footer-meta">
-        <span>© 2026 Hydrogen</span>
-        <span>Source not distributed</span>
+      <div class="footer-links" aria-label="Footer">
+        <a href="#interface">Interface</a>
+        <a href="#timing">Timing</a>
+        <a href="#audit">Audit</a>
         <a href="#main">Back to top ↑</a>
       </div>
+    </div>
+    <a class="footer-wordmark" href="/" aria-label="Hydrogen home">HYDROGEN</a>
+    <div class="wrap footer-bottom">
+      <span>© 2026 Hydrogen</span>
+      <span>No telemetry · No network · Source not distributed</span>
     </div>
   </footer>
 </body>

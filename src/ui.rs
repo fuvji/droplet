@@ -931,11 +931,12 @@ impl<'a> Ui<'a> {
         self.row_presets(r, 3);
         y += r.h + gap;
 
-        let r = Rect::new(x0, y, w, self.card_h(3));
+        let r = Rect::new(x0, y, w, self.card_h(4));
         self.card(r, "Behaviour", None);
         self.row_switch(r, 0, "Keep panel open", "vP");
         self.row_switch(r, 1, "Low latency mode", "vLL");
         self.row_switch(r, 2, "Only in Minecraft", "vFO");
+        self.row_value(r, 3, "Capture", "Visible");
 
         let mut y = (HEADER_H + PAD) * s;
         let r = Rect::new(x1, y, w, self.card_h(3));
