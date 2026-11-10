@@ -12,16 +12,16 @@
   <meta property="og:title" content="Hydrogen 2.5.0 — built for the next tick.">
   <meta property="og:description" content="A small, local Windows macro suite. Pre-indexed input routing, exact sequences, no telemetry, no network calls, and no game-memory access.">
   <meta property="og:url" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/">
-  <meta property="og:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-panel.png?v=2.5.0">
+  <meta property="og:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-core.png?v=2.5.0">
   <meta property="og:image:width" content="648">
   <meta property="og:image:height" content="432">
   <meta property="og:image:alt" content="The Hydrogen 2.5.0 Core panel at native 648 by 432 size.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Hydrogen 2.5.0 — built for the next tick.">
   <meta name="twitter:description" content="Pre-indexed input routing. Exact sequences. A visible overlay. No game-memory access.">
-  <meta name="twitter:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-panel.png?v=2.5.0">
+  <meta name="twitter:image" content="https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page/assets/hydrogen-core.png?v=2.5.0">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=2.5.0-2">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -47,7 +47,7 @@
         <a href="#sponsors">Sponsors</a>
         <a href="https://github.com/fuvji/hydrogen">Source</a>
       </nav>
-      <a class="header-action" href="sponsors.html">Partner <span aria-hidden="true">↗</span></a>
+      <a class="header-action" href="/sponsors">Partner <span aria-hidden="true">↗</span></a>
     </div>
   </header>
 
@@ -111,7 +111,7 @@
         <span class="partner-kicker">Partner slot</span>
         <p>Reach Minecraft PvP players and Rust/Windows tooling developers without trackers or popups.</p>
       </div>
-      <a class="text-link" href="sponsors.html">Open sponsor inventory <span aria-hidden="true">↗</span></a>
+      <a class="text-link" href="/sponsors">Open sponsor inventory <span aria-hidden="true">↗</span></a>
     </aside>
 
     <section class="section wrap" id="performance" aria-labelledby="performance-title">
@@ -195,7 +195,7 @@
           <span class="media-live"><i aria-hidden="true"></i>Native capture</span>
         </div>
         <div class="media-image">
-          <img src="/assets/hydrogen-panel.png?v=2.5.0" width="648" height="432" alt="The Hydrogen 2.5.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
+          <img src="/assets/hydrogen-core.png?v=2.5.0" width="648" height="432" alt="The Hydrogen 2.5.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
           <span class="scanline" aria-hidden="true"></span>
         </div>
         <figcaption class="media-caption">
@@ -206,26 +206,32 @@
 
       <div class="preview-lab">
         <input class="preview-input" type="radio" name="preview" id="preview-core" checked>
-        <input class="preview-input" type="radio" name="preview" id="preview-modules">
-        <input class="preview-input" type="radio" name="preview" id="preview-rail">
-        <div class="preview-tabs" role="group" aria-label="Panel crops">
-          <label for="preview-core">Core panel</label>
-          <label for="preview-modules">Module cards</label>
-          <label for="preview-rail">Status rail</label>
-          <span class="preview-hint">Same capture, different crops</span>
+        <input class="preview-input" type="radio" name="preview" id="preview-crystal">
+        <input class="preview-input" type="radio" name="preview" id="preview-assist">
+        <input class="preview-input" type="radio" name="preview" id="preview-system">
+        <div class="preview-tabs" role="group" aria-label="Native panel captures">
+          <label for="preview-core"><span>01</span>Core</label>
+          <label for="preview-crystal"><span>02</span>Crystal</label>
+          <label for="preview-assist"><span>03</span>Assist</label>
+          <label for="preview-system"><span>04</span>System</label>
+          <span class="preview-hint">Four tabs · four native captures</span>
         </div>
         <div class="preview-stage">
           <figure class="preview-pane pane-core">
-            <img src="/assets/hydrogen-panel.png?v=2.5.0" width="648" height="432" alt="Full native capture of the Hydrogen Core panel." loading="lazy" decoding="async">
-            <figcaption>Full panel / 648 × 432</figcaption>
+            <img src="/assets/hydrogen-core.png?v=2.5.0" width="648" height="432" alt="Native Core tab with Shield, Mace, Potion, Breach, Auto Use, and Dash controls." loading="lazy" decoding="async">
+            <figcaption><span>Core / combat modules</span><span>Native 648 × 432</span></figcaption>
           </figure>
-          <figure class="preview-pane pane-modules">
-            <div class="crop"><img src="/assets/hydrogen-panel.png?v=2.5.0" width="648" height="432" alt="Close crop of the Hydrogen module cards." loading="lazy" decoding="async"></div>
-            <figcaption>Module cards / native crop</figcaption>
+          <figure class="preview-pane pane-crystal">
+            <img src="/assets/hydrogen-crystal.png?v=2.5.0" width="648" height="432" alt="Native Crystal tab with Auto Crystal, Anchor, Hover Totem, and Pearl controls." loading="lazy" decoding="async">
+            <figcaption><span>Crystal / anchor + totem</span><span>Native 648 × 432</span></figcaption>
           </figure>
-          <figure class="preview-pane pane-rail">
-            <div class="crop"><img src="/assets/hydrogen-panel.png?v=2.5.0" width="648" height="432" alt="Close crop of the Hydrogen navigation and status rail." loading="lazy" decoding="async"></div>
-            <figcaption>Navigation rail / native crop</figcaption>
+          <figure class="preview-pane pane-assist">
+            <img src="/assets/hydrogen-assist.png?v=2.5.0" width="648" height="432" alt="Native Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap timing controls." loading="lazy" decoding="async">
+            <figcaption><span>Assist / timing tools</span><span>Native 648 × 432</span></figcaption>
+          </figure>
+          <figure class="preview-pane pane-system">
+            <img src="/assets/hydrogen-system.png?v=2.5.0" width="648" height="432" alt="Native System tab with accent, session, danger zone, and performance controls." loading="lazy" decoding="async">
+            <figcaption><span>System / theme + session</span><span>Native 648 × 432</span></figcaption>
           </figure>
         </div>
       </div>
@@ -240,9 +246,9 @@
     <section class="section wrap" id="replay" aria-labelledby="replay-title">
       <div class="capture-grid">
         <div class="capture-frame">
-          <div class="capture-chrome"><span>CAPTURE / 2.5.0</span><span>648 × 432</span><span class="status-live"><i aria-hidden="true"></i>Visible</span></div>
+          <div class="capture-chrome"><span>CAPTURE / ASSIST</span><span>648 × 432</span><span class="status-live"><i aria-hidden="true"></i>Visible</span></div>
           <div class="capture-image">
-            <img src="/assets/hydrogen-panel.png?v=2.5.0" width="648" height="432" alt="Hydrogen 2.5.0 panel used as a capture preview." loading="lazy" decoding="async">
+            <img src="/assets/hydrogen-assist.png?v=2.5.0" width="648" height="432" alt="Hydrogen Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap controls." loading="lazy" decoding="async">
             <span class="capture-sweep" aria-hidden="true"></span>
             <span class="capture-tag">NATIVE UI / NOT GAMEPLAY</span>
           </div>
@@ -333,7 +339,7 @@
           <h2 id="sponsors-title">A quiet place<br><em>for a relevant product.</em></h2>
           <p>Hydrogen is funded by direct sponsorships, not third-party ad scripts. The audience is specific: Minecraft Java PvP players and people who care about small Windows tools, Rust, and input systems.</p>
           <div class="sponsor-actions">
-            <a class="button button-primary" href="sponsors.html">View sponsor inventory <span aria-hidden="true">↗</span></a>
+            <a class="button button-primary" href="/sponsors">View sponsor inventory <span aria-hidden="true">↗</span></a>
             <a class="text-link" href="https://github.com/fuvji/hydrogen/issues/new?title=Sponsorship%20inquiry&amp;body=Company%3A%0APlacement%3A%0ABudget%3A%0ALink%3A" rel="noopener">Start an inquiry <span aria-hidden="true">↗</span></a>
           </div>
           <p class="sponsor-fine">No analytics, cookies, popups, or third-party ad clients. Sponsor links leave the site.</p>
@@ -415,7 +421,7 @@
         </details>
         <details>
           <summary>Does the site run ads?</summary>
-          <p>No third-party ad client, analytics, or cookies. Sponsor placements are direct and static; sponsor links leave the site. See the <a href="sponsors.html">sponsor inventory</a>.</p>
+          <p>No third-party ad client, analytics, or cookies. Sponsor placements are direct and static; sponsor links leave the site. See the <a href="/sponsors">sponsor inventory</a>.</p>
         </details>
       </div>
     </section>
@@ -431,7 +437,7 @@
         <a href="#performance">Performance</a>
         <a href="#interface">Interface</a>
         <a href="#audit">Audit</a>
-        <a href="sponsors.html">Sponsors</a>
+        <a href="/sponsors">Sponsors</a>
         <a href="https://github.com/fuvji/hydrogen">Source</a>
         <a href="#main">Back to top ↑</a>
       </div>

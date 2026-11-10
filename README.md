@@ -6,7 +6,7 @@ Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Hydrogen 2.5.0 Core panel](site/public/assets/hydrogen-panel.png)
+![Hydrogen 2.5.0 Core panel](site/public/assets/hydrogen-core.png)
 
 ## Features
 
@@ -89,8 +89,8 @@ the supported product. See [LICENSE](LICENSE).
 The public product page is static documentation and media. Its source is
 published in the same repository. It has no analytics, external fonts,
 client-side JavaScript, third-party ad scripts, or network calls. It includes a
-native panel capture, CSS motion, a benchmark chart, a runtime model, and an
-explicit capture-lab note. The 2.5.0 page adds a direct sponsor inventory at
+four native panel captures, CSS motion, a benchmark chart, a runtime model, and
+an explicit capture-lab note. The 2.5.0 page adds a direct sponsor inventory at
 `site/public/sponsors.html`; sponsor links are ordinary outbound navigation.
 The Freebuff Sites project ID is recorded in `site/SITE_ID.txt`.
 
@@ -156,7 +156,7 @@ master/focus gate prevents injection.
 - Signed MSIX: `312,525` bytes, `119c46e213e48b743067b2bd10850268547252779a4d6f6faabd7f70d2518814`;
   signature verified by the local trust provider.
 - Source and package: `2.5.0` / `2.5.0.0`.
-- The 2.5.0 panel capture is in `site/public/assets/hydrogen-panel.png`.
+- Four native 2.5.0 tab captures live in `site/public/assets/hydrogen-{core,crystal,assist,system}.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft
 client; input injection and timing are verified independently. The site does

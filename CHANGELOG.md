@@ -12,9 +12,13 @@
 - Rebuilt the product site as an ion-lab interface with a benchmark chart, a
   runtime pipeline model, CSS-only motion, a native-capture preview lab, and
   responsive sponsor and audit layouts.
-- Added a direct sponsor inventory at `/sponsors.html`. The site still loads no
+- Added a direct sponsor inventory at `/sponsors`. The site still loads no
   third-party ad scripts, analytics, cookies, external fonts, or client-side
   JavaScript.
+- Polished the site after release: four distinct native panel captures, an
+  animated aurora/grid background, rounded surfaces throughout, and clean
+  sponsor routing. The GitHub repository homepage now points at the product
+  site.
 - Rebuilt and signed the 2.5.0 MSIX. The package is 312,525 bytes and its
   signature verifies with the local development certificate.
 - Kept the deliberate boundaries: no game-memory access, no network calls, no

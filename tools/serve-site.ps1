@@ -37,6 +37,13 @@ try {
                 $path = [Uri]::UnescapeDataString(($Matches[2] -split '\?', 2)[0])
                 if ($path -eq '/') { $path = '/index.html' }
                 $candidate = [IO.Path]::GetFullPath((Join-Path $rootFull ($path.TrimStart('/').Replace('/', '\'))))
+                if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -and
+                    [string]::IsNullOrEmpty([IO.Path]::GetExtension($candidate))) {
+                    $htmlCandidate = $candidate + '.html'
+                    if (Test-Path -LiteralPath $htmlCandidate -PathType Leaf) {
+                        $candidate = $htmlCandidate
+                    }
+                }
                 if ($candidate.StartsWith($rootFull, [StringComparison]::OrdinalIgnoreCase) -and
                     (Test-Path -LiteralPath $candidate -PathType Leaf)) {
                     $body = [IO.File]::ReadAllBytes($candidate)

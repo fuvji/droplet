@@ -68,7 +68,7 @@ try {
         } finally {
             $graphics.ReleaseHdc($hdc)
         }
-        $bitmap.Save((Join-Path $out 'hydrogen-panel.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+        $bitmap.Save((Join-Path $out 'hydrogen-core.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     } finally {
         $graphics.Dispose()
         $bitmap.Dispose()
