@@ -8,19 +8,26 @@ Source: <https://github.com/fuvji/hydrogen>
 
 ## Layout
 
-- `public/` contains the HTML, CSS, favicon, sitemap, robots file, and real
-  Core-tab interface capture.
-- `worker.js` serves `env.ASSETS`, sets a strict CSP and cache policy.
+- `public/` contains the HTML, CSS, favicon, sitemap, robots file, sponsor
+  inventory, and the real 2.5.0 Core-tab capture.
+- `worker.js` serves `env.ASSETS` and adds a strict CSP and cache policy.
 - `deploy.json` is the Freebuff Sites deployment manifest.
 - `SITE_ID.txt` records the Freebuff Sites project ID.
 
-The 2.4.1 page uses a dark violet/block visual system, with measured release
-facts, native-size media, timing diagrams, a module index, an audit panel, and
-an explicit distribution disclosure.
+The 2.5.0 page uses a cyan ion-lab visual system with measured trigger-routing
+facts, a benchmark chart, a runtime pipeline model, native capture crops,
+CSS-only motion, an audit, a hard-boundaries section, and direct sponsor
+inventory.
 
-The page has no external fonts, third-party images, scripts, analytics, or
-network calls. The only image is the local panel capture at
-`public/assets/hydrogen-panel.png`.
+The page has no external fonts, third-party images, analytics, ad clients,
+cookies, scripts, or network calls. The only image is the local panel capture at
+`public/assets/hydrogen-panel.png`. `sponsors.html` uses the same stylesheet and
+no external resources.
+
+The capture lab deliberately does not present fabricated gameplay footage. The
+page explains that live Minecraft hit registration is still unverified and
+invites a real clip through the issue link. The only motion preview is a CSS
+study of the native panel capture.
 
 Hydrogen is proprietary. The source and build scripts are published in the
 public GitHub repository for transparency, but public availability is not an

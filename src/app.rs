@@ -22,6 +22,7 @@ use crate::win::{self, *};
 
 pub struct Engine {
     st: RwLock<Arc<Settings>>,
+    triggers: RwLock<Arc<macros::TriggerMap>>,
     pub focus: AtomicBool,
     pub present: AtomicBool,
     pub gate: AtomicBool,
@@ -34,6 +35,7 @@ impl Engine {
     fn new(s: &Settings) -> Engine {
         Engine {
             st: RwLock::new(Arc::new(s.clone())),
+            triggers: RwLock::new(Arc::new(macros::TriggerMap::build(s))),
             focus: AtomicBool::new(false),
             present: AtomicBool::new(false),
             gate: AtomicBool::new(false),
@@ -45,7 +47,13 @@ impl Engine {
     pub fn settings(&self) -> Arc<Settings> {
         self.st.read().unwrap().clone()
     }
+    pub fn triggers(&self) -> Arc<macros::TriggerMap> {
+        self.triggers.read().unwrap().clone()
+    }
     fn publish(&self, s: Settings) {
+        // Bindings can change from the panel. Rebuild the event index once per
+        // settings publish, never on the input-hook hot path.
+        *self.triggers.write().unwrap() = Arc::new(macros::TriggerMap::build(&s));
         *self.st.write().unwrap() = Arc::new(s);
     }
 }
@@ -960,7 +968,8 @@ unsafe extern "system" fn kb_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
     }
 
     let s = engine.settings();
-    macros::trigger(Ev::K(vk), &s);
+    let map = engine.triggers();
+    macros::trigger(Ev::K(vk), &s, &map);
     win::CallNextHookEx(0, code, wp, lp)
 }
 
@@ -1012,7 +1021,8 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
         return win::CallNextHookEx(0, code, wp, lp);
     }
     let s = engine.settings();
-    macros::trigger(Ev::M(btn), &s);
+    let map = engine.triggers();
+    macros::trigger(Ev::M(btn), &s, &map);
     win::CallNextHookEx(0, code, wp, lp)
 }
 

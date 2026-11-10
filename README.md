@@ -1,15 +1,19 @@
 # Hydrogen
 
-[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/hydrogen)
+[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page) · [Source](https://github.com/fuvji/hydrogen) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
 
 Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
-![Hydrogen 2.4.1 Core panel](site/public/assets/hydrogen-panel.png)
+![Hydrogen 2.5.0 Core panel](site/public/assets/hydrogen-panel.png)
 
 ## Features
 
+- Pre-indexed trigger routing: bindings are parsed when settings publish, then
+  the low-level hook resolves an event with one array read instead of scanning
+  up to 24 binding strings. The release microbenchmark is 0.45 ns versus
+  202.39 ns for the old route, a 445× reduction in the routing decision alone.
 - Anchor: place, charge once, switch off glowstone, detonate. The three slots
   must be distinct and each step keeps the 50 ms tick floor.
 - Sprint: while physical W is held, pulse the sprint binding once per second.
@@ -22,14 +26,30 @@ keyboard/mouse input; it does not read or modify game memory.
   capture-evasion mode.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
   and Hover Inventory are one-shot actions with per-module busy guards.
-- 648x432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
+- 648×432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
   local timing, an optional offline combat timing profile, and AHK-compatible
   INI migration.
 - Portable x64 executable plus a signed full-trust MSIX package.
 - The panel is visible to screen capture and streaming tools. There is no
   capture exclusion, streamproof mode, process hiding, or disguise behavior.
-- The public product page uses a dark violet/block system, measured release
-  facts, timing diagrams, and an explicit distribution disclosure.
+- The public product page uses an ion-lab visual system with measured routing
+  facts, a pipeline model, native capture previews, CSS-only motion, an audit,
+  specs, and direct sponsor inventory.
+
+## Performance
+
+The 2.5.0 route benchmark is documented in [BENCHMARKS.md](BENCHMARKS.md).
+It measures the routing decision only:
+
+| Path | Time |
+| --- | ---: |
+| Binding scan (2.4.1) | 202.39 ns |
+| Pre-indexed route (2.5.0) | 0.45 ns |
+| Reduction | 445× |
+
+This is not a zero-latency claim and not an end-to-end input or game-latency
+measurement. Minecraft observes input on a 50 ms tick. The reduced work is in
+Hydrogen's own hook path.
 
 ## Combat timing profile
 
@@ -49,13 +69,14 @@ Hydrogen is designed to stay small, auditable, and predictable:
 
 - No crates, network calls, telemetry, updater, or runtime downloader.
 - No camera, WebView, game-memory access, or external AI/LLM integration.
-- Vision is limited to the existing 1x1 magenta crosshair sample used by the
+- Vision is limited to the existing 1×1 magenta crosshair sample used by the
   totem watcher.
 - Input hooks and the safety gate stop macros when focus leaves Minecraft (or
   when focus-only mode is disabled).
 - No process hiding, scan evasion, self-erasure, or disguised executable.
 - No screen-capture concealment. The overlay is ordinary visible desktop
   composition.
+- No anti-cheat bypass, input laundering, or zero-latency mode.
 
 ## Distribution
 
@@ -67,9 +88,11 @@ the supported product. See [LICENSE](LICENSE).
 
 The public product page is static documentation and media. Its source is
 published in the same repository. It has no analytics, external fonts,
-client-side JavaScript, or network calls. The Freebuff Sites project ID is
-recorded in `site/SITE_ID.txt`. The 2.4.1 page adds a sitemap, timing diagrams,
-an audit panel, and a visible-capture boundary.
+client-side JavaScript, third-party ad scripts, or network calls. It includes a
+native panel capture, CSS motion, a benchmark chart, a runtime model, and an
+explicit capture-lab note. The 2.5.0 page adds a direct sponsor inventory at
+`site/public/sponsors.html`; sponsor links are ordinary outbound navigation.
+The Freebuff Sites project ID is recorded in `site/SITE_ID.txt`.
 
 ## Development
 
@@ -83,10 +106,10 @@ cargo build --release
 
 The release profile uses `opt-level = 3`, fat LTO, one codegen unit, aborting
 panics, and stripped symbols. The project targets
-`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The website is a single
-static HTML/CSS page with a local screenshot, no JavaScript, no external fonts,
-and no third-party requests. Its worker adds a strict CSP and asset-aware cache
-headers.
+`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The website is a pair of
+static HTML pages with a shared CSS file, local images, no JavaScript, no
+external fonts, and no third-party requests. Its worker adds a strict CSP and
+asset-aware cache headers.
 
 ### Local site preview
 
@@ -122,17 +145,31 @@ master/focus gate prevents injection.
 
 ## Verification
 
-- `cargo test --release`: 13 tests covering config migration, timing bounds,
+- `cargo test --release`: 14 tests covering config migration, timing bounds,
   Anchor slot validation, W-Tap defaults/planning, Sprint scheduling,
-  cadence-brain warm-up, and combat-profile parsing.
+  cadence-brain warm-up, combat-profile parsing, and trigger-index
+  equivalence/benchmarking.
+- Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
+  reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
 - Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `582,656` bytes, down from `604,672` bytes in 2.3.8.
-- Source and installed package: `2.4.1` / `2.4.1.0`; the rebuilt MSIX signature
-  verified with the local development certificate.
+- Release binary: `585,728` bytes, `62501b5286c97d253109dfe906c6853a1e3b7135a8f1d26149f229f813d4b022`.
+- Signed MSIX: `312,525` bytes, `119c46e213e48b743067b2bd10850268547252779a4d6f6faabd7f70d2518814`;
+  signature verified by the local trust provider.
+- Source and package: `2.5.0` / `2.5.0.0`.
+- The 2.5.0 panel capture is in `site/public/assets/hydrogen-panel.png`.
 
 Real in-game hit registration still needs verification in a live Minecraft
-client; input injection and timing are verified independently.
+client; input injection and timing are verified independently. The site does
+not publish fabricated gameplay footage.
+
+## Sponsors
+
+The direct sponsor inventory is in [SPONSORS.md](SPONSORS.md) and
+`site/public/sponsors.html`. There is no ad network, no tracking, and no
+self-serve insertion. Open an inquiry through the GitHub issue link on the
+sponsor page.
 
 ## License
 
-Proprietary. See [LICENSE](LICENSE). No source code is distributed.
+Proprietary. See [LICENSE](LICENSE). The source is public for inspection, but
+public availability is not an open-source grant.

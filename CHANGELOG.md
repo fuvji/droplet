@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.5.0
+
+- Replaced the per-event binding scan with a prebuilt event-to-action index.
+  Bindings are parsed when settings publish; the low-level hook now resolves a
+  key with one array read. The routing microbenchmark measured 0.45 ns for the
+  indexed path versus 202.39 ns for the old scan (445× on the same release
+  build and key event). This is routing only, not end-to-end latency.
+- Added a 14th release test covering routing equivalence and the benchmark.
+  The release binary is 585,728 bytes.
+- Rebuilt the product site as an ion-lab interface with a benchmark chart, a
+  runtime pipeline model, CSS-only motion, a native-capture preview lab, and
+  responsive sponsor and audit layouts.
+- Added a direct sponsor inventory at `/sponsors.html`. The site still loads no
+  third-party ad scripts, analytics, cookies, external fonts, or client-side
+  JavaScript.
+- Rebuilt and signed the 2.5.0 MSIX. The package is 312,525 bytes and its
+  signature verifies with the local development certificate.
+- Kept the deliberate boundaries: no game-memory access, no network calls, no
+  capture concealment, no anti-cheat bypass, no scan evasion, and no
+  zero-latency claim. Live Minecraft hit registration remains unverified.
+
 ## 2.4.1
 
 - The local cadence brain now uses a warm-up EWMA: early activations adapt

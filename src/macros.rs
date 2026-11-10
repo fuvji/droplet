@@ -157,6 +157,7 @@ fn tap_exact_key(k: Option<Key>) {
     }
 }
 
+#[cfg(test)]
 fn hit(binding: &str, ev: Ev) -> bool {
     keys::ev(binding).map(|e| e == ev).unwrap_or(false)
 }
@@ -169,64 +170,168 @@ fn fire(s: &Arc<Settings>, ev: Ev, module: &'static str, f: fn(&Settings, Ev)) {
     spawn(s.clone(), ev, f);
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Action {
+    Dash,
+    Shield,
+    Mace,
+    Breach,
+    Potion,
+    Crystal,
+    Anchor,
+    FastUse,
+    Pearl,
+    Totem,
+    AutoUse,
+    WTap,
+    HoverInv,
+}
+
+/// Pre-parsed event-to-action table. The old hook path scanned up to 24
+/// binding strings and their hash cache on every event; this table reduces that
+/// hot path to one indexed read. Rebuild it whenever settings change.
+pub struct TriggerMap {
+    keys: [Option<Action>; 256],
+    mouse: [Option<Action>; 8],
+}
+
+impl Default for TriggerMap {
+    fn default() -> Self {
+        TriggerMap {
+            keys: [None; 256],
+            mouse: [None; 8],
+        }
+    }
+}
+
+impl TriggerMap {
+    pub fn build(s: &Settings) -> TriggerMap {
+        let mut map = TriggerMap::default();
+        map.bind(&s.dash_key, Action::Dash);
+        map.bind(&s.dash_key2, Action::Dash);
+        map.bind(&s.shield_key, Action::Shield);
+        map.bind(&s.shield_key2, Action::Shield);
+        map.bind(&s.mace_key, Action::Mace);
+        map.bind(&s.mace_key2, Action::Mace);
+        map.bind(&s.breach_key, Action::Breach);
+        map.bind(&s.breach_key2, Action::Breach);
+        map.bind(&s.potion_key, Action::Potion);
+        map.bind(&s.potion_key2, Action::Potion);
+        map.bind(&s.crystal_key, Action::Crystal);
+        map.bind(&s.crystal_key2, Action::Crystal);
+        map.bind(&s.anchor_key, Action::Anchor);
+        map.bind(&s.anchor_key2, Action::Anchor);
+        map.bind(&s.fastuse_key, Action::FastUse);
+        map.bind(&s.fastuse_key2, Action::FastUse);
+        map.bind(&s.pearl_key, Action::Pearl);
+        map.bind(&s.pearl_key2, Action::Pearl);
+        map.bind(&s.totem_key, Action::Totem);
+        map.bind(&s.totem_key2, Action::Totem);
+        map.bind(&s.autouse_key, Action::AutoUse);
+        map.bind(&s.autouse_key2, Action::AutoUse);
+        map.bind(&s.wtap_key, Action::WTap);
+        map.bind(&s.hover_inv_key, Action::HoverInv);
+        map
+    }
+
+    fn bind(&mut self, binding: &str, action: Action) {
+        let Some(ev) = keys::ev(binding) else { return; };
+        match ev {
+            Ev::K(vk) if (vk as usize) < self.keys.len() => {
+                let slot = &mut self.keys[vk as usize];
+                if slot.is_none() {
+                    *slot = Some(action);
+                }
+            }
+            Ev::M(btn) if (btn as usize) < self.mouse.len() => {
+                let slot = &mut self.mouse[btn as usize];
+                if slot.is_none() {
+                    *slot = Some(action);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    #[inline]
+    pub fn get(&self, ev: Ev) -> Option<Action> {
+        match ev {
+            Ev::K(vk) if (vk as usize) < self.keys.len() => self.keys[vk as usize],
+            Ev::M(btn) if (btn as usize) < self.mouse.len() => self.mouse[btn as usize],
+            _ => None,
+        }
+    }
+}
+
 /// Route a raw input event to whichever module owns that binding.
-pub fn trigger(ev: Ev, s: &Arc<Settings>) {
+pub fn trigger(ev: Ev, s: &Arc<Settings>, map: &TriggerMap) {
+    let Some(action) = map.get(ev) else { return; };
+    match action {
+        Action::Dash => fire(s, ev, "vD", dash),
+        Action::Shield => fire(s, ev, "v1", shield),
+        Action::Mace => fire(s, ev, "v2", mace_swap),
+        Action::Breach => fire(s, ev, "v3", breach),
+        Action::Potion => fire(s, ev, "v4", potion),
+        Action::Crystal => fire(s, ev, "v5", crystal),
+        Action::Anchor => fire(s, ev, "v6", anchor),
+        Action::FastUse => fire(s, ev, "vA", fast_use),
+        Action::Pearl => fire(s, ev, "v7", pearl),
+        Action::Totem => fire(s, ev, "v8", totem_swap),
+        Action::AutoUse => fire(s, ev, "vW", auto_use),
+        Action::WTap => {
+            // Most clicks are ordinary attacks. Only allocate the short-lived
+            // W-Tap thread when forward is actually held.
+            if s.wtap && input::physical_down(Ev::K(0x57)) {
+                smart::on_trigger("wtap");
+                spawn(s.clone(), ev, w_tap);
+            }
+        }
+        Action::HoverInv => spawn(s.clone(), ev, inventory_peek),
+    }
+}
+
+#[cfg(test)]
+fn scan_action(s: &Settings, ev: Ev) -> Option<Action> {
     if hit(&s.dash_key, ev) || hit(&s.dash_key2, ev) {
-        fire(s, ev, "vD", dash);
-        return;
+        return Some(Action::Dash);
     }
     if hit(&s.shield_key, ev) || hit(&s.shield_key2, ev) {
-        fire(s, ev, "v1", shield);
-        return;
+        return Some(Action::Shield);
     }
     if hit(&s.mace_key, ev) || hit(&s.mace_key2, ev) {
-        fire(s, ev, "v2", mace_swap);
-        return;
+        return Some(Action::Mace);
     }
     if hit(&s.breach_key, ev) || hit(&s.breach_key2, ev) {
-        fire(s, ev, "v3", breach);
-        return;
+        return Some(Action::Breach);
     }
     if hit(&s.potion_key, ev) || hit(&s.potion_key2, ev) {
-        fire(s, ev, "v4", potion);
-        return;
+        return Some(Action::Potion);
     }
     if hit(&s.crystal_key, ev) || hit(&s.crystal_key2, ev) {
-        fire(s, ev, "v5", crystal);
-        return;
+        return Some(Action::Crystal);
     }
     if hit(&s.anchor_key, ev) || hit(&s.anchor_key2, ev) {
-        fire(s, ev, "v6", anchor);
-        return;
+        return Some(Action::Anchor);
     }
     if hit(&s.fastuse_key, ev) || hit(&s.fastuse_key2, ev) {
-        fire(s, ev, "vA", fast_use);
-        return;
+        return Some(Action::FastUse);
     }
     if hit(&s.pearl_key, ev) || hit(&s.pearl_key2, ev) {
-        fire(s, ev, "v7", pearl);
-        return;
+        return Some(Action::Pearl);
     }
     if hit(&s.totem_key, ev) || hit(&s.totem_key2, ev) {
-        fire(s, ev, "v8", totem_swap);
-        return;
+        return Some(Action::Totem);
     }
     if hit(&s.autouse_key, ev) || hit(&s.autouse_key2, ev) {
-        fire(s, ev, "vW", auto_use);
-        return;
+        return Some(Action::AutoUse);
     }
     if hit(&s.wtap_key, ev) {
-        // Most clicks are ordinary attacks. Only allocate the short-lived
-        // W-Tap thread when forward is actually held.
-        if s.wtap && input::physical_down(Ev::K(0x57)) {
-            smart::on_trigger("wtap");
-            spawn(s.clone(), ev, w_tap);
-        }
-        return;
+        return Some(Action::WTap);
     }
     if hit(&s.hover_inv_key, ev) {
-        spawn(s.clone(), ev, inventory_peek);
+        return Some(Action::HoverInv);
     }
+    None
 }
 
 // ------------------------------------------------------------------- macros
@@ -684,5 +789,58 @@ mod tests {
         assert!(!anchor_slots_ok(a, a, c));
         assert!(!anchor_slots_ok(a, c, a));
         assert!(!anchor_slots_ok(c, b, b));
+    }
+
+    #[test]
+    fn trigger_index_matches_the_binding_scan_and_is_faster() {
+        use std::time::Instant;
+
+        let s = Settings::default();
+        let map = TriggerMap::build(&s);
+        let events = [
+            Ev::K(0x42),
+            Ev::K(0x51),
+            Ev::K(0x52),
+            Ev::M(Btn::X1),
+            Ev::K(0x43),
+            Ev::K(0x5A),
+            Ev::K(0x58),
+            Ev::M(Btn::X2),
+            Ev::M(Btn::Middle),
+            Ev::K(0x4E),
+            Ev::K(0x56),
+            Ev::M(Btn::Left),
+            Ev::K(0x45),
+            Ev::K(0x99),
+        ];
+        for ev in events {
+            assert_eq!(map.get(ev), scan_action(&s, ev), "event {ev:?}");
+        }
+        assert_eq!(map.get(Ev::K(0x58)), Some(Action::Anchor));
+        assert_eq!(map.get(Ev::K(0x45)), Some(Action::HoverInv));
+        assert_eq!(map.get(Ev::K(0x99)), None);
+
+        let ev = Ev::K(0x58);
+        let n = 1_000_000u32;
+        for _ in 0..10_000 {
+            std::hint::black_box(map.get(ev));
+            std::hint::black_box(scan_action(&s, ev));
+        }
+        let start = Instant::now();
+        for _ in 0..n {
+            std::hint::black_box(map.get(ev));
+        }
+        let indexed = start.elapsed().as_nanos() as f64 / n as f64;
+
+        let start = Instant::now();
+        for _ in 0..n {
+            std::hint::black_box(scan_action(&s, ev));
+        }
+        let scan = start.elapsed().as_nanos() as f64 / n as f64;
+        println!(
+            "trigger route: indexed={indexed:.2} ns  scan={scan:.2} ns  speedup={:.1}x",
+            scan / indexed
+        );
+        assert!(indexed < scan, "indexed={indexed} ns scan={scan} ns");
     }
 }

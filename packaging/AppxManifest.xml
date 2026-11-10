@@ -9,7 +9,7 @@
   <Identity
     Name="HydrogenMacroSuite"
     Publisher="CN=Hydrogen Macro Suite"
-    Version="2.4.1.0"
+    Version="2.5.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
