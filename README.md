@@ -1,20 +1,29 @@
 # Hydrogen
 
+[Website](https://site-f9270d9239294ae0b43816a6d295ef6a.freebuff.page)
+
 Hydrogen is a low-latency, zero-dependency Rust macro suite for Windows and
 Minecraft Java. It runs as a tray-native overlay and injects only synthetic
 keyboard/mouse input; it does not read or modify game memory.
 
+![Hydrogen 2.4.0 Core panel](site/public/assets/hydrogen-panel.png)
+
 ## Features
 
-- Normal Anchor: place, charge, switch off glowstone, detonate.
-- Air Anchor: prime once, then reuse the floating anchor and pop-and-place the
-  next anchor in the same client tick.
+- Anchor: place, charge once, switch off glowstone, detonate. The three slots
+  must be distinct and each step keeps the 50 ms tick floor.
+- Sprint: while physical W is held, pulse the sprint binding once per second.
+  The key is never held down between pulses, and the watcher is lock-free.
+- W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
+  using the old W / 100–120 ms default pair migrate once.
 - Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
-  W-Tap, Sprint, and Hover Inventory modules.
+  and Hover Inventory are one-shot actions with per-module busy guards.
 - 648x432 acrylic panel, event-driven rendering, Low Latency mode, adaptive
   local timing, an optional offline combat timing profile, and AHK-compatible
   INI migration.
 - Portable x64 executable plus a signed full-trust MSIX package.
+- The panel is visible to screen capture and streaming tools. There is no
+  capture exclusion, streamproof mode, process hiding, or disguise behavior.
 
 ## Combat timing profile
 
@@ -39,8 +48,24 @@ Hydrogen is designed to stay small, auditable, and predictable:
 - Input hooks and the safety gate stop macros when focus leaves Minecraft (or
   when focus-only mode is disabled).
 - No process hiding, scan evasion, self-erasure, or disguised executable.
+- No screen-capture concealment. The overlay is ordinary visible desktop
+  composition.
 
-## Build
+## Distribution
+
+Hydrogen is proprietary software. The source code, build scripts, internal
+engineering notes, and non-public assets are not distributed, and no public
+source download is provided. The versioned executable is the product. See
+[LICENSE](LICENSE).
+
+The public product page is static documentation and media, not a source
+repository. It has no analytics, external fonts, client-side JavaScript, or
+network calls. Its source lives locally in `site/`, and the Freebuff Sites
+project ID is recorded in `site/SITE_ID.txt`.
+
+## Development
+
+These commands are for the private development checkout:
 
 ```bash
 rustup target add x86_64-pc-windows-gnu
@@ -76,14 +101,16 @@ master/focus gate prevents injection.
 ## Verification
 
 - `cargo test --release`: 12 tests covering config migration, timing bounds,
-  loop generation, W-Tap planning, Air Anchor state, and combat-profile parsing.
-- Air Anchor live key trace: first cycle `h,g,h,r`; normal Anchor `h,g,r`.
-- Mouse trace: pop and replacement right-clicks occur at the same timestamp.
-- Source version: `2.3.8`; installed package: `2.3.7.0`, status `Ok`.
+  Anchor slot validation, W-Tap defaults/planning, Sprint scheduling, and
+  combat-profile parsing.
+- Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
+- Release binary: `582,144` bytes, down from `604,672` bytes in 2.3.8.
+- Source and installed package: `2.4.0` / `2.4.0.0`; the rebuilt MSIX signature
+  verified with the local development certificate.
 
 Real in-game hit registration still needs verification in a live Minecraft
 client; input injection and timing are verified independently.
 
 ## License
 
-MIT.
+Proprietary. See [LICENSE](LICENSE). No source code is distributed.

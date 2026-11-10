@@ -348,7 +348,6 @@ pub const MAPVK_VK_TO_VSC_EX: u32 = 4;
 
 pub const GWLP_USERDATA: i32 = -21;
 
-pub const WDA_EXCLUDEFROMCAPTURE: u32 = 0x0000_0011;
 
 pub const SPI_GETWORKAREA: u32 = 0x0030;
 
@@ -437,7 +436,6 @@ extern "system" {
     pub fn EnumWindows(cb: EnumProc, lp: LPARAM) -> BOOL;
     pub fn GetWindowLongPtrW(hwnd: HWND, idx: i32) -> isize;
     pub fn SetWindowLongPtrW(hwnd: HWND, idx: i32, val: isize) -> isize;
-    pub fn SetWindowDisplayAffinity(hwnd: HWND, aff: u32) -> BOOL;
     pub fn SetLayeredWindowAttributes(hwnd: HWND, key: u32, alpha: u8, flags: u32) -> BOOL;
     pub fn SendInput(count: u32, inputs: *const INPUT, size: i32) -> u32;
     pub fn SetProcessDpiAwarenessContext(ctx: isize) -> BOOL;

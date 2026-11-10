@@ -148,7 +148,6 @@ pub enum Act {
     Clear(&'static str),
     SetInt(&'static str, i32),
     SetStr(&'static str, &'static str),
-    Mode(&'static str),
     Theme(usize, i32),
     Preset(i32, i32, i32),
     Reset,
@@ -470,15 +469,6 @@ impl<'a> Ui<'a> {
         let tr = Rect::new(chip.x + chip.w + 8.0 * s, r.y + 4.0 * s, r.w - 12.0 * s - chip.w - 8.0 * s - 44.0 * s, 17.0 * s);
         self.label(tr.x, tr.y, tr.w, tr.h, title, 11.5, false, color);
         if let Some(k) = toggle {
-            if crate::macros::spam_active(k) {
-                let pulse = 0.55 + 0.45 * (self.time * 4.5).sin();
-                self.c.circle(
-                    r.x + r.w - 44.0 * s,
-                    r.y + 12.0 * s,
-                    2.0 * s,
-                    with_alpha(self.th.accent, (150.0 + 90.0 * pulse) as u8),
-                );
-            }
             let sw = Rect::new(r.x + r.w - 12.0 * s - 28.0 * s, r.y + 5.0 * s, 28.0 * s, 16.0 * s);
             self.switch(sw.x, sw.y, k, on);
         }
@@ -529,61 +519,17 @@ impl<'a> Ui<'a> {
         }
     }
 
-    fn mode_chip(&mut self, r: Rect, key: &'static str) {
-        let s = self.scale;
-        let toggle = self.s.str_at(key) == "toggle";
-        let live = toggle && crate::macros::spam_active(crate::macros::mode_module(key));
-        let hot = self.hovered(r);
-        let hv = self.anim(wid(key, 14), if hot { 1.0 } else { 0.0 });
-        let pulse = 0.5 + 0.5 * (self.time * 5.0).sin();
-        // Default "hold" is a quiet text value, not another pill. Only a real
-        // toggle state (or hover) earns a surface.
-        if live {
-            self.c.round_rect(
-                r.x,
-                r.y,
-                r.w,
-                r.h,
-                r.h * 0.5,
-                with_alpha(self.th.accent, (14.0 + 10.0 * pulse) as u8),
-            );
-        } else if toggle {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.accent, 8));
-        } else if hv > 0.01 {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.text, (4.0 * hv) as u8));
-        }
-        let color = if toggle { self.th.accent } else { mix(self.th.dim, self.th.text, hv) };
-        let text = if live { "spam" } else if toggle { "toggle" } else { "hold" };
-        self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 8.5, false, color);
-        if live {
-            self.c.circle(
-                r.x + r.w - 5.0 * s,
-                r.y + r.h * 0.5,
-                1.8 * s,
-                with_alpha(self.th.accent, (140.0 + 110.0 * pulse) as u8),
-            );
-        }
-        if self.pressed && hot {
-            self.acts.push(Act::Mode(key));
-        }
-    }
-
     // ---- rows
 
-    fn row_key(&mut self, card: Rect, i: usize, label: &str, key: &'static str, mode: Option<&'static str>) {
+    fn row_key(&mut self, card: Rect, i: usize, label: &str, key: &'static str) {
         let s = self.scale;
         let y = self.row_y(card, i);
-        let mode_w = if mode.is_some() { 42.0 * s } else { 0.0 };
-        let gap = if mode.is_some() { 3.0 * s } else { 0.0 };
-        let key_w = (card.w - 12.0 * s - 10.0 * s - mode_w - gap).min(66.0 * s);
-        let kx = card.x + card.w - 10.0 * s - mode_w - gap - key_w;
-        // Keep the label inside the space left of the key chips, never under them.
+        let key_w = (card.w - 12.0 * s - 10.0 * s).min(66.0 * s);
+        let kx = card.x + card.w - 10.0 * s - key_w;
+        // Keep the label inside the space left of the key chip, never under it.
         let label_w = (kx - (card.x + 12.0 * s) - 6.0 * s).max(0.0);
         self.label(card.x + 12.0 * s, y, label_w, ROW_H * s, label, 9.5, false, self.th.dim);
         self.chip(Rect::new(kx, y + 2.5 * s, key_w, 17.0 * s), key);
-        if let Some(mk) = mode {
-            self.mode_chip(Rect::new(kx + key_w + gap, y + 2.5 * s, mode_w, 17.0 * s), mk);
-        }
     }
 
     fn row_slot(&mut self, card: Rect, i: usize, label: &str, key: &'static str) {
@@ -852,21 +798,21 @@ impl<'a> Ui<'a> {
         // Nine rows per column keeps the four-row Dash card inside the panel.
         let r = Rect::new(x0, y, w, self.card_h(3));
         self.card(r, "Shield", Some("v1"));
-        self.row_key(r, 0, "Trigger", "v1Bn", Some("v1Md"));
+        self.row_key(r, 0, "Trigger", "v1Bn");
         self.row_slot(r, 1, "Axe slot", "v1S1");
         self.row_switch(r, 2, "Stun lock", "vF");
         y += r.h + gap;
 
         let r = Rect::new(x0, y, w, self.card_h(3));
         self.card(r, "Mace", Some("v2"));
-        self.row_key(r, 0, "Trigger", "v2Bn", Some("v2Md"));
+        self.row_key(r, 0, "Trigger", "v2Bn");
         self.row_slot(r, 1, "Mace slot", "v2S1");
         self.row_slider3(r, 2, "Input delay", "v2D", [50, 100, 150], "ms");
         y += r.h + gap;
 
         let r = Rect::new(x0, y, w, self.card_h(4));
         self.card(r, "Potion", Some("v4"));
-        self.row_key(r, 0, "Trigger", "v4Bn", Some("v4Md"));
+        self.row_key(r, 0, "Trigger", "v4Bn");
         self.row_slot(r, 1, "Potion I", "v4S1");
         self.row_slot(r, 2, "Potion II", "v4S2");
         self.row_slot(r, 3, "Return", "v4S3");
@@ -874,20 +820,20 @@ impl<'a> Ui<'a> {
         let mut y = (HEADER_H + PAD) * s;
         let r = Rect::new(x1, y, w, self.card_h(3));
         self.card(r, "Breach", Some("v3"));
-        self.row_key(r, 0, "Trigger", "v3Bn", Some("v3Md"));
+        self.row_key(r, 0, "Trigger", "v3Bn");
         self.row_slot(r, 1, "Mace", "v3S1");
         self.row_slot(r, 2, "Return", "v3S2");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(2));
         self.card(r, "Auto Use", Some("vW"));
-        self.row_key(r, 0, "Trigger", "vWBn", Some("vWMd"));
+        self.row_key(r, 0, "Trigger", "vWBn");
         self.row_slot(r, 1, "Item", "vWS1");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(5));
         self.card(r, "Dash", Some("vD"));
-        self.row_key(r, 0, "Trigger", "vDBn", Some("vDMd"));
+        self.row_key(r, 0, "Trigger", "vDBn");
         self.row_slot(r, 1, "Spear", "vDS1");
         self.row_slot(r, 2, "Return", "vDS2");
         self.row_slider3(r, 3, "Cooldown", "vDCd", [50, 100, 150], "ms");
@@ -903,7 +849,7 @@ impl<'a> Ui<'a> {
 
         let r = Rect::new(x0, y, w, self.card_h(5));
         self.card(r, "Auto Crystal", Some("v5"));
-        self.row_key(r, 0, "Trigger", "v5Bn", Some("v5Md"));
+        self.row_key(r, 0, "Trigger", "v5Bn");
         self.row_slot(r, 1, "Obsidian", "v5S1");
         self.row_slot(r, 2, "Crystal", "v5S2");
         self.row_slider(r, 3, "Min delay", "v5D1", FAST_MIN_LO, FAST_MIN_HI, "ms");
@@ -912,26 +858,25 @@ impl<'a> Ui<'a> {
 
         let r = Rect::new(x0, y, w, self.card_h(4));
         self.card(r, "Hover Totem", Some("v8"));
-        self.row_key(r, 0, "Trigger", "v8Bn", Some("v8Md"));
+        self.row_key(r, 0, "Trigger", "v8Bn");
         self.row_slot(r, 1, "Totem", "v8Sp");
         self.row_slot(r, 2, "Hotbar", "v8T");
         self.row_switch(r, 3, "Auto inventory", "vI");
 
         let mut y = (HEADER_H + PAD) * s;
-        let r = Rect::new(x1, y, w, self.card_h(7));
+        let r = Rect::new(x1, y, w, self.card_h(6));
         self.card(r, "Anchor", Some("v6"));
-        self.row_key(r, 0, "Trigger", "v6Bn", Some("v6Md"));
+        self.row_key(r, 0, "Trigger", "v6Bn");
         self.row_slot(r, 1, "Anchor", "v6S1");
         self.row_slot(r, 2, "Glowstone", "v6S2");
         self.row_slot(r, 3, "Totem", "v6S3");
-        self.row_switch(r, 4, "Air anchor", "v6A");
-        self.row_slider(r, 5, "Min delay", "v6D1", FAST_MIN_LO, FAST_MIN_HI, "ms");
-        self.row_slider(r, 6, "Max delay", "v6D2", FAST_MAX_LO, FAST_MAX_HI, "ms");
+        self.row_slider(r, 4, "Min delay", "v6D1", FAST_MIN_LO, FAST_MIN_HI, "ms");
+        self.row_slider(r, 5, "Max delay", "v6D2", FAST_MAX_LO, FAST_MAX_HI, "ms");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));
         self.card(r, "Pearl", Some("v7"));
-        self.row_key(r, 0, "Trigger", "v7Bn", Some("v7Md"));
+        self.row_key(r, 0, "Trigger", "v7Bn");
         self.row_slot(r, 1, "Pearl", "v7S1");
         self.row_slot(r, 2, "Catch", "v7S3");
         self.row_switch(r, 3, "Catch on hold", "v9");
@@ -946,14 +891,14 @@ impl<'a> Ui<'a> {
 
         let r = Rect::new(x0, y, w, self.card_h(3));
         self.card(r, "Fast Use", Some("vA"));
-        self.row_key(r, 0, "Trigger", "vABn", Some("vABMd"));
+        self.row_key(r, 0, "Trigger", "vABn");
         self.row_slider(r, 1, "Min delay", "vAD1", FAST_MIN_LO, FAST_MIN_HI, "ms");
         self.row_slider(r, 2, "Max delay", "vAD2", FAST_MAX_LO, FAST_MAX_HI, "ms");
         y += r.h + gap;
 
         let r = Rect::new(x0, y, w, self.card_h(5));
         self.card(r, "W-Tap", Some("vC"));
-        self.row_key(r, 0, "Attack", "vCBn", None);
+        self.row_key(r, 0, "Attack", "vCBn");
         self.row_seg(r, 1, "Mode", "vM", ["W", "S"]);
         self.row_slider(r, 2, "Min delay", "vCD1", 50, 300, "ms");
         self.row_slider(r, 3, "Max delay", "vCD2", 50, 300, "ms");

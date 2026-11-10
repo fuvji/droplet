@@ -122,7 +122,6 @@ settings_schema! {
     low_latency: "vLL": bool = true;
     focus_only:  "vFO": bool = true;
     smart:       "vAI": bool = true;
-    anchor_air:  "v6A": bool = true;
 
     // ---- timing (milliseconds)
     // The three fast modules share a tight default profile: Min 47 ms and Max
@@ -133,8 +132,8 @@ settings_schema! {
     crystal_max:  "v5D2": i32 = 53i32;
     anchor_min:   "v6D1": i32 = 47i32;
     anchor_max:   "v6D2": i32 = 53i32;
-    wtap_min:     "vCD1": i32 = 100i32;
-    wtap_max:     "vCD2": i32 = 120i32;
+    wtap_min:     "vCD1": i32 = 132i32;
+    wtap_max:     "vCD2": i32 = 148i32;
     dash_cd:      "vDCd": i32 = 1i32;
     mace_delay:   "v2D":  i32 = 1i32;
     fastuse_min:  "vAD1": i32 = 47i32;
@@ -148,21 +147,8 @@ settings_schema! {
     win_y:        "winY": i32 = -1i32;
 
     // ---- modes / theme
-    wtap_mode: "vM":   String = "W";
+    wtap_mode: "vM":   String = "S";
     theme:     "thmC": String = "E6E8EF";
-
-    // ---- trigger modes (hold = fire on press, toggle = flip the module)
-    dash_mode:    "vDMd": String = "hold";
-    shield_mode:  "v1Md": String = "hold";
-    mace_mode:    "v2Md": String = "hold";
-    breach_mode:  "v3Md": String = "hold";
-    potion_mode:  "v4Md": String = "hold";
-    crystal_mode: "v5Md": String = "hold";
-    anchor_mode:  "v6Md": String = "hold";
-    pearl_mode:   "v7Md": String = "hold";
-    totem_mode:   "v8Md": String = "hold";
-    fastuse_mode: "vABMd": String = "hold";
-    autouse_mode: "vWMd": String = "hold";
 
     // ---- trigger binds
     dash_key:     "vDBn": String = "b";
@@ -242,7 +228,6 @@ impl Settings {
             "vLL" => self.low_latency,
             "vFO" => self.focus_only,
             "vAI" => self.smart,
-            "v6A" => self.anchor_air,
             _ => false,
         }
     }
@@ -318,12 +303,12 @@ impl Settings {
     /// Keep older configs usable after the W-Tap mode rename and make the
     /// discrete cooldown robust against hand-edited INI files.
     pub fn normalize(&mut self) {
-        if self.wtap_mode.eq_ignore_ascii_case("shield") {
-            self.wtap_mode = "S".into();
-        } else if self.wtap_mode.eq_ignore_ascii_case("s") {
-            self.wtap_mode = "S".into();
-        } else {
+        if self.wtap_mode.eq_ignore_ascii_case("w") {
             self.wtap_mode = "W".into();
+        } else {
+            // S is the shipped default; the old "shield" spelling also lands
+            // here, as do unknown values from hand-edited INI files.
+            self.wtap_mode = "S".into();
         }
         if !(1..=3).contains(&self.dash_cd) {
             self.dash_cd = 1;
@@ -351,6 +336,16 @@ impl Settings {
             }
             self.timing_rev = 1;
         }
+        // The first S-Tap release used W plus 100-120 ms. Move that exact old
+        // default pair once; a user-customized mode or range is left alone.
+        if self.timing_rev < 2 {
+            if self.wtap_mode == "W" && self.wtap_min == 100 && self.wtap_max == 120 {
+                self.wtap_mode = "S".into();
+                self.wtap_min = 132;
+                self.wtap_max = 148;
+            }
+            self.timing_rev = 2;
+        }
         self.normalize_timing();
     }
 
@@ -368,6 +363,11 @@ impl Settings {
         pair(&mut self.crystal_min, &mut self.crystal_max);
         pair(&mut self.anchor_min, &mut self.anchor_max);
         pair(&mut self.fastuse_min, &mut self.fastuse_max);
+        self.wtap_min = self.wtap_min.clamp(50, 300);
+        self.wtap_max = self.wtap_max.clamp(50, 300);
+        if self.wtap_min > self.wtap_max {
+            self.wtap_max = self.wtap_min;
+        }
     }
 
     pub fn set_theme_rgb(&mut self, r: i32, g: i32, b: i32) {
@@ -458,6 +458,28 @@ mod tests {
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
         assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
+        assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
+        assert_eq!(s.wtap_mode, "S");
+    }
+
+    #[test]
+    fn old_wtap_defaults_migrate_once() {
+        let mut s = Settings::default();
+        s.timing_rev = 1;
+        s.wtap_mode = "W".into();
+        s.wtap_min = 100;
+        s.wtap_max = 120;
+        s.normalize();
+        assert_eq!(s.wtap_mode, "S");
+        assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
+        assert_eq!(s.timing_rev, 2);
+
+        s.wtap_mode = "W".into();
+        s.wtap_min = 100;
+        s.wtap_max = 120;
+        s.normalize();
+        assert_eq!(s.wtap_mode, "W");
+        assert_eq!((s.wtap_min, s.wtap_max), (100, 120));
     }
 
     #[test]
@@ -470,7 +492,7 @@ mod tests {
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
         assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
-        assert_eq!(s.timing_rev, 1);
+        assert_eq!(s.timing_rev, 2);
 
         let mut old_anchor = Settings::default();
         old_anchor.anchor_min = 37;
@@ -485,7 +507,7 @@ mod tests {
         s.crystal_max = 103;
         s.normalize();
         assert_eq!(s.crystal_max, 53);
-        assert_eq!(s.timing_rev, 1);
+        assert_eq!(s.timing_rev, 2);
 
         s.crystal_max = 103;
         s.normalize();
@@ -509,6 +531,11 @@ mod tests {
         s.fastuse_max = 53;
         s.normalize_timing();
         assert_eq!((s.fastuse_min, s.fastuse_max), (60, 60));
+
+        s.wtap_min = 300;
+        s.wtap_max = 50;
+        s.normalize_timing();
+        assert_eq!((s.wtap_min, s.wtap_max), (300, 300));
     }
 
     #[test]

@@ -61,14 +61,6 @@ pub fn main_hwnd() -> HWND {
     MAIN_HWND.load(Ordering::Relaxed)
 }
 
-/// Settings keys that are macro modules (used to drop latches when switched off).
-fn is_module(k: &str) -> bool {
-    matches!(
-        k,
-        "v0" | "vD" | "v1" | "v2" | "v3" | "v4" | "v5" | "v6" | "v7" | "v8" | "vA" | "vB" | "vC" | "vW"
-    )
-}
-
 static RENDER_US: AtomicU32 = AtomicU32::new(0);
 static SD_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SD_PROGRESS: AtomicU32 = AtomicU32::new(0);
@@ -303,9 +295,6 @@ impl App {
                 Act::Toggle(k) => {
                     let v = !self.settings.bool_at(k);
                     self.settings.set_bool(k, v);
-                    if !v && is_module(k) {
-                        macros::stop_all_spam();
-                    }
                     if k == "vP" && !v && !self.engine.present.load(Ordering::Relaxed) {
                         self.hide_panel();
                     }
@@ -323,12 +312,6 @@ impl App {
                         *self.engine.capture_key.lock().unwrap() = Some(k);
                         self.kick_anim();
                     }
-                }
-                Act::Mode(k) => {
-                    macros::stop_all_spam();
-                    let next = if self.settings.str_at(k) == "toggle" { "hold" } else { "toggle" };
-                    self.settings.set_str(k, next);
-                    self.changed();
                 }
                 Act::Clear(k) => {
                     self.settings.set_str(k, "...");
@@ -405,9 +388,6 @@ impl App {
     fn toggle_master(&mut self) {
         let v = !self.settings.bool_at("v0");
         self.settings.set_bool("v0", v);
-        if !v {
-            macros::stop_all_spam();
-        }
         self.changed();
         self.update_tray();
     }
@@ -632,9 +612,6 @@ impl App {
     fn on_state(&mut self) {
         let present = self.engine.present.load(Ordering::Relaxed);
         let persist = self.settings.bool_at("vP");
-        if !self.engine.gate.load(Ordering::Relaxed) {
-            macros::stop_all_spam();
-        }
         if present || persist {
             self.show_panel();
         } else {
@@ -1131,7 +1108,7 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
         }
     });
 
-    // sprint hold: physical W only, one frame of latency
+    // sprint pulse: physical W only, one tap per second
     let e = engine.clone();
     thread::spawn(move || {
         while !e.quitting.load(Ordering::Relaxed) {
@@ -1443,10 +1420,6 @@ pub fn run() {
         let alpha = if acrylic != "none" { ACRYLIC_ALPHA } else { 255 };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
-        if std::env::var_os("HYDROGEN_CAPTURE").is_none() {
-            win::SetWindowDisplayAffinity(hwnd, win::WDA_EXCLUDEFROMCAPTURE);
-        }
-
         let icon = native_icon();
         if icon != 0 {
             win::SetClassLongPtrW(hwnd, -14, icon);
@@ -1478,8 +1451,6 @@ pub fn run() {
 
         engine.quitting.store(true, Ordering::Relaxed);
         let app = &mut *APP;
-        // Never leave the sprint key held down if the app closes mid-run.
-        macros::release_sprint(true);
         if !app.destructed {
             app.settings.save();
         }

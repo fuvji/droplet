@@ -1,9 +1,9 @@
 [package]
 name = "hydrogen"
-version = "2.3.8"
+version = "2.4.0"
 edition = "2021"
 description = "Hydrogen - low latency Minecraft macro suite"
-license = "MIT"
+license = "LicenseRef-Proprietary"
 
 [[bin]]
 name = "hydrogen"

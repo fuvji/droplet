@@ -20,11 +20,6 @@ pub const TICK_MS: i32 = 50;
 static QPF: AtomicI64 = AtomicI64::new(1);
 static SEQ: AtomicU64 = AtomicU64::new(0);
 
-/// Latched keys/buttons for "toggle" triggers: while set, the event reads as
-/// held down so a macro keeps spamming until the trigger is pressed again.
-static LATCH_K: [AtomicU64; 4] = [const { AtomicU64::new(0) }; 4];
-static LATCH_M: [AtomicBool; 8] = [const { AtomicBool::new(false) }; 8];
-
 /// Raise the calling thread to time-critical priority (low latency mode).
 pub fn boost_thread() {
     unsafe {
@@ -224,68 +219,6 @@ pub fn click_exact(btn: Btn) {
     click(btn, true);
 }
 
-/// Two complete button clicks in a single `SendInput` batch. Air Anchor needs
-/// the pop and the follow-up placement in the same client tick; two separate
-/// clicks a tick apart let the explosion clear the old anchor before the
-/// replacement use lands.
-pub fn click_pair_exact(btn: Btn) {
-    send(&[
-        mk_mouse(btn, false),
-        mk_mouse(btn, true),
-        mk_mouse(btn, false),
-        mk_mouse(btn, true),
-    ]);
-}
-
-// ------------------------------------------------------------- toggle latch
-
-pub fn latched(e: Ev) -> bool {
-    match e {
-        Ev::K(vk) => {
-            let i = (vk as usize) >> 6;
-            if i >= LATCH_K.len() {
-                return false;
-            }
-            (LATCH_K[i].load(Ordering::Relaxed) & (1u64 << (vk & 63))) != 0
-        }
-        Ev::M(b) => LATCH_M[(b as usize).min(LATCH_M.len() - 1)].load(Ordering::Relaxed),
-    }
-}
-
-/// Flip the latch for an event; returns `true` when it is now latched.
-pub fn flip_latch(e: Ev) -> bool {
-    match e {
-        Ev::K(vk) => {
-            let i = (vk as usize) >> 6;
-            if i >= LATCH_K.len() {
-                return false;
-            }
-            let bit = 1u64 << (vk & 63);
-            (LATCH_K[i].fetch_xor(bit, Ordering::SeqCst) & bit) == 0
-        }
-        Ev::M(b) => !LATCH_M[(b as usize).min(LATCH_M.len() - 1)].fetch_xor(true, Ordering::SeqCst),
-    }
-}
-
-pub fn clear_latches() {
-    for s in &LATCH_K {
-        s.store(0, Ordering::SeqCst);
-    }
-    for s in &LATCH_M {
-        s.store(false, Ordering::SeqCst);
-    }
-    // Wake macros parked in wait_up so they notice the latch is gone now
-    // rather than on the next physical release.
-    if let Ok(map) = sigs().lock() {
-        for sig in map.values() {
-            if let Ok(mut g) = sig.generation.lock() {
-                *g = g.wrapping_add(1);
-                sig.cv.notify_all();
-            }
-        }
-    }
-}
-
 /// Humanised micro-jitter applied before clicks (the "ghost click" feature).
 pub fn jitter(on: bool, amount: i32) {
     if !on {
@@ -313,9 +246,6 @@ pub fn jitter(on: bool, amount: i32) {
 // ------------------------------------------------------------ key state/sync
 
 pub fn raw_down(e: Ev) -> bool {
-    if latched(e) {
-        return true;
-    }
     let vk = match e {
         Ev::K(vk) => vk,
         Ev::M(b) => b.vk(),
@@ -426,11 +356,6 @@ pub fn wait_up(e: Ev, ms: u64) -> bool {
         .cv
         .wait_timeout_while(g, Duration::from_millis(ms), |v| *v == base)
         .unwrap();
-    // A latched event stays logically held across physical releases; only
-    // unlatching it (or the timeout) may end the wait.
-    if latched(e) {
-        return false;
-    }
     !res.1.timed_out() || !raw_down(e)
 }
 

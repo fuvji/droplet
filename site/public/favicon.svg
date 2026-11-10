@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Hydrogen">
+  <rect width="64" height="64" rx="14" fill="#06080e"/>
+  <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#263247"/>
+  <path d="M19 18v28M45 18v28M19 32h26" fill="none" stroke="#8ab4f8" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="49" cy="49" r="3" fill="#67d4e8"/>
+</svg>
