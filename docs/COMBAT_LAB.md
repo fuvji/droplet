@@ -26,6 +26,17 @@ affect a wait.
 This is intentionally only a **timing prior**. It does not aim, move, select a
 target, or learn a visual policy.
 
+## Annotate a local clip
+
+Open `tools/combat-annotator.html` directly in a browser. Load a local video,
+choose the module, and mark each confirmed hit with `H` (or the button). The
+50 ms step buttons align marks to game ticks; the page keeps the file in the
+browser and never uploads it. Export the CSV, then run the lab below.
+
+The annotator is a convenience, not a hit detector. You are still responsible
+for confirming that a hit landed. Do not use footage you do not have permission
+to use, and do not annotate public-server cheating.
+
 ## Input format
 
 Use a CSV with one row per candidate event. Only rows marked as a confirmed hit

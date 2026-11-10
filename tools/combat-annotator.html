@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hydrogen Combat Lab</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0c0d10;
+    --panel: #14161b;
+    --line: #282c35;
+    --text: #e7e9ef;
+    --muted: #8e95a5;
+    --accent: #c7f36b;
+    --danger: #ff7b72;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 20px 56px; }
+  header { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+  h1 { margin: 0; font-size: 24px; letter-spacing: -.03em; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  video { width: 100%; max-height: 52vh; background: #000; border: 1px solid var(--line); border-radius: 8px; display: block; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .file { display: inline-flex; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px; cursor: pointer; }
+  .file input { display: none; }
+  .file:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  label.field { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+  select, button {
+    font: inherit;
+    color: var(--text);
+    background: #1b1f27;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: #596174; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #10140a; font-weight: 700; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .status { margin: 10px 0 0; color: var(--muted); min-height: 1.45em; }
+  .status strong { color: var(--text); }
+  .rows { width: 100%; border-collapse: collapse; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  .rows th, .rows td { text-align: left; border-bottom: 1px solid var(--line); padding: 7px 6px; }
+  .rows th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .rows td:last-child { text-align: right; }
+  .empty { color: var(--muted); padding: 14px 6px; }
+  .hint { color: var(--muted); font-size: 12px; margin: 10px 0 0; }
+  kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; color: var(--text); font: 12px ui-monospace, monospace; }
+  @media (max-width: 640px) { main { padding-top: 18px; } h1 { font-size: 20px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Hydrogen <span>Combat Lab</span></h1>
+      <p class="sub">Mark confirmed hits in a local clip. Nothing leaves this page.</p>
+    </div>
+    <p class="sub">20 TPS &middot; 50 ms per tick</p>
+  </header>
+
+  <section class="panel" aria-label="Video and annotation controls">
+    <div class="toolbar">
+      <label class="file">Load local video
+        <input id="file" type="file" accept="video/*">
+      </label>
+      <span id="fileName" class="sub">No video loaded</span>
+    </div>
+    <div style="height:12px"></div>
+    <video id="video" controls playsinline preload="metadata"></video>
+    <div class="toolbar" style="margin-top:12px">
+      <label class="field">Module
+        <select id="module">
+          <option value="v6">Anchor</option>
+          <option value="v5">Crystal</option>
+          <option value="v2">Mace</option>
+          <option value="v3">Breach</option>
+          <option value="v8">Totem</option>
+          <option value="vA">Fast Use</option>
+          <option value="v1">Shield</option>
+          <option value="vC">W-Tap</option>
+        </select>
+      </label>
+      <button id="mark" class="primary" type="button">Mark confirmed hit <kbd>H</kbd></button>
+      <button id="back" type="button">&minus;50 ms</button>
+      <button id="forward" type="button">+50 ms</button>
+      <button id="undo" type="button">Undo</button>
+      <button id="clear" type="button">Clear</button>
+      <button id="export" type="button">Export CSV</button>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite">Load a clip, then mark only hits you can verify.</p>
+    <p class="hint">Use <kbd>H</kbd> to mark, <kbd>Backspace</kbd> to undo, and the 50 ms buttons to align to game ticks. Export the CSV and run <code>tools/combat-lab.ps1</code>.</p>
+  </section>
+
+  <section class="panel" aria-label="Marked hits">
+    <table class="rows">
+      <thead><tr><th>#</th><th>Clip</th><th>Module</th><th>Time</th><th>Hit</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p id="empty" class="empty">No hits marked yet.</p>
+  </section>
+</main>
+
+<script>
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const video = $("video");
+  const state = { clip: "clip", url: "", rows: [] };
+
+  function formatTime(ms) {
+    const total = Math.max(0, Math.round(ms));
+    const minutes = Math.floor(total / 60000);
+    const seconds = Math.floor((total % 60000) / 1000);
+    const millis = total % 1000;
+    return String(minutes).padStart(2, "0") + ":" +
+      String(seconds).padStart(2, "0") + "." + String(millis).padStart(3, "0");
+  }
+
+  function setStatus(message) {
+    $("status").textContent = message;
+  }
+
+  function currentMs() {
+    return Math.max(0, Math.round(video.currentTime * 1000));
+  }
+
+  function render() {
+    const body = $("rows");
+    body.replaceChildren();
+    state.rows.forEach((row, index) => {
+      const tr = document.createElement("tr");
+      for (const value of [
+        String(index + 1),
+        row.clip,
+        row.module,
+        formatTime(row.time_ms),
+        "1",
+      ]) {
+        const td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+      }
+      body.appendChild(tr);
+    });
+    $("empty").hidden = state.rows.length > 0;
+    $("undo").disabled = state.rows.length === 0;
+    $("clear").disabled = state.rows.length === 0;
+    $("export").disabled = state.rows.length === 0;
+  }
+
+  function requireVideo() {
+    if (!video.src) {
+      setStatus("Load a local clip first.");
+      return false;
+    }
+    return true;
+  }
+
+  function markHit() {
+    if (!requireVideo()) return;
+    state.rows.push({
+      clip: state.clip,
+      module: $("module").value,
+      time_ms: currentMs(),
+      hit: 1,
+    });
+    state.rows.sort((a, b) => a.time_ms - b.time_ms);
+    render();
+    setStatus("Marked " + $("module").value + " at " + formatTime(currentMs()) + ".");
+  }
+
+  function step(deltaMs) {
+    if (!requireVideo()) return;
+    video.currentTime = Math.max(0, video.currentTime + deltaMs / 1000);
+  }
+
+  function undo() {
+    if (state.rows.length) {
+      state.rows.pop();
+      render();
+      setStatus("Removed the last hit.");
+    }
+  }
+
+  function csvEscape(value) {
+    const text = String(value);
+    return /[",\n\r]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+  }
+
+  function exportCsv() {
+    if (!state.rows.length) return;
+    const lines = ["clip,module,time_ms,hit"];
+    for (const row of state.rows) {
+      lines.push([
+        csvEscape(row.clip),
+        csvEscape(row.module),
+        row.time_ms,
+        1,
+      ].join(","));
+    }
+    const blob = new Blob([lines.join("\n") + "\n"], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = state.clip + "-hits.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setStatus("Exported " + state.rows.length + " hit(s). Run the combat lab next.");
+  }
+
+  $("file").addEventListener("change", (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    if (state.url) URL.revokeObjectURL(state.url);
+    state.clip = (file.name.replace(/\.[^.]+$/, "") || "clip").trim() || "clip";
+    state.rows = [];
+    state.url = URL.createObjectURL(file);
+    video.src = state.url;
+    video.load();
+    $("fileName").textContent = file.name;
+    render();
+    setStatus("Loaded " + file.name + ". Mark only confirmed hits.");
+  });
+
+  video.addEventListener("loadedmetadata", () => {
+    setStatus("Ready. Length " + formatTime(video.duration * 1000) + ".");
+  });
+  video.addEventListener("error", () => {
+    setStatus("This browser could not decode that video.");
+  });
+
+  $("mark").addEventListener("click", markHit);
+  $("back").addEventListener("click", () => step(-50));
+  $("forward").addEventListener("click", () => step(50));
+  $("undo").addEventListener("click", undo);
+  $("clear").addEventListener("click", () => {
+    state.rows = [];
+    render();
+    setStatus("Cleared.");
+  });
+  $("export").addEventListener("click", exportCsv);
+
+  document.addEventListener("keydown", (event) => {
+    const target = event.target;
+    if (target && /^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) return;
+    if (event.code === "KeyH") {
+      event.preventDefault();
+      markHit();
+    } else if (event.key === "Backspace") {
+      event.preventDefault();
+      undo();
+    }
+  });
+
+  render();
+</script>
+</body>
+</html>

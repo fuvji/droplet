@@ -19,10 +19,11 @@ keyboard/mouse input; it does not read or modify game memory.
 ## Combat timing profile
 
 `tools/combat-lab.ps1` turns timestamped, human-confirmed hits from combat
-footage into a compact local timing prior. Hydrogen reads
-`%LOCALAPPDATA%\Hydrogen\combat.profile` once at startup, blends it with the
-local cadence brain, and clamps it to the configured Min/Max. Delete the file
-to disable it. The runtime never reads video or the network.
+footage into a compact local timing prior. `tools/combat-annotator.html` is a
+local-only video page that exports the CSV; it never uploads the clip. Hydrogen
+reads `%LOCALAPPDATA%\Hydrogen\combat.profile` once at startup, blends it with
+the local cadence brain, and clamps it to the configured Min/Max. Delete the
+file to disable it. The runtime never reads video or the network.
 
 See [docs/COMBAT_LAB.md](docs/COMBAT_LAB.md) for the CSV contract and safety
 rules, and [docs/AI.md](docs/AI.md) for the research boundary.
