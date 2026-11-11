@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.9.0
+
+- Replaced module pill switches with round power buttons and gave every module
+  an original 18 px item-style line glyph. The glyphs are drawn from GDI+
+  primitives, carry no background plate, and use no Mojang textures.
+- Removed the tray icon, tray menu, and taskbar integration. Hiding the panel is
+  now sticky: an alt-tab or focus change cannot resurrect it. Ctrl+Right Shift
+  shows or hides it. Close stops the watchers and exits immediately.
+- Removed the redundant Dash `Clicks 1x` row and the Behaviour `Capture` row.
+  Dash is one row shorter; the public audit still states the visible-capture
+  boundary.
+- Restored the Anchor 37–43 ms default and slider window. The macro still
+  enforces the 50 ms tick floor, and the card now states that floor explicitly.
+- Dash, Shield, and Pearl select the slot and click in one SendInput batch.
+  This is ordinary input, not a capture or anti-cheat bypass.
+- The low-level hooks now reject unbound events with the prebuilt trigger table
+  before cloning the settings Arc. Bound events take the existing path.
+- Self-destruct is a one-second hold with a visible progress percentage.
+- Deeper graphite palette, warm white text, a single accent hairline, and the
+  same 13 px shared corner radius.
+- Added a downloads section with local OS detection, a dedicated release ledger
+  at `releases.html`, SHA-256 checksums, and actual Windows ZIP/MSIX artifacts.
+- Added a tag-driven Windows release workflow and detailed
+  `releases/v2.9.0.md` notes.
+- The old Freebuff deployment was unpublished. `https://fuvji.github.io/droplet/`
+  is the canonical product URL.
+- Release binary: 601,600 bytes, SHA-256
+  `3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9`.
+  Signed MSIX: 306,082 bytes, SHA-256
+  `c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215`.
+  Release tests: 19/19.
+- Boundaries unchanged: no streamproof mode, no capture evasion, no game-memory
+  reads, no network calls, no anti-cheat bypass, no input disguise, and no
+  zero-latency or auto-update claim. Linux and macOS remain unported.
+
 ## 2.8.0
 
 - Unified the window silhouette on one logical 13 px radius. The painted
@@ -17,7 +52,7 @@
   The headline is now **Minecraft Zero Macro**.
 - Added `site/public/refine.css` as a separate design layer over the existing
   stylesheet, so the base layout stays intact and the refinement is easy to
-  audit. The page still ships no JavaScript, external fonts, or video.
+  audit. The page still ships no third-party scripts, external fonts, or video.
 - Release binary: 594,944 bytes, SHA-256
   `57449188e2abdf7da33620cf4698e3610030edf689512a4a55e2045621bd8ad3`.
   Signed MSIX: 312,164 bytes, SHA-256

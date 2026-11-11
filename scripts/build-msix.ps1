@@ -14,10 +14,10 @@ $signtool = Get-ChildItem -Path $msixTools -Recurse -Filter 'signtool.exe' |
 if (-not $makeappx) { throw 'MakeAppx.exe was not found in .toolchain\msix.' }
 
 $stage = Join-Path $root 'packaging\package'
-$apps = Join-Path $root 'apps\Droplet'
+$apps = Join-Path $root 'apps\droplet'
 $assets = Join-Path $root 'packaging\Assets'
 $manifest = Join-Path $root 'packaging\AppxManifest.xml'
-$msix = Join-Path $apps 'Droplet.msix'
+$msix = Join-Path $apps 'droplet.msix'
 
 $exe = @(
     (Join-Path $root 'target\x86_64-pc-windows-gnu\release\droplet.exe'),
@@ -30,8 +30,8 @@ New-Item -ItemType Directory -Force -Path $stage, $apps | Out-Null
 Remove-Item -LiteralPath $stage -Recurse -Force
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item -LiteralPath $manifest -Destination (Join-Path $stage 'AppxManifest.xml')
-Copy-Item -LiteralPath $exe -Destination (Join-Path $stage 'Droplet.exe')
-Copy-Item -LiteralPath $exe -Destination (Join-Path $apps 'Droplet.exe') -Force
+Copy-Item -LiteralPath $exe -Destination (Join-Path $stage 'droplet.exe')
+Copy-Item -LiteralPath $exe -Destination (Join-Path $apps 'droplet.exe') -Force
 Copy-Item -LiteralPath $assets -Destination $stage -Recurse
 
 & $makeappx pack /d $stage /p $msix /o
@@ -44,10 +44,10 @@ if ($SkipSign) {
 
 if (-not $signtool) { throw 'SignTool.exe was not found in .toolchain\msix.' }
 $pfx = Join-Path $msixTools 'Droplet-Dev.pfx'
-$cer = Join-Path $apps 'Droplet-Dev.cer'
+$cer = Join-Path $apps 'droplet-dev.cer'
 $passwordFile = Join-Path $msixTools 'pfx-password.txt'
 if (-not (Test-Path -LiteralPath $cer)) {
-    $legacyCer = Join-Path $root 'dist\Droplet-Dev.cer'
+    $legacyCer = Join-Path $root 'dist\droplet-dev.cer'
     if (Test-Path -LiteralPath $legacyCer) {
         Copy-Item -LiteralPath $legacyCer -Destination $cer -Force
     }
@@ -86,7 +86,7 @@ if ($LASTEXITCODE -ne 0) {
 } else {
     Write-Output 'Package signature verified by the local trust provider.'
 }
-Write-Output "Portable app: $(Join-Path $apps 'Droplet.exe')"
+Write-Output "Portable app: $(Join-Path $apps 'droplet.exe')"
 Write-Output "Signed package: $msix"
 Write-Output "Development certificate: $cer"
 Write-Output 'Install with: Install-Droplet.cmd (UAC prompt required once for certificate trust)'

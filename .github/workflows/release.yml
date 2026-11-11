@@ -1,0 +1,48 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Test
+        run: cargo test --release --target x86_64-pc-windows-msvc
+      - name: Build
+        run: cargo build --release --target x86_64-pc-windows-msvc
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          $stage = "dist/droplet-windows-x64"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item "target/x86_64-pc-windows-msvc/release/droplet.exe" "$stage/droplet.exe"
+          Copy-Item "LICENSE" "$stage/LICENSE"
+          Copy-Item "site/public/downloads/README.txt" "$stage/README.txt"
+          $hash = (Get-FileHash "$stage/droplet.exe" -Algorithm SHA256).Hash.ToLower()
+          "Droplet $env:GITHUB_REF_NAME — SHA-256`n`n$hash  droplet.exe" | Set-Content "$stage/SHA256SUMS.txt" -Encoding ascii
+          Compress-Archive -Path "$stage/*" -DestinationPath "dist/droplet-windows-x64.zip" -Force
+          Get-FileHash "dist/droplet-windows-x64.zip" -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLower())  droplet-windows-x64.zip" } |
+            Set-Content "dist/SHA256SUMS.txt" -Encoding ascii
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = "releases/$env:GITHUB_REF_NAME.md"
+          if (-not (Test-Path $notes)) { $notes = "CHANGELOG.md" }
+          gh release create $env:GITHUB_REF_NAME `
+            "dist/droplet-windows-x64.zip" `
+            "dist/SHA256SUMS.txt" `
+            --title "Droplet $env:GITHUB_REF_NAME" `
+            --notes-file $notes

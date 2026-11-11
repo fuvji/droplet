@@ -1,6 +1,6 @@
 # Droplet website
 
-The public product page is a static site deployed through Freebuff Sites:
+The product site is published from the `gh-pages` branch at:
 
 <https://fuvji.github.io/droplet/>
 
@@ -8,72 +8,47 @@ Source: <https://github.com/fuvji/droplet>
 
 ## Layout
 
-- `public/` contains the HTML, CSS, transparent favicon, sitemap, robots file,
-  plain-text `llms.txt`, sponsor inventory, native captures from all four panel
-  tabs, and the CSS crossfade of those captures.
-- `worker.js` serves `env.ASSETS` and adds a strict CSP and cache policy.
-- `deploy.json` is the Freebuff Sites deployment manifest.
-- `SITE_ID.txt` records the Freebuff Sites project ID.
+- `public/index.html` — product page: downloads, benchmark, previews, modules,
+  audit, evidence vault, specs, sponsor inventory, FAQ, founder credit.
+- `public/releases.html` — detailed 2.9.0 release ledger and version history.
+- `public/sponsors.html` — direct sponsor inventory.
+- `public/style.css` — base visual system.
+- `public/refine.css` — editorial layer, download/vault cards, 3D previews,
+  release ledger styles, and reduced-motion fallbacks.
+- `public/downloads.js` — local-only OS hint for the download cards. It sends
+  nothing, stores nothing, and has no third-party imports.
+- `public/downloads/` — portable ZIP, signed MSIX, README, and SHA-256 list.
+- `public/assets/` — four native 624×408 captures, the transparent icon sprite,
+  and the transparent favicon/mark assets.
+- `public/sitemap.xml`, `robots.txt`, `llms.txt` — canonical GitHub Pages URLs.
 
-The 2.8.0 page uses a graphite/white acrylic visual system with measured
-trigger-routing facts, a benchmark chart and measurement table, a runtime
-pipeline model, native capture crops, a silent four-tab CSS crossfade, panel
-anatomy notes, the RGB Color card and Hold/Toggle chips, an audit, a
-hard-boundaries section, and direct sponsor inventory. `refine.css` is a
-separate editorial layer over the base stylesheet.
+## Release artifacts
 
-The page has no external fonts, third-party images, analytics, ad clients,
-cookies, scripts, or network calls. The images are four distinct local captures
-at `public/assets/droplet-core.png`, `droplet-crystal.png`,
-`droplet-assist.png`, and `droplet-system.png`. `sponsors.html` uses the same
-stylesheet and no external resources.
+`droplet-windows-x64.zip` (289,296 B) contains the unsigned portable
+`droplet.exe`, the license, README, and checksums. `droplet-windows-x64.msix`
+(306,082 B) is signed with the project development certificate. Linux and
+macOS packages are not published because the Win32/GDI+ core has not been
+ported.
 
-The capture lab deliberately does not present fabricated gameplay footage. The
-page explains that live Minecraft hit registration is still unverified and
-invites a real clip through the issue link. The capture lab crossfades the four
-native tab captures with CSS only, so the page ships no video and no scripts;
-the preview tabs are the same four separate screenshots, never one repeated
-image.
-
-Droplet is proprietary. The source and build scripts are published in the
-public GitHub repository for transparency, but public availability is not an
-open-source grant. The site does not present Droplet as open source or as
-streamproof.
-
-## Deploy
-
-From the repository root, deploy the manifest through Freebuff Sites:
-
-```text
-site/deploy.json
-```
-
-The project's preview and production environments are independent. Publish the
-production environment explicitly after a successful deploy.
+The site is explicit about this. It does not relabel a Windows binary as a
+Linux or macOS build, and it does not offer a streamproof or anti-cheat bypass
+mode.
 
 ## Local preview
 
-From the repository root, the dependency-free loopback server serves
-`public/` for layout and asset checks:
+From the repository root:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/serve-site.ps1
 ```
 
-Open <http://127.0.0.1:4173/>. This server is local-only; it does not emulate
-the worker's security headers or the production cache policy.
+Open <http://127.0.0.1:4173/>. The server is loopback-only.
 
-## Custom domain
+## Deploy
 
-A short root domain such as `droplet.net` requires registrar and DNS control.
-`droplet.net` is already registered, so it cannot be claimed from this
-repository. To connect a domain you do control:
+Copy `site/public/` to the `gh-pages` branch and push it. Keep the download
+artifacts in `public/downloads/`; GitHub Pages has no build step. After a push,
+check the canonical URL, the download ZIP, the MSIX, the checksum file,
+`releases.html`, and the module-icon sprite on the public origin.
 
-1. Point the apex `A`/`AAAA` records and `www` `CNAME` at the Freebuff Sites
-   target through the registrar.
-2. Add the domain in the Sites dashboard and verify ownership there.
-3. Update the canonical URL, Open Graph image URL, `robots.txt`, `sitemap.xml`,
-   and `llms.txt` together so search and answer engines see one origin.
-
-Do not add a `CNAME` file or a fake TLS configuration here; the hosting
-provider must issue the certificate and route the hostname.
+Do not publish signing private keys, environment files, or source maps.

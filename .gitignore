@@ -8,6 +8,8 @@
 /target/
 /packaging/package/
 /apps/
+/dist/
+/.site.log
 
 # Runtime noise
 *.log

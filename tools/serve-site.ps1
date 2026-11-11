@@ -10,11 +10,14 @@ $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopba
 $mime = @{
     '.html' = 'text/html; charset=utf-8'
     '.css'  = 'text/css; charset=utf-8'
+    '.js'   = 'text/javascript; charset=utf-8'
     '.png'  = 'image/png'
     '.svg'  = 'image/svg+xml'
     '.webm' = 'video/webm'
     '.xml'  = 'application/xml; charset=utf-8'
     '.txt'  = 'text/plain; charset=utf-8'
+    '.zip'  = 'application/zip'
+    '.msix' = 'application/octet-stream'
 }
 
 $listener.Start()

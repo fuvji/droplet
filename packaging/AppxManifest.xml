@@ -9,7 +9,7 @@
   <Identity
     Name="DropletMacroSuite"
     Publisher="CN=Droplet Macro Suite"
-    Version="2.8.0.0"
+    Version="2.9.0.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
@@ -32,7 +32,7 @@
   <Applications>
     <Application
       Id="Droplet"
-      Executable="Droplet.exe"
+      Executable="droplet.exe"
       EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         DisplayName="Droplet"

@@ -50,6 +50,12 @@ impl Engine {
     pub fn triggers(&self) -> Arc<macros::TriggerMap> {
         self.triggers.read().unwrap().clone()
     }
+    /// Cheap hit test for the hook path. Most key events do not match a
+    /// binding, so resolve that before cloning the settings Arc for a macro.
+    #[inline]
+    pub fn has_trigger(&self, ev: Ev) -> bool {
+        self.triggers.read().unwrap().get(ev).is_some()
+    }
     fn publish(&self, s: Settings) {
         // Bindings can change from the panel. Rebuild the event index once per
         // settings publish, never on the input-hook hot path.
@@ -61,7 +67,6 @@ impl Engine {
 static ENGINE: OnceLock<Arc<Engine>> = OnceLock::new();
 static mut APP: *mut App = std::ptr::null_mut();
 static MAIN_HWND: AtomicIsize = AtomicIsize::new(0);
-static TASKBAR_CREATED: AtomicU32 = AtomicU32::new(0);
 static GAME: AtomicIsize = AtomicIsize::new(0);
 static HOOK_TID: AtomicU32 = AtomicU32::new(0);
 
@@ -83,7 +88,6 @@ thread_local! {
 
 struct App {
     hwnd: HWND,
-    tray_icon: HICON,
     dpi: f32,
     engine: Arc<Engine>,
     settings: Settings,
@@ -110,16 +114,15 @@ struct App {
     back: Option<BackBuffer>,
     canvas: Option<Canvas>,
     shown: bool,
-    tray: bool,
+    user_hidden: bool,
     destructed: bool,
     applied_low: bool,
 }
 
 impl App {
-    fn new(hwnd: HWND, tray_icon: HICON, dpi: f32, engine: Arc<Engine>, settings: Settings, fonts: Fonts) -> App {
+    fn new(hwnd: HWND, dpi: f32, engine: Arc<Engine>, settings: Settings, fonts: Fonts) -> App {
         App {
             hwnd,
-            tray_icon,
             dpi,
             applied_low: settings.low_latency,
             engine,
@@ -144,7 +147,7 @@ impl App {
             back: None,
             canvas: None,
             shown: false,
-            tray: false,
+            user_hidden: false,
             destructed: false,
         }
     }
@@ -314,9 +317,6 @@ impl App {
                         self.hide_panel();
                     }
                     self.changed();
-                    if k == "v0" {
-                        self.update_tray();
-                    }
                 }
                 Act::Mode(k) => {
                     macros::stop_toggle(macros::mode_module(k));
@@ -373,6 +373,7 @@ impl App {
                 Act::Discord => unsafe { open_url("https://discord.gg/fvrdYzrQjq") },
                 Act::Destruct => self.self_destruct(),
                 Act::Hide => {
+                    self.user_hidden = true;
                     self.hide_panel();
                     self.settings.save();
                 }
@@ -414,7 +415,6 @@ impl App {
             macros::stop_all_toggles();
         }
         self.changed();
-        self.update_tray();
     }
 
     fn self_destruct(&mut self) {
@@ -492,6 +492,7 @@ impl App {
             );
         }
         self.shown = true;
+        self.user_hidden = false;
         self.kick_anim();
         self.invalidate();
     }
@@ -526,6 +527,7 @@ impl App {
 
     fn toggle_panel(&mut self) {
         if self.shown {
+            self.user_hidden = true;
             self.hide_panel();
             self.settings.save();
         } else {
@@ -533,108 +535,14 @@ impl App {
         }
     }
 
-    // ---------------------------------------------------------------- tray
-
-    fn init_tray(&mut self) {
-        if self.tray_icon == 0 {
-            return;
-        }
-        self.tray = false;
-        unsafe {
-            let mut nid: win::NOTIFYICONDATAW = std::mem::zeroed();
-            nid.cbSize = std::mem::size_of::<win::NOTIFYICONDATAW>() as u32;
-            nid.hWnd = self.hwnd;
-            nid.uID = 1;
-            nid.uFlags = win::NIF_MESSAGE | win::NIF_ICON | win::NIF_TIP;
-            nid.uCallbackMessage = win::WM_APP_TRAY;
-            nid.hIcon = self.tray_icon;
-            win::wide_buf("Droplet - waiting for Minecraft", &mut nid.szTip);
-            self.tray = win::Shell_NotifyIconW(win::NIM_ADD, &nid) != 0;
-        }
-        self.update_tray();
-    }
-
-    fn update_tray(&mut self) {
-        if !self.tray {
-            return;
-        }
-        let present = self.engine.present.load(Ordering::Relaxed);
-        let focus = self.engine.focus.load(Ordering::Relaxed);
-        let armed = self.settings.bool_at("v0");
-        let game = if focus {
-            "game focused"
-        } else if present {
-            "game detected"
-        } else {
-            "waiting for Minecraft"
-        };
-        let tip = format!("Droplet - {} - {}", game, if armed { "armed" } else { "safe" });
-        unsafe {
-            let mut nid: win::NOTIFYICONDATAW = std::mem::zeroed();
-            nid.cbSize = std::mem::size_of::<win::NOTIFYICONDATAW>() as u32;
-            nid.hWnd = self.hwnd;
-            nid.uID = 1;
-            nid.uFlags = win::NIF_TIP;
-            win::wide_buf(&tip, &mut nid.szTip);
-            win::Shell_NotifyIconW(win::NIM_MODIFY, &nid);
-        }
-    }
-
-    fn remove_tray(&mut self) {
-        if !self.tray {
-            return;
-        }
-        unsafe {
-            let mut nid: win::NOTIFYICONDATAW = std::mem::zeroed();
-            nid.cbSize = std::mem::size_of::<win::NOTIFYICONDATAW>() as u32;
-            nid.hWnd = self.hwnd;
-            nid.uID = 1;
-            win::Shell_NotifyIconW(win::NIM_DELETE, &nid);
-        }
-        self.tray = false;
-    }
-
-    fn tray_menu(&mut self) {
-        unsafe {
-            let menu = win::CreatePopupMenu();
-            if menu == 0 {
-                return;
-            }
-            let show = win::wide(if self.shown { "Hide panel" } else { "Show panel" });
-            win::AppendMenuW(menu, win::MF_STRING, 1, show.as_ptr());
-            let arm = win::wide(if self.settings.bool_at("v0") { "Disarm macros" } else { "Arm macros" });
-            win::AppendMenuW(menu, win::MF_STRING, 2, arm.as_ptr());
-            win::AppendMenuW(menu, win::MF_SEPARATOR, 0, std::ptr::null());
-            let exit = win::wide("Exit");
-            win::AppendMenuW(menu, win::MF_STRING, 3, exit.as_ptr());
-
-            let mut p = POINT::default();
-            win::GetCursorPos(&mut p);
-            win::SetForegroundWindow(self.hwnd);
-            let cmd = win::TrackPopupMenu(
-                menu,
-                win::TPM_RIGHTBUTTON | win::TPM_BOTTOMALIGN | win::TPM_RETURNCMD,
-                p.x,
-                p.y,
-                0,
-                self.hwnd,
-                std::ptr::null(),
-            );
-            win::DestroyMenu(menu);
-            win::PostMessageW(self.hwnd, win::WM_NULL, 0, 0);
-
-            match cmd {
-                1 => self.toggle_panel(),
-                2 => self.toggle_master(),
-                3 => {
-                    win::DestroyWindow(self.hwnd);
-                }
-                _ => {}
-            }
-        }
-    }
-
     fn on_state(&mut self) {
+        // A manual hide is sticky. Focus changes from alt-tabbing must not
+        // resurrect the panel; only the toggle hotkey or a direct show clears
+        // this flag. This is the bug where the panel reappeared after being
+        // minimized to the tray when the user switched tabs.
+        if self.user_hidden {
+            return;
+        }
         let present = self.engine.present.load(Ordering::Relaxed);
         let persist = self.settings.bool_at("vP");
         if present || persist {
@@ -642,7 +550,6 @@ impl App {
         } else {
             self.hide_panel();
         }
-        self.update_tray();
     }
 
     fn on_pointer(&mut self, lp: LPARAM) {
@@ -732,12 +639,6 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
         return win::DefWindowProcW(hwnd, msg, wp, lp);
     }
     let app = &mut *APP;
-    let taskbar_created = TASKBAR_CREATED.load(Ordering::Relaxed);
-    if taskbar_created != 0 && msg == taskbar_created {
-        app.init_tray();
-        return 0;
-    }
-
     match msg {
         win::WM_PAINT => {
             if hwnd == app.hwnd {
@@ -868,21 +769,14 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
             app.self_destruct();
             0
         }
-        win::WM_APP_TRAY => {
-            let ev = (lp & 0xFFFF) as u32;
-            match ev {
-                win::WM_LBUTTONUP => app.toggle_panel(),
-                win::WM_RBUTTONUP => app.tray_menu(),
-                _ => {}
-            }
-            0
-        }
         win::WM_CLOSE => {
+            // Close means quit, not hide: stop the watchers and tear the
+            // window down immediately. The message loop then saves and exits.
+            app.engine.quitting.store(true, Ordering::Relaxed);
             win::DestroyWindow(app.hwnd);
             0
         }
         win::WM_DESTROY => {
-            app.remove_tray();
             win::PostQuitMessage(0);
             0
         }
@@ -954,7 +848,7 @@ unsafe extern "system" fn kb_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
         return win::CallNextHookEx(0, code, wp, lp);
     }
 
-    // backslash: tap toggles the master switch, two second hold self-destructs
+    // backslash: tap toggles the master switch, one second hold self-destructs
     if vk == 0xDC {
         if !SD_ACTIVE.swap(true, Ordering::SeqCst) {
             let _ = std::thread::Builder::new().stack_size(64 * 1024).spawn(move || {
@@ -963,10 +857,10 @@ unsafe extern "system" fn kb_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
                 let mut progress: u32;
                 loop {
                     let elapsed = (input::now() - start) as f64 / freq;
-                    progress = ((elapsed / 2.0) * 1000.0).clamp(0.0, 1000.0) as u32;
+                    progress = ((elapsed / 1.0) * 1000.0).clamp(0.0, 1000.0) as u32;
                     SD_PROGRESS.store(progress, Ordering::Relaxed);
                     win::PostMessageW(hwnd, win::WM_APP_TICK, 0, 0);
-                    if elapsed >= 2.0 || !input::raw_down(Ev::K(0xDC)) {
+                    if elapsed >= 1.0 || !input::raw_down(Ev::K(0xDC)) {
                         break;
                     }
                     input::sleep_ms(40.0);
@@ -984,6 +878,9 @@ unsafe extern "system" fn kb_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
         return win::CallNextHookEx(0, code, wp, lp);
     }
 
+    if !engine.has_trigger(Ev::K(vk)) {
+        return win::CallNextHookEx(0, code, wp, lp);
+    }
     let s = engine.settings();
     let map = engine.triggers();
     macros::trigger(Ev::K(vk), &s, &map);
@@ -1035,6 +932,9 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
         return win::CallNextHookEx(0, code, wp, lp);
     }
     if !engine.gate.load(Ordering::Relaxed) {
+        return win::CallNextHookEx(0, code, wp, lp);
+    }
+    if !engine.has_trigger(Ev::M(btn)) {
         return win::CallNextHookEx(0, code, wp, lp);
     }
     let s = engine.settings();
@@ -1460,16 +1360,9 @@ pub fn run() {
             win::SetClassLongPtrW(hwnd, -14, icon);
         }
 
-        let app = Box::new(App::new(hwnd, icon, dpi, engine.clone(), settings, fonts));
+        let app = Box::new(App::new(hwnd, dpi, engine.clone(), settings, fonts));
         APP = Box::into_raw(app);
         MAIN_HWND.store(hwnd, Ordering::Relaxed);
-
-        let tc = win::RegisterWindowMessageW(win::wide("TaskbarCreated").as_ptr());
-        TASKBAR_CREATED.store(tc, Ordering::Relaxed);
-        {
-            let app = &mut *APP;
-            app.init_tray();
-        }
 
         spawn_hooks(engine.clone());
         spawn_watchers(engine.clone(), hwnd);
@@ -1494,6 +1387,9 @@ pub fn run() {
             win::DestroyIcon(icon);
         }
         gp::shutdown();
+        // Everything is flushed; leave at once instead of waiting on runtime
+        // teardown. The close button and self-destruct both land here.
+        std::process::exit(0);
     }
 }
 

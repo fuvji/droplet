@@ -1,0 +1,28 @@
+# performance
+
+## Measured
+
+| Path | Time | Method |
+| --- | ---: | --- |
+| Old binding scan | 202.39 ns | 1,000,000 lookups, release profile |
+| Pre-indexed route | 0.45 ns | One array read from a prebuilt table |
+| Reduction | 445× | Same event, process, and profile |
+
+Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
+one codegen unit, panic-abort, stripped.
+
+## 2.9.0 changes
+
+- Unbound key events are rejected by `Engine::has_trigger` before cloning the
+  settings `Arc`.
+- Dash/Shield/Pearl slot select and click share one `SendInput` batch.
+- The icon and power-control additions increased the exe from 594,944 to
+  601,600 bytes. This is not presented as a size reduction.
+
+## Not measured
+
+- End-to-end input latency.
+- Game-tick or hit-registration timing.
+- Anything called “quantum”, “zero latency”, or “100% no restriction”.
+
+See [[droplet]] and [[release]].

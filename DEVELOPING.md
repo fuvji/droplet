@@ -27,22 +27,25 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1
 ```
 
 The script stages `packaging/AppxManifest.xml`, the package assets, and the
-release payload, then writes and signs `apps/Droplet/Droplet.msix`. The portable
-copy is `apps/Droplet/Droplet.exe`. Install with `Install-Droplet.cmd`; a new
-machine must trust the development certificate in
-`LocalMachine\TrustedPeople` once.
+release payload, then writes and signs `apps/droplet/droplet.msix`. The portable
+copy is `apps/droplet/droplet.exe`. Install with `Install-Droplet.cmd`; a new
+machine must trust the development certificate
+(`apps/droplet/droplet-dev.cer`) in `LocalMachine\TrustedPeople` once.
 
 ## Site
 
-The public page is static and has no client-side JavaScript, external fonts,
-third-party requests, analytics, or network calls. Preview it with:
+The public page is static. One local script (`site/public/downloads.js`) detects
+the visitor's OS for the download cards; it stores nothing and sends nothing.
+There are no third-party scripts, external fonts, analytics, ad clients, or
+network calls. Preview it with:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/serve-site.ps1
 ```
 
-Open <http://127.0.0.1:4173/>. The production manifest is `site/deploy.json`;
-`site/README.md` documents deployment and custom-domain requirements.
+Open <http://127.0.0.1:4173/>. GitHub Pages serves the contents of
+`site/public/` from the `gh-pages` branch. `site/README.md` documents the
+release artifacts and site layout.
 
 ## Verification
 
@@ -62,16 +65,19 @@ Before publishing, also check:
 - `git diff --check`
 - every local `href`/`src` in `site/public` resolves
 - all four captures are 624×408
-- the production page has no console or CSP errors
+- the product page, `releases.html`, and `sponsors.html` have no console errors
+- every download and checksum link resolves
 - the MSIX signature is valid
 
 ## Repository
 
 <https://github.com/fuvji/droplet>
 
-The Freebuff Sites project ID is in `site/SITE_ID.txt`. Do not put credentials
-or signing private keys in the repository; the local development certificate
-and SDK cache are ignored by Git.
+Downloads are generated from the release build and published under
+`site/public/downloads/`. The tag workflow in `.github/workflows/release.yml`
+builds a portable Windows ZIP and publishes it with the notes in `releases/`.
+Do not put credentials or signing private keys in the repository; the local
+development certificate and SDK cache are ignored by Git.
 
 ## Design rules
 

@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not $Package) {
-    $Package = Join-Path $root 'apps\Droplet\Droplet.msix'
+    $Package = Join-Path $root 'apps\droplet\droplet.msix'
 }
 $pkg = (Resolve-Path -LiteralPath $Package).Path
 
@@ -98,7 +98,7 @@ if (-not $installed) {
 
 Write-Output ('Installed Droplet ' + $installed.Version)
 Write-Output ('Package: ' + $installed.PackageFullName)
-Write-Output 'Launch Droplet from the Start menu. The panel starts in the tray.'
+Write-Output 'Launch Droplet from the Start menu. Press Ctrl+Right Shift to show or hide the panel.'
 if (-not $NoPause) {
     Read-Host 'Press Enter to close'
 }

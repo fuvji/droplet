@@ -1,123 +1,126 @@
-# Droplet
+<div align="center">
 
-[Website](https://fuvji.github.io/droplet/) · [Source](https://github.com/fuvji/droplet) · [Benchmarks](BENCHMARKS.md) · [Sponsors](SPONSORS.md)
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.0 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with round power buttons.">
 
-Droplet is a low-latency, zero-dependency Rust macro suite for Windows and
-Minecraft Java. It runs as a tray-native overlay and injects only synthetic
-keyboard/mouse input; it does not read or modify game memory.
+# droplet
 
-## About
+**Minecraft Zero Macro** — a local, visible Windows input macro suite.
 
-Droplet — branded **Minecraft Zero Macro** — is a compact, local keyboard-and-
-mouse macro suite for Windows, written in Rust. It is built for players who
-want exact, repeatable input sequences without game-memory reads, network
-calls, or telemetry. The panel and every action stay visible to ordinary screen
+[Website](https://fuvji.github.io/droplet/) · [Downloads](https://fuvji.github.io/droplet/#download) · [Releases](https://fuvji.github.io/droplet/releases.html) · [Benchmarks](BENCHMARKS.md) · [Source](https://github.com/fuvji/droplet)
+
+</div>
+
+Droplet runs exact keyboard-and-mouse sequences for Minecraft Java, entirely
+on your machine. It reads no game memory, makes no network calls, and ships no
+telemetry. The panel and every action remain visible to ordinary screen
 capture.
 
-![Droplet 2.8.0 Core panel](site/public/assets/droplet-core.png)
+## Download
 
-## Features
+| Platform | Package | Size | Status |
+| --- | --- | ---: | --- |
+| Windows 10/11 x64 | [Portable ZIP](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip) | 289,296 B | **Available** |
+| Windows 10/11 x64 | [Signed MSIX](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix) | 306,082 B | **Available** |
+| Linux | — | — | Port not started; the core is Win32/GDI+ |
+| macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
-- Pre-indexed trigger routing: bindings are parsed when settings publish, then
-  the low-level hook resolves an event with one array read instead of scanning
-  up to 24 binding strings. The release microbenchmark is 0.45 ns versus
-  202.39 ns for the old route, a 445× reduction in the routing decision alone.
-- Anchor: place, charge once, switch off glowstone, detonate. The three slots
-  must be distinct and each step keeps the 50 ms tick floor. 2.6.0 removed two
-  duplicated waits from the normal path, shortening it by 100 ms.
-- Sprint: while physical W is held, pulse the sprint binding every 100 ms. The
-  key is never held down between pulses; the watcher is lock-free and samples
-  every 8 ms so the deadline is not rounded up by a coarse poll.
-- W-Tap: S-Tap by default with a 132–148 ms timing window. Existing configs
-  using the old W / 100–120 ms default pair migrate once.
-- Per-trigger Hold/Toggle: every trigger card carries a mode chip. Hold keeps
-  the one-shot behavior; Toggle latches one worker per module and stops on
-  master off, module off, a mode change, a reset, or losing the game gate.
-- RGB accent picker: System > Color offers six presets and per-channel Red,
-  Green, and Blue sliders, persisted in the original `thmC` key. Accent,
-  borders, switches, chips, and charts all derive from it.
-- One logical 13 px corner radius paints the panel hairline and clips the
-  window region, and the four site captures use the same mask.
-- Binding and slot chips borrow their stored labels instead of formatting a
-  new String on every paint, removing the last per-chip allocations from the
-  panel frame.
-- The local cadence brain uses a warm-up EWMA: early activations adapt quickly,
-  then the step floor settles at 12.5%, always inside the configured Min/Max.
-- System > Behaviour reports `Capture: Visible`. There is no streamproof or
-  capture-evasion mode.
-- Crystal, Mace, Dash, Shield, Potion, Pearl, Totem, Breach, Fast Use, Auto Use,
-  and Hover Inventory run as one-shot actions with per-module busy guards;
-  Toggle repeats that same sequence instead of opening a second code path.
-- 624×408 acrylic panel, event-driven rendering, Low Latency mode, adaptive
-  local timing, an optional offline combat timing profile, and AHK-compatible
-  INI migration.
-- Portable x64 executable plus a signed full-trust MSIX package.
-- The panel is visible to screen capture and streaming tools. There is no
-  capture exclusion, streamproof mode, process hiding, or disguise behavior.
-- The public product page uses a monochrome graphite/white acrylic system with
-  measured routing facts, a pipeline model, native capture previews, a silent
-  four-tab CSS crossfade, an audit, specs, and direct sponsor inventory.
+Verify with [SHA256SUMS.txt](https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt).
+The portable exe is unsigned; the MSIX uses the project development
+certificate. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img`
+is published because those builds do not exist.
 
-## Performance
+## What is in 2.9.0
 
-The trigger-routing benchmark measured in 2.6.0 is documented in
-[BENCHMARKS.md](BENCHMARKS.md). It measures the routing decision only:
+- **Round power controls** on every module card, with distinct on, off, and
+  hover states and no background plate.
+- **Original item-style line glyphs** for all modules: pearl, shield, spear,
+  mace, potion, crystal, anchor, totem, grass block, sword, player head,
+  repeater, and chest. They are drawn from GDI+ primitives, not copied Mojang
+  textures, and every icon is transparent.
+- **Compact Dash** card without the redundant `Clicks 1x` row.
+- **Sticky hide**: the tray icon is gone, and a manual hide is no longer undone
+  by an alt-tab or focus change. `Ctrl + Right Shift` shows or hides the panel.
+- **Instant close**: the close button stops the watchers and exits.
+- **One-second self-destruct hold** with a visible progress percentage.
+- **Anchor 37–43 ms** default and slider window, with the 50 ms Minecraft tick
+  floor stated on the card and still applied by the macro.
+- **Same-frame input** for Dash, Shield, and Pearl: slot selection and click
+  share one `SendInput` batch. Ordinary input only; the focus gate remains.
+- **Faster hook rejection**: unbound keys are rejected by the prebuilt trigger
+  table before either settings `Arc` is cloned.
+- **Downloads and a release ledger** on the website, plus a tag-driven Windows
+  release workflow.
 
-| Path | Time |
-| --- | ---: |
-| Binding scan (2.4.1) | 202.39 ns |
-| Pre-indexed route (2.5.0+) | 0.45 ns |
-| Reduction | 445× |
+## GUI
 
-This is not a zero-latency claim and not an end-to-end input or game-latency
-measurement. Minecraft observes input on a 50 ms tick. The reduced work is in
-Droplet's own hook path.
+![Droplet 2.9.0 System panel](site/public/assets/droplet-system.png)
 
-## Combat timing profile
+The panel is a native 624×408 acrylic surface. The painted hairline and the
+Win32 window region share one 13 px radius. Painting is event-driven; an idle
+panel does not schedule animation frames. Binding and slot chips borrow their
+labels instead of allocating a `String` per chip per frame.
 
-`tools/combat-lab.ps1` turns timestamped, human-confirmed hits from combat
-footage into a compact local timing prior. `tools/combat-annotator.html` is a
-local-only video page that exports the CSV; it never uploads the clip. Droplet
-reads `%LOCALAPPDATA%\Droplet\combat.profile` once at startup, blends it with
-the local cadence brain, and clamps it to the configured Min/Max. Delete the
-file to disable it. The runtime never reads video or the network.
+## Modules
 
-See [docs/COMBAT_LAB.md](docs/COMBAT_LAB.md) for the CSV contract and safety
-rules, and [docs/AI.md](docs/AI.md) for the research boundary.
+| Module | Sequence | Mode |
+| --- | --- | --- |
+| Anchor | Place, charge once, switch off glowstone, detonate | one-shot |
+| Auto Crystal | Obsidian, then crystal | one-shot / toggle |
+| Mace | Settled swap and hit | one-shot / toggle |
+| Shield | Axe select and hit in one batch; optional held stun | one-shot / toggle |
+| Dash | Spear select, hit, restore; 50/100/150 ms cooldown | one-shot / toggle |
+| Breach | Mace swap and return | one-shot / toggle |
+| Potion | Two-slot drink and return | one-shot / toggle |
+| Pearl | Pearl select and throw in one batch, then catch | one-shot / toggle |
+| Hover Totem | Totem swap watcher | watcher |
+| Fast Use | Bounded held right-click cadence | one-shot / toggle |
+| Auto Use | Use an item, swap back | one-shot / toggle |
+| W-Tap | S-Tap default, 132–148 ms | per-click |
+| Sprint | One tap every 100 ms while physical W is held | bounded watcher |
+| Ghost Click | Small local click offset, 1–12 px | per-click |
+| Hover inventory | Peek without leaving combat | one-shot |
+
+## Performance, without fairy tales
+
+| Path | Time per lookup | Method |
+| --- | ---: | --- |
+| Old binding scan | 202.39 ns | Hash and scan up to 24 binding strings |
+| Pre-indexed route | 0.45 ns | One array read from a prebuilt table |
+| Routing reduction | 445× | Same event, process, and release profile |
+
+This is a **routing microbenchmark**, not end-to-end input latency, game-tick
+latency, or hit registration. Minecraft observes input on a 50 ms tick; Windows
+and the device path add their own scheduling. “Zero” in the product name is a
+name, not a latency claim. Details and reproduction:
+[BENCHMARKS.md](BENCHMARKS.md).
+
+## Verify
+
+- `cargo test --release`: **19 / 19**.
+- Portable executable: **601,600 bytes**,
+  `3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9`.
+- Signed MSIX: **306,082 bytes**,
+  `c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215`.
+- Package version: **2.9.0.0**, signature **Valid**, installed status **Ok**.
+- Four native 624×408 captures in `site/public/assets/`.
+- No live Minecraft client is available here, so hit registration and the new
+  same-frame input ordering remain unverified in game.
 
 ## Deliberate boundaries
 
-Droplet is designed to stay small, auditable, and predictable:
+Droplet is local and visible by design.
 
-- No crates, network calls, telemetry, updater, or runtime downloader.
-- No camera, WebView, game-memory access, or external AI/LLM integration.
-- Vision is limited to the existing 1×1 magenta crosshair sample used by the
-  totem watcher.
-- Input hooks and the safety gate stop macros when focus leaves Minecraft (or
-  when focus-only mode is disabled).
-- No process hiding, scan evasion, self-erasure, or disguised executable.
-- No screen-capture concealment. The overlay is ordinary visible desktop
-  composition.
-- No anti-cheat bypass, input laundering, or zero-latency mode.
+- No game-memory reads or writes.
+- No network calls, telemetry, analytics, or silent auto-updater.
+- No streamproof/capture-evasion mode, process hiding, scan evasion, log
+  erasure, anti-cheat bypass, or input-device disguise.
+- No zero-latency, “quantum speed”, or “100% no restriction” claim.
+- The focus and master gates stop every macro when they are not satisfied.
+- The portable exe is unsigned; SmartScreen may warn.
+- Windows only for now. Linux and macOS require a real platform port, not a
+  renamed archive.
 
-## Distribution
-
-Droplet is proprietary software. The source is published at
-<https://github.com/fuvji/droplet> for transparency and inspection. Public
-availability does not make Droplet open source: no licence is granted to copy,
-modify, redistribute, or sublicense the source. The versioned executable remains
-the supported product. See [LICENSE](LICENSE).
-
-The public product page is static documentation and media. Its source is
-published in the same repository. It has no analytics, external fonts,  client-side JavaScript, third-party ad scripts, or network calls. It includes
-  four native panel captures, CSS motion, a benchmark chart, a runtime model, and
-an explicit capture-lab note. The site includes a direct sponsor inventory at
-`site/public/sponsors.html`; sponsor links are ordinary outbound navigation.
-The Freebuff Sites project ID is recorded in `site/SITE_ID.txt`.
-
-## Development
-
-These commands are for the development checkout:
+## Build
 
 ```bash
 rustup target add x86_64-pc-windows-gnu
@@ -125,78 +128,38 @@ cargo test --release
 cargo build --release
 ```
 
-The release profile uses `opt-level = 3`, fat LTO, one codegen unit, aborting
-panics, and stripped symbols. The project targets
-`x86_64-pc-windows-gnu` via `.cargo/config.toml`. The repository's
-[development guide](DEVELOPING.md) covers packaging, site preview, and the
-security model. The website is a pair of static HTML pages with a shared CSS
-file, local images, no JavaScript, no external fonts, and no third-party
-requests. Its worker adds a strict CSP and asset-aware cache headers.
-
-### Local site preview
-
-The static page has a dependency-free preview server for the private checkout:
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/serve-site.ps1
-```
-
-Open <http://127.0.0.1:4173/>. The server binds loopback only and is not part of
-the deployed site; production uses the manifest in `site/deploy.json`.
-
-## Package and install
+Package and install:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1
 ```
 
-The script stages the manifest/assets/payload, packs and signs the MSIX with the
-project-local signing tools, and writes the portable executable to
-`apps/Droplet/Droplet.exe`. `Install-Droplet.cmd` installs the package and
-launches it from the Start menu.
+Outputs are lowercase: `apps/droplet/droplet.exe` and
+`apps/droplet/droplet.msix`. See [DEVELOPING.md](DEVELOPING.md).
 
-The development certificate is self-signed. Installing the package on another
-machine requires trusting that certificate in `LocalMachine\TrustedPeople`.
+## Repository map
 
-## Configuration
+| Path | Contents |
+| --- | --- |
+| `src/` | Win32 shell, GDI+ paint, input hooks, macro modules, settings |
+| `site/public/` | Static product site, release ledger, downloads, captures |
+| `releases/` | Detailed per-version release notes |
+| `docs/` | Combat-lab notes, AI boundaries, portable Obsidian vault |
+| `.github/workflows/` | Tag-driven Windows release pipeline |
+| `scripts/`, `tools/` | MSIX packaging, signing, captures, local preview |
 
-Settings live in `%LOCALAPPDATA%\Droplet\config.ini`. Existing AHK
-`%TEMP%\settings.dat` files are imported once using the same `v0`/`v6` key
-names. Config writes are atomic and an invalid slot combination or an inactive
-master/focus gate prevents injection.
+The site uses one local script for OS detection on the download page. It sends
+nothing and stores nothing. There are no third-party scripts, fonts, analytics,
+or ad clients.
 
-## Verification
+## Founder
 
-- `cargo test --release`: 19 tests covering config migration, timing bounds,
-  RGB parsing, trigger-mode normalization and latch generations, the
-  allocation-free binding lookup, Anchor slot validation, W-Tap
-  defaults/planning, Sprint scheduling, cadence-brain warm-up, combat-profile
-  parsing, and trigger-index equivalence/benchmarking.
-- Trigger routing benchmark: 0.45 ns indexed versus 202.39 ns scanned; 445×
-  reduction in the routing lookup. See [BENCHMARKS.md](BENCHMARKS.md).
-- Anchor input trace: `h,g,r` for the default place, charge, and detonate steps.
-- Release binary: `594,944` bytes, `57449188e2abdf7da33620cf4698e3610030edf689512a4a55e2045621bd8ad3`.
-- Signed MSIX: `312,164` bytes, `e3c23f85c31a67a0272058f8995c0df87b6d261609c9337553f9dad6d52572b3`;
-  signed with the local Droplet development certificate. A fresh machine needs
-  that leaf in `LocalMachine\TrustedPeople`, which `Install-Droplet.cmd` does
-  with a one-time UAC prompt.
-- Sprint deadline: 100 ms, asserted by `sprint_pulses_every_hundred_ms`; the
-  watcher polls every 8 ms so the deadline is not rounded up by the timer.
-- Source and package: `2.8.0` / `2.8.0.0`.
-- Four native 624×408 tab captures live in `site/public/assets/droplet-{core,crystal,assist,system}.png`.
+Designed and built by [@epufk](https://github.com/epufk).
 
-Real in-game hit registration still needs verification in a live Minecraft
-client; input injection and timing are verified independently. The site does
-not publish fabricated gameplay footage.
-
-## Sponsors
-
-The direct sponsor inventory is in [SPONSORS.md](SPONSORS.md) and
-`site/public/sponsors.html`. There is no ad network, no tracking, and no
-self-serve insertion. Open an inquiry through the GitHub issue link on the
-sponsor page.
+Not an official Minecraft product. Not approved by or associated with Mojang or
+Microsoft. Minecraft is a trademark of Mojang Synergies AB.
 
 ## License
 
-Proprietary. See [LICENSE](LICENSE). The source is public for inspection, but
-public availability is not an open-source grant.
+Proprietary. The source is public for inspection; public availability is not an
+open-source grant. See [LICENSE](LICENSE).

@@ -1,8 +1,8 @@
 [package]
 name = "droplet"
-version = "2.8.0"
+version = "2.9.0"
 edition = "2021"
-description = "Droplet - low latency Minecraft macro suite"
+description = "Droplet - local Minecraft keyboard and mouse macro suite"
 license = "LicenseRef-Proprietary"
 
 [[bin]]

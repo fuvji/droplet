@@ -475,10 +475,12 @@ fn dash(s: &Settings, _ev: Ev, _latched: bool) {
         Some(b) => b,
         None => return,
     };
-    // Dash is one click again. The previous second click duplicated the
-    // attack and delayed the spear/return swap by a full tick.
-    lc(s);
-    taps(&[&s.dash_spear, &s.dash_restore, &s.dash_restore]);
+    // Spear select and attack share one SendInput batch so the client sees
+    // them in the same input frame. Restore follows immediately, not a tick
+    // later. The final sleep is the module cooldown, not input latency.
+    input::jitter(s.ghost, s.ghost_off);
+    input::tap_click(keys::parse(&s.dash_spear), Btn::Left);
+    taps(&[&s.dash_restore, &s.dash_restore]);
     input::sleep_ms(s.dash_cd_ms() as f64);
 }
 
@@ -490,8 +492,10 @@ fn shield(s: &Settings, ev: Ev, latched: bool) {
         Some(b) => b,
         None => return,
     };
-    lc(s);
-    tap(&s.shield_axe);
+    // Axe select and hit are one batch. The held tail below still repeats
+    // the ordinary click path so a physical hold keeps breaking the shield.
+    input::jitter(s.ghost, s.ghost_off);
+    input::tap_click(keys::parse(&s.shield_axe), Btn::Left);
     // Held past the tap window: keep breaking the shield until release. A
     // latched Toggle worker already repeats the tap, so the hold tail is only
     // for a physically held trigger.
@@ -679,8 +683,10 @@ fn pearl(s: &Settings, ev: Ev, latched: bool) {
         Some(b) => b,
         None => return,
     };
-    rc(s);
-    tap(&s.pearl_slot);
+    // Pearl select and throw are one batch, so the throw cannot land on the
+    // previously held slot. The catch sequence is unchanged.
+    input::jitter(s.ghost, s.ghost_off);
+    input::tap_click(keys::parse(&s.pearl_slot), Btn::Right);
     if latched || !input::wait_up(ev, 90) {
         tap(&s.pearl_catch);
         tap(&s.pearl_catch);

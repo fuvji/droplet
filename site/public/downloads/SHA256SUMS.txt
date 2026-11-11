@@ -1,0 +1,5 @@
+Droplet 2.9.0 — SHA-256
+
+3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9  droplet.exe
+c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215  droplet.msix
+251932da68bbe2c27f5f3670a12f1ea2a454fda7ecb157227ae1c2a66e15e47d  droplet-windows-x64.zip

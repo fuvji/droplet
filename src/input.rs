@@ -219,6 +219,21 @@ pub fn click_exact(btn: Btn) {
     click(btn, true);
 }
 
+/// Select a hotbar slot and click it in one SendInput batch. The client sees
+/// the slot change and the use action in the same input frame instead of two
+/// separately dispatched calls. This is still ordinary keyboard/mouse input;
+/// it does not bypass the game tick or the focus gate.
+pub fn tap_click(k: Option<Key>, btn: Btn) {
+    let Some(k) = k else { return };
+    let buf = [
+        mk_key(k, false),
+        mk_key(k, true),
+        mk_mouse(btn, false),
+        mk_mouse(btn, true),
+    ];
+    send(&buf);
+}
+
 /// Humanised micro-jitter applied before clicks (the "ghost click" feature).
 pub fn jitter(on: bool, amount: i32) {
     if !on {

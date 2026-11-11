@@ -13,18 +13,19 @@
   <meta property="og:title" content="Droplet — Minecraft Zero Macro">
   <meta property="og:description" content="A compact, local Windows keyboard-and-mouse macro suite for Minecraft Java. Pre-indexed routing, exact sequences, no telemetry, no network calls, and no game-memory access.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.8.0">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.0">
   <meta property="og:image:width" content="624">
   <meta property="og:image:height" content="408">
   <meta property="og:image:alt" content="The Droplet Minecraft Macro Suite Core panel at native 624 by 408 size.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Droplet — Minecraft Zero Macro">
   <meta name="twitter:description" content="A compact, local Minecraft Java macro suite for Windows. Exact sequences, visible composition, no game-memory access.">
-  <meta name="twitter:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.8.0">
+  <meta name="twitter:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.0">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="alternate" type="text/plain" href="llms.txt" title="Droplet plain-text summary">
-  <link rel="stylesheet" href="style.css?v=2.8.0-2">
-  <link rel="stylesheet" href="refine.css?v=2.8.0-2">
+  <link rel="stylesheet" href="style.css?v=2.9.0-1">
+  <link rel="stylesheet" href="refine.css?v=2.9.0-1">
+  <script src="downloads.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -39,18 +40,18 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.8.0</span>
+        <span class="brand-version">2.9.0</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
+        <a href="#download">Download</a>
         <a href="#performance">Performance</a>
         <a href="#interface">Interface</a>
-        <a href="#replay">Capture lab</a>
         <a href="#modules">Modules</a>
         <a href="#audit">Audit</a>
-        <a href="#sponsors">Sponsors</a>
+        <a href="releases.html">Releases</a>
         <a href="https://github.com/fuvji/droplet">Source</a>
       </nav>
-      <a class="header-action" href="sponsors.html">Partner <span aria-hidden="true">↗</span></a>
+      <a class="header-action" href="#download">Download <span aria-hidden="true">↓</span></a>
     </div>
   </header>
 
@@ -61,9 +62,10 @@
         <h1 id="hero-title">Minecraft<br><em>Zero Macro.</em></h1>
         <p class="lede">Droplet is a compact keyboard-and-mouse macro suite for Minecraft Java. One press runs one exact sequence, resolved through a prebuilt trigger index. No game-memory reads, network calls, or runtime dependencies.</p>
         <div class="actions">
-          <a class="button button-primary" href="#performance">Read the measurements <span aria-hidden="true">↘</span></a>
-          <a class="button button-quiet" href="#interface">Inspect the panel</a>
+          <a class="button button-primary" href="downloads/droplet-windows-x64.zip" download data-download-primary><span data-download-label>Download for Windows</span> <span aria-hidden="true">↓</span></a>
+          <a class="button button-quiet" href="#performance">Read the measurements</a>
         </div>
+        <p class="hero-download-note">2.9.0 · Windows x64 · portable ZIP + signed MSIX</p>
         <ul class="hero-notes" aria-label="Product boundaries">
           <li>Keyboard + mouse only</li>
           <li>Visible to capture</li>
@@ -71,9 +73,9 @@
         </ul>
       </div>
 
-      <aside class="console-card" aria-label="Droplet 2.8.0 runtime card">
+      <aside class="console-card" aria-label="Droplet 2.9.0 runtime card">
         <div class="console-head">
-          <span>Runtime / 2.8.0</span>
+          <span>Runtime / 2.9.0</span>
           <span class="status-live"><i aria-hidden="true"></i>Local</span>
         </div>
         <div class="console-main">
@@ -91,7 +93,7 @@
         </div>
         <dl class="console-grid">
           <div><dt>Release tests</dt><dd>19 / 19</dd></div>
-          <div><dt>Release binary</dt><dd>594,944 B</dd></div>
+          <div><dt>Release binary</dt><dd>601,600 B</dd></div>
           <div><dt>Tick floor</dt><dd>50 ms</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
         </dl>
@@ -104,7 +106,7 @@
 
     <section class="proof-rail wrap" aria-label="Measured release facts">
       <div><strong>445×</strong><span>routing lookup reduction</span></div>
-      <div><strong>594,944</strong><span>bytes · release exe</span></div>
+      <div><strong>601,600</strong><span>bytes · release exe</span></div>
       <div><strong>19 / 19</strong><span>release tests passing</span></div>
       <div><strong>0</strong><span>network calls</span></div>
     </section>
@@ -116,6 +118,48 @@
       </div>
       <a class="text-link" href="sponsors.html">Open sponsor inventory <span aria-hidden="true">↗</span></a>
     </aside>
+
+    <section class="section wrap" id="download" aria-labelledby="download-title">
+      <div class="section-head">
+        <div>
+          <p class="section-tag"><span aria-hidden="true"></span>Download</p>
+          <h2 id="download-title">Take the<br><em>small build.</em></h2>
+        </div>
+        <p class="section-lede">One portable ZIP and one signed package. No installer, runtime downloader, account, or telemetry. The executable is 601,600 bytes and runs locally.</p>
+      </div>
+
+      <div class="download-grid" data-platform-grid>
+        <article class="download-card is-current" data-os="windows">
+          <div class="download-head"><span class="download-icon">WIN</span><span class="download-state">Available now</span></div>
+          <h3>Windows 10 / 11</h3>
+          <p>x64 portable. Unzip and run <code>droplet.exe</code>. The portable build needs no admin rights.</p>
+          <div class="download-actions">
+            <a class="button button-primary" href="downloads/droplet-windows-x64.zip" download>Portable ZIP <span aria-hidden="true">↓</span></a>
+            <a class="text-link" href="downloads/droplet-windows-x64.msix" download>Signed MSIX <span aria-hidden="true">↗</span></a>
+          </div>
+          <small>601,600 B exe · 306,082 B MSIX · <a href="downloads/SHA256SUMS.txt">checksums</a></small>
+        </article>
+        <article class="download-card is-muted" data-os="linux">
+          <div class="download-head"><span class="download-icon">LNX</span><span class="download-state is-pending">Port tracked</span></div>
+          <h3>Linux</h3>
+          <p>The hook, window, and GDI+ paint layers are Win32-specific. A real port is a separate engineering project, not a repackaged binary.</p>
+          <div class="download-actions"><a class="text-link" href="https://github.com/fuvji/droplet/issues/new?title=Linux%20port" rel="noopener">Track the port <span aria-hidden="true">↗</span></a></div>
+          <small>No .deb, AppImage, or .tar.gz is published because no Linux build exists.</small>
+        </article>
+        <article class="download-card is-muted" data-os="macos">
+          <div class="download-head"><span class="download-icon">MAC</span><span class="download-state is-pending">Port tracked</span></div>
+          <h3>macOS</h3>
+          <p>No Cocoa screen, event tap, or Quartz paint layer exists yet. The Windows build is not relabeled as a Mac build.</p>
+          <div class="download-actions"><a class="text-link" href="https://github.com/fuvji/droplet/issues/new?title=macOS%20port" rel="noopener">Track the port <span aria-hidden="true">↗</span></a></div>
+          <small>No .dmg, .zip, or .img is published because no macOS build exists.</small>
+        </article>
+      </div>
+      <p class="download-note" data-platform-note>Droplet ships a Windows x64 build. This page checks your platform locally and never sends it anywhere.</p>
+      <div class="download-verify">
+        <span>Verify</span><code>sha256sum -c SHA256SUMS.txt</code>
+        <a class="text-link" href="releases.html">Full release notes and history <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
 
     <section class="section wrap" id="performance" aria-labelledby="performance-title">
       <div class="section-head">
@@ -136,7 +180,7 @@
               <strong>202.39 <small>ns</small></strong>
             </div>
             <div class="benchmark-row is-fast">
-              <div class="bench-label"><span>Indexed route</span><small>2.8.0</small></div>
+              <div class="bench-label"><span>Indexed route</span><small>2.9.0</small></div>
               <div class="bench-track"><i class="bar-thin"></i></div>
               <strong>0.45 <small>ns</small></strong>
             </div>
@@ -144,6 +188,8 @@
               <strong>445×</strong>
               <span>less time in the routing decision. Same event. Same process.</span>
             </div>
+            <div class="bench-axis" aria-hidden="true"><span>1 ns</span><span>10 ns</span><span>100 ns</span><span>1 µs</span></div>
+            <p class="bench-note">Log scale. The indexed route is 445× shorter, but this is the routing decision only — not input, game-tick, or hit latency.</p>
           </div>
           <figcaption>1,000,000 lookups per path · AMD Ryzen 7 5700G · release profile. This measures routing only, not end-to-end input or game latency.</figcaption>
         </figure>
@@ -164,7 +210,7 @@
       </div>
 
       <div class="measure-card">
-        <div class="measure-head"><span>Measurement detail</span><span>Release 2.8.0</span></div>
+        <div class="measure-head"><span>Measurement detail</span><span>Release 2.9.0</span></div>
         <table class="measure-table">
           <thead><tr><th>Metric</th><th>Result</th><th>Method</th></tr></thead>
           <tbody>
@@ -209,16 +255,16 @@
 
       <figure class="media-frame">
         <div class="media-bar">
-          <span class="media-title">CORE / 2.8.0</span>
+          <span class="media-title">CORE / 2.9.0</span>
           <span class="media-meta">624 × 408</span>
           <span class="media-live"><i aria-hidden="true"></i>Native capture</span>
         </div>
         <div class="media-image">
-          <img src="assets/droplet-core.png?v=2.8.0" width="624" height="408" alt="The Droplet 2.8.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
+          <img src="assets/droplet-core.png?v=2.9.0" width="624" height="408" alt="The Droplet 2.9.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
           <span class="scanline" aria-hidden="true"></span>
         </div>
         <figcaption class="media-caption">
-          <span>Core tab, native size, captured from the 2.8.0 build.</span>
+          <span>Core tab, native size, captured from the 2.9.0 build.</span>
           <span>Windows 11 / 100% DPI</span>
         </figcaption>
       </figure>
@@ -237,19 +283,19 @@
         </div>
         <div class="preview-stage">
           <figure class="preview-pane pane-core">
-            <img src="assets/droplet-core.png?v=2.8.0" width="624" height="408" alt="Native Core tab with Shield, Mace, Potion, Breach, Auto Use, and Dash controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-core.png?v=2.9.0" width="624" height="408" alt="Native Core tab with Shield, Mace, Potion, Breach, Auto Use, and Dash controls." loading="lazy" decoding="async">
             <figcaption><span>Core / combat modules</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-crystal">
-            <img src="assets/droplet-crystal.png?v=2.8.0" width="624" height="408" alt="Native Crystal tab with Auto Crystal, Anchor, Hover Totem, and Pearl controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-crystal.png?v=2.9.0" width="624" height="408" alt="Native Crystal tab with Auto Crystal, Anchor, Hover Totem, and Pearl controls." loading="lazy" decoding="async">
             <figcaption><span>Crystal / anchor + totem</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-assist">
-            <img src="assets/droplet-assist.png?v=2.8.0" width="624" height="408" alt="Native Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap timing controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-assist.png?v=2.9.0" width="624" height="408" alt="Native Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap timing controls." loading="lazy" decoding="async">
             <figcaption><span>Assist / timing tools</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-system">
-            <img src="assets/droplet-system.png?v=2.8.0" width="624" height="408" alt="Native System tab with appearance, session, danger zone, and performance controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-system.png?v=2.9.0" width="624" height="408" alt="Native System tab with appearance, session, danger zone, and performance controls." loading="lazy" decoding="async">
             <figcaption><span>System / appearance + session</span><span>Native 624 × 408</span></figcaption>
           </figure>
         </div>
@@ -273,10 +319,10 @@
         <div class="capture-frame">
           <div class="capture-chrome"><span>UI REEL / FOUR TABS</span><span>624 × 408 STILLS</span><span class="status-live"><i aria-hidden="true"></i>Visible</span></div>
           <div class="capture-image capture-reel" role="img" aria-label="Silent CSS crossfade of the native Core, Crystal, Assist, and System panels. Native stills, not gameplay.">
-            <img class="reel-frame" src="assets/droplet-core.png?v=2.8.0" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-2" src="assets/droplet-crystal.png?v=2.8.0" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-3" src="assets/droplet-assist.png?v=2.8.0" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-4" src="assets/droplet-system.png?v=2.8.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame" src="assets/droplet-core.png?v=2.9.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-2" src="assets/droplet-crystal.png?v=2.9.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-3" src="assets/droplet-assist.png?v=2.9.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-4" src="assets/droplet-system.png?v=2.9.0" width="624" height="408" alt="" loading="lazy" decoding="async">
             <span class="capture-tag">NATIVE UI / NOT GAMEPLAY</span>
           </div>
           <div class="capture-caption"><span>Core → Crystal → Assist → System</span><span>Silent stills, crossfaded</span></div>
@@ -310,20 +356,21 @@
       </div>
 
       <div class="module-grid">
-        <article class="module-card"><span class="module-code">AN</span><h3>Anchor</h3><p>Place, charge, clear, detonate.</p><small>50 ms floor</small></article>
-        <article class="module-card"><span class="module-code">CR</span><h3>Crystal</h3><p>Obsidian, then crystal.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">MC</span><h3>Mace</h3><p>Swap with settled timing.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">SH</span><h3>Shield</h3><p>Axe tap with stun option.</p><small>held option</small></article>
-        <article class="module-card"><span class="module-code">DS</span><h3>Dash</h3><p>Spear poke and restore.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">BR</span><h3>Breach</h3><p>Mace swap and return.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">PT</span><h3>Potion</h3><p>Two-slot drink and return.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">PL</span><h3>Pearl</h3><p>Throw, catch, keep moving.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">TT</span><h3>Totem</h3><p>Swap when it matters.</p><small>watcher</small></article>
-        <article class="module-card"><span class="module-code">FU</span><h3>Fast Use</h3><p>Held right-click cadence.</p><small>bounded</small></article>
-        <article class="module-card"><span class="module-code">AU</span><h3>Auto Use</h3><p>Use an item, swap back.</p><small>one-shot</small></article>
-        <article class="module-card"><span class="module-code">WT</span><h3>W-Tap</h3><p>S-Tap by default.</p><small>132–148 ms</small></article>
-        <article class="module-card"><span class="module-code">SP</span><h3>Sprint</h3><p>One pulse every 100 ms.</p><small>while W held</small></article>
-        <article class="module-card"><span class="module-code">HI</span><h3>Hover inventory</h3><p>Peek without leaving combat.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#anchor"/></svg><h3>Anchor</h3><p>Place, charge, clear, detonate.</p><small>37–43 ms window · 50 ms floor</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#crystal"/></svg><h3>Crystal</h3><p>Obsidian, then crystal.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#mace"/></svg><h3>Mace</h3><p>Swap with settled timing.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#shield"/></svg><h3>Shield</h3><p>Axe select and hit in one batch.</p><small>held option</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#spear"/></svg><h3>Dash</h3><p>Spear select, hit, restore.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#breach"/></svg><h3>Breach</h3><p>Mace swap and return.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#potion"/></svg><h3>Potion</h3><p>Two-slot drink and return.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#pearl"/></svg><h3>Pearl</h3><p>Select and throw in one batch.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#totem"/></svg><h3>Hover Totem</h3><p>Swap when it matters.</p><small>watcher</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#grass"/></svg><h3>Fast Use</h3><p>Held right-click cadence.</p><small>bounded</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#autouse"/></svg><h3>Auto Use</h3><p>Use an item, swap back.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#sword"/></svg><h3>W-Tap</h3><p>S-Tap by default.</p><small>132–148 ms</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#head"/></svg><h3>Sprint</h3><p>One pulse every 100 ms.</p><small>while W held</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#chest"/></svg><h3>Hover inventory</h3><p>Peek without leaving combat.</p><small>one-shot</small></article>
+        <article class="module-card"><svg class="module-icon" aria-hidden="true"><use href="assets/module-icons.svg#repeater"/></svg><h3>Ghost Click</h3><p>A small, local click offset.</p><small>1–12 px</small></article>
       </div>
     </section>
 
@@ -337,7 +384,7 @@
         </div>
 
         <div class="audit-panel">
-          <div class="audit-head"><span>Release audit</span><span>2.8.0 / 2026-11-10</span></div>
+          <div class="audit-head"><span>Release audit</span><span>2.9.0 / 2026-11-11</span></div>
           <ul class="audit-list">
             <li><span class="audit-name">Trigger routing</span><span class="audit-value">0.45 ns indexed</span><span class="audit-state is-pass">measured</span></li>
             <li><span class="audit-name">Runtime dependencies</span><span class="audit-value">0</span><span class="audit-state is-pass">pass</span></li>
@@ -346,7 +393,7 @@
             <li><span class="audit-name">Game memory</span><span class="audit-value">No reads / writes</span><span class="audit-state is-pass">pass</span></li>
             <li><span class="audit-name">Capture status</span><span class="audit-value">Visible</span><span class="audit-state is-boundary">boundary</span></li>
             <li><span class="audit-name">Source distribution</span><span class="audit-value">Public repository</span><span class="audit-state is-pass">transparent</span></li>
-            <li><span class="audit-name">Release binary</span><span class="audit-value">594,944 B</span><span class="audit-state is-pass">measured</span></li>
+            <li><span class="audit-name">Release binary</span><span class="audit-value">601,600 B</span><span class="audit-state is-pass">measured</span></li>
             <li><span class="audit-name">Live Minecraft</span><span class="audit-value">Pending</span><span class="audit-state is-open">unverified</span></li>
           </ul>
           <div class="audit-foot"><span>No streamproof mode. No capture exclusion.</span><span>Stable, visible desktop composition.</span></div>
@@ -357,6 +404,22 @@
         <div><span>No</span><b>anti-cheat bypass</b><small>No scan evasion, process hiding, or input laundering.</small></div>
         <div><span>No</span><b>zero-latency claim</b><small>The game tick remains the boundary.</small></div>
         <div><span>No</span><b>streamproof mode</b><small>The panel is ordinary visible composition.</small></div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="vault" aria-labelledby="vault-title">
+      <div class="section-head">
+        <div>
+          <p class="section-tag"><span aria-hidden="true"></span>Evidence vault</p>
+          <h2 id="vault-title">Every claim<br><em>has a receipt.</em></h2>
+        </div>
+        <p class="section-lede">The measurements, release ledger, checksums, and security boundaries live in the repository. Nothing here depends on a dashboard or a hidden analytics account.</p>
+      </div>
+      <div class="vault-grid">
+        <a class="vault-card" href="https://github.com/fuvji/droplet/blob/main/BENCHMARKS.md" rel="noopener"><span>01 / Method</span><h3>Benchmark ledger</h3><p>Warm-up, iteration count, machine, and the exact routing comparison.</p><small>BENCHMARKS.md ↗</small></a>
+        <a class="vault-card" href="releases.html"><span>02 / History</span><h3>Release ledger</h3><p>Versioned notes, package sizes, hashes, fixes, and known limits.</p><small>releases.html ↗</small></a>
+        <a class="vault-card" href="downloads/SHA256SUMS.txt"><span>03 / Verify</span><h3>Checksums</h3><p>SHA-256 for the portable ZIP, the unsigned exe, and the signed MSIX.</p><small>SHA256SUMS.txt ↗</small></a>
+        <a class="vault-card" href="https://github.com/fuvji/droplet/blob/main/SECURITY.md" rel="noopener"><span>04 / Boundary</span><h3>Security model</h3><p>No memory access, no network, no capture evasion, no input disguise.</p><small>SECURITY.md ↗</small></a>
       </div>
     </section>
 
@@ -391,11 +454,11 @@
             <p class="section-lede">No framework, no runtime downloader, no telemetry. Just a focused Windows executable and the parts Windows already provides.</p>
           </div>
           <dl class="spec-list">
-            <div class="spec-row"><dt>Version</dt><dd>2.8.0</dd></div>
+            <div class="spec-row"><dt>Version</dt><dd>2.9.0</dd></div>
             <div class="spec-row"><dt>Runtime</dt><dd>Rust · zero crates</dd></div>
             <div class="spec-row"><dt>Panel</dt><dd>624 × 408 acrylic overlay</dd></div>
             <div class="spec-row"><dt>Trigger path</dt><dd>Prebuilt index · one array read</dd></div>
-            <div class="spec-row"><dt>Release binary</dt><dd>594,944 bytes</dd></div>
+            <div class="spec-row"><dt>Release binary</dt><dd>601,600 bytes</dd></div>
             <div class="spec-row"><dt>Input</dt><dd>Win32 SendInput only</dd></div>
             <div class="spec-row"><dt>Timing</dt><dd>Local cadence brain + optional profile</dd></div>
             <div class="spec-row"><dt>Network</dt><dd>None</dd></div>
@@ -415,6 +478,7 @@
             <li>No telemetry, analytics, network calls, or game-memory access.</li>
           </ul>
           <div class="release-notes">
+            <div><span>2.9.0</span><p>Round power controls, transparent item glyphs, a compact Dash card, sticky hide, one-second self-destruct, same-frame Dash/Shield/Pearl input, and Windows downloads with checksums.</p></div>
             <div><span>2.8.0</span><p>One shared 13 px radius now paints and clips every corner, binding chips paint without allocating, and the site is rebuilt as a cleaner editorial layout.</p></div>
             <div><span>2.7.0</span><p>Accent color is back as presets plus RGB sliders, and every trigger card switches between Hold and a latched Toggle.</p></div>
             <div><span>2.6.2</span><p>Window corners now follow the painted radius, the brand mark is a single transparent droplet, and the site names the product: Minecraft Macro Suite.</p></div>
@@ -469,17 +533,20 @@
         <div><strong>Droplet</strong><p>Proprietary. Local by design.</p></div>
       </div>
       <div class="footer-links" aria-label="Footer">
+        <a href="#download">Download</a>
+        <a href="releases.html">Releases</a>
         <a href="#performance">Performance</a>
-        <a href="#interface">Interface</a>
         <a href="#audit">Audit</a>
         <a href="sponsors.html">Sponsors</a>
-        <a href="https://github.com/fuvji/droplet">Source</a>
+        <a href="https://github.com/fuvji/droplet">GitHub</a>
+        <a href="https://discord.gg/fvrdYzrQjq" rel="noopener">Discord</a>
         <a href="#main">Back to top ↑</a>
       </div>
     </div>
     <a class="footer-wordmark" href="./" aria-label="Droplet home">DROPLET</a>
     <div class="wrap footer-bottom">
       <span>© 2026 Droplet</span>
+      <span class="footer-founder">Founder <a href="https://github.com/epufk" rel="noopener">@epufk</a></span>
       <span>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</span>
       <span>Source public · No telemetry · No network</span>
     </div>

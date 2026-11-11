@@ -130,8 +130,8 @@ settings_schema! {
     // selected envelope; manual mode uses it directly.
     crystal_min:  "v5D1": i32 = 47i32;
     crystal_max:  "v5D2": i32 = 53i32;
-    anchor_min:   "v6D1": i32 = 47i32;
-    anchor_max:   "v6D2": i32 = 53i32;
+    anchor_min:   "v6D1": i32 = 37i32;
+    anchor_max:   "v6D2": i32 = 43i32;
     wtap_min:     "vCD1": i32 = 132i32;
     wtap_max:     "vCD2": i32 = 148i32;
     dash_cd:      "vDCd": i32 = 1i32;
@@ -432,17 +432,10 @@ impl Settings {
 
         // Migrate the previous shipped defaults exactly once, without
         // touching a custom range on later launches. 47/103 was the 2.3
-        // default for all three modules; the older anchor default was 37/43.
+        // default for the two fast modules.
         if self.timing_rev < 1 {
             if self.crystal_min == 47 && self.crystal_max == 103 {
                 self.crystal_max = 53;
-            }
-            if self.anchor_min == 47 && self.anchor_max == 103 {
-                self.anchor_max = 53;
-            }
-            if self.anchor_min == 37 && self.anchor_max == 43 {
-                self.anchor_min = 47;
-                self.anchor_max = 53;
             }
             if self.fastuse_min == 47 && self.fastuse_max == 103 {
                 self.fastuse_max = 53;
@@ -459,6 +452,16 @@ impl Settings {
             }
             self.timing_rev = 2;
         }
+        // 2.9.0 restores the tighter Anchor window. Move the 2.8.0 shipped
+        // 47/53 pair once; a custom range is left untouched. This runs last so
+        // an older revision still passes through the W-Tap step above.
+        if self.timing_rev < 3 {
+            if self.anchor_min == 47 && (self.anchor_max == 53 || self.anchor_max == 103) {
+                self.anchor_min = 37;
+                self.anchor_max = 43;
+            }
+            self.timing_rev = 3;
+        }
         self.normalize_timing();
     }
 
@@ -474,7 +477,13 @@ impl Settings {
             }
         }
         pair(&mut self.crystal_min, &mut self.crystal_max);
-        pair(&mut self.anchor_min, &mut self.anchor_max);
+        // Anchor exposes the tighter 37-43 ms window. The macro still applies
+        // the 50 ms tick floor before the next hotbar action.
+        self.anchor_min = self.anchor_min.clamp(37, 43);
+        self.anchor_max = self.anchor_max.clamp(37, 43);
+        if self.anchor_min > self.anchor_max {
+            self.anchor_max = self.anchor_min;
+        }
         pair(&mut self.fastuse_min, &mut self.fastuse_max);
         self.wtap_min = self.wtap_min.clamp(50, 300);
         self.wtap_max = self.wtap_max.clamp(50, 300);
@@ -568,7 +577,7 @@ mod tests {
     fn fast_timing_defaults_are_tight() {
         let s = Settings::default();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
+        assert_eq!((s.anchor_min, s.anchor_max), (37, 43));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
         assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
         assert_eq!(s.wtap_mode, "S");
@@ -584,7 +593,7 @@ mod tests {
         s.normalize();
         assert_eq!(s.wtap_mode, "S");
         assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
-        assert_eq!(s.timing_rev, 2);
+        assert_eq!(s.timing_rev, 3);
 
         s.wtap_mode = "W".into();
         s.wtap_min = 100;
@@ -602,15 +611,15 @@ mod tests {
         s.fastuse_max = 103;
         s.normalize();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
+        assert_eq!((s.anchor_min, s.anchor_max), (37, 43));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
-        assert_eq!(s.timing_rev, 2);
+        assert_eq!(s.timing_rev, 3);
 
         let mut old_anchor = Settings::default();
         old_anchor.anchor_min = 37;
         old_anchor.anchor_max = 43;
         old_anchor.normalize();
-        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (47, 53));
+        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (37, 43));
     }
 
     #[test]
@@ -619,7 +628,7 @@ mod tests {
         s.crystal_max = 103;
         s.normalize();
         assert_eq!(s.crystal_max, 53);
-        assert_eq!(s.timing_rev, 2);
+        assert_eq!(s.timing_rev, 3);
 
         s.crystal_max = 103;
         s.normalize();
@@ -637,7 +646,7 @@ mod tests {
         s.anchor_min = 47;
         s.anchor_max = 999;
         s.normalize_timing();
-        assert_eq!((s.anchor_min, s.anchor_max), (47, 103));
+        assert_eq!((s.anchor_min, s.anchor_max), (43, 43));
 
         s.fastuse_min = 60;
         s.fastuse_max = 53;

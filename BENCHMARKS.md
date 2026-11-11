@@ -66,11 +66,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.8.0**
-- Portable executable: **594,944 bytes**
-- SHA-256: `57449188e2abdf7da33620cf4698e3610030edf689512a4a55e2045621bd8ad3`
-- Signed MSIX: **312,164 bytes**
-- MSIX SHA-256: `e3c23f85c31a67a0272058f8995c0df87b6d261609c9337553f9dad6d52572b3`
+- Version: **2.9.0**
+- Portable executable: **601,600 bytes**
+- SHA-256: `3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9`
+- Signed MSIX: **306,082 bytes**
+- MSIX SHA-256: `c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215`
 - Release tests: **19 / 19**
 - Runtime dependencies: **0**
 - Network calls: **0**
@@ -78,3 +78,8 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 The signed MSIX is built from the same executable. Package signing is a local
 development-certificate build, not a Microsoft Store identity.
+
+2.9.0 changed GUI controls and input batching, not the trigger-routing lookup,
+so the 0.45 ns / 202.39 ns routing numbers remain the 2.6.0 measurement. The
+larger 2.9.0 executable reflects the new icon, power-control, and download
+surface; it is not presented as a size reduction.
