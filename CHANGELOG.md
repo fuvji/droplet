@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.10.1
+
+- Fixed false **Game detected** status. Detection now resolves the owning
+  process image and accepts only Java (`javaw.exe`/`java.exe` with a game
+  signature) or Bedrock (`Minecraft.Windows.exe`); browsers, Discord, editors,
+  and `MinecraftLauncher.exe` are rejected.
+- Added a cheap title/class prefilter, two-sample presence confirmation, and an
+  8-tick cold discovery scan. The `Only in Minecraft` gate uses the same state.
+- Portable executable: **595,968 bytes**, SHA-256
+  `239792e66f5684f6ecfde7f7c5395e5bb11f8870d50d89f8288b262ba841d696`.
+  Tests: **24 / 24**.
+- Boundaries unchanged: no game-memory access, process injection, hiding,
+  anti-cheat bypass, input disguise, or capture evasion.
+
 ## 2.10.0
 
 - Ported Hydrogen's `A6` Anchor branch: select Anchor, right-click, 37-43 ms,

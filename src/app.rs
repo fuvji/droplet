@@ -945,16 +945,65 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
 
 // -------------------------------------------------------------- discovery
 
+fn process_leaf(image: &str) -> &str {
+    image.rsplit(|c| c == '\\' || c == '/').next().unwrap_or(image)
+}
+
+/// Match the window to an actual Minecraft process, not just a title.
+///
+/// Browsers, Discord, editors, and the launcher can all carry "Minecraft" in
+/// their title. A title is only a candidate hint; the process image decides.
+/// Bedrock owns `Minecraft.Windows.exe`; Java clients run inside `javaw.exe`
+/// (or a console `java.exe`) and expose a GLFW/LWJGL window class or a known
+/// client title. Launcher windows are deliberately rejected.
+fn game_window_matches(image: &str, class: &str, title: &str) -> bool {
+    let exe = process_leaf(image).to_ascii_lowercase();
+    let class = class.to_ascii_lowercase();
+    let title = title.to_ascii_lowercase();
+
+    if exe == "minecraft.windows.exe" {
+        return true;
+    }
+    if exe != "javaw.exe" && exe != "java.exe" {
+        return false;
+    }
+    if title.contains("launcher") || class.contains("launcher") {
+        return false;
+    }
+
+    let game_class =
+        class.starts_with("glfw") || class == "lwjgl" || class.contains("minecraft");
+    let game_title = title.contains("minecraft")
+        || title.contains("lunar client")
+        || title.contains("badlion");
+    game_class || game_title
+}
+
 fn is_game(hwnd: HWND) -> bool {
-    if hwnd == 0 {
+    if hwnd == 0 || unsafe { win::IsWindowVisible(hwnd) } == 0 {
         return false;
     }
     let cls = unsafe { win::get_class(hwnd) }.to_ascii_lowercase();
-    if cls.starts_with("glfw") || cls == "lwjgl" || cls.contains("minecraft") {
-        return true;
-    }
     let title = unsafe { win::get_title(hwnd) }.to_ascii_lowercase();
-    title.contains("minecraft") || title.contains("lunar client") || title.contains("badlion")
+    let candidate = cls.starts_with("glfw")
+        || cls == "lwjgl"
+        || cls.contains("minecraft")
+        || title.contains("minecraft")
+        || title.contains("lunar client")
+        || title.contains("badlion");
+    if !candidate {
+        return false;
+    }
+
+    let pid = unsafe { win::window_pid(hwnd) };
+    if pid == 0 || pid == std::process::id() {
+        return false;
+    }
+    let image = unsafe { win::process_image(pid) };
+    if image.is_empty() {
+        return false;
+    }
+    game_window_matches(&image, &cls, &title)
 }
 
 unsafe extern "system" fn enum_proc(hwnd: HWND, lp: LPARAM) -> BOOL {
@@ -980,6 +1029,7 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
     thread::spawn(move || {
         let mut last: Option<(bool, bool)> = None;
         let mut misses = 0u32;
+        let mut hits = 0u32;
         while !e.quitting.load(Ordering::Relaxed) {
             // One foreground lookup per tick; only enumerate when the cache is cold.
             let fg = unsafe { win::GetForegroundWindow() };
@@ -997,12 +1047,21 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
                 misses = 0;
             } else if game == 0 {
                 misses += 1;
-                if misses % 12 == 0 {
+                if misses % 8 == 0 {
                     game = find_game();
                 }
             }
             GAME.store(game, Ordering::Relaxed);
-            let present = game != 0;
+            // Confirm two samples (about 320 ms) before showing a running
+            // game. Clear on the first miss so a closed client cannot leave
+            // a stale badge, while a transient foreground change cannot
+            // flicker the status.
+            if game != 0 {
+                hits = (hits + 1).min(2);
+            } else {
+                hits = 0;
+            }
+            let present = hits >= 2;
             let focus = present && root == game;
 
             let s = e.settings();
@@ -1470,4 +1529,72 @@ unsafe fn round_corners(hwnd: HWND, radius: i32) -> bool {
     let border: u32 = 0xFFFF_FFFE; // DWMWA_COLOR_NONE
     let _ = f(hwnd, 34, &border as *const u32 as *const c_void, 4);
     ok
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{game_window_matches, process_leaf};
+
+    #[test]
+    fn game_detection_rejects_browser_and_chat_titles() {
+        assert!(!game_window_matches(
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            "Chrome_WidgetWin_1",
+            "Minecraft - Google Chrome"
+        ));
+        assert!(!game_window_matches(
+            r"C:\Users\me\AppData\Local\Discord\app-1.0\Discord.exe",
+            "Chrome_WidgetWin_1",
+            "Minecraft | Discord"
+        ));
+        assert!(!game_window_matches(
+            r"C:\Windows\System32\notepad.exe",
+            "Notepad",
+            "Minecraft notes.txt"
+        ));
+    }
+
+    #[test]
+    fn game_detection_rejects_the_launcher() {
+        assert!(!game_window_matches(
+            r"C:\XboxGames\Minecraft Launcher\MinecraftLauncher.exe",
+            "MinecraftLauncher",
+            "Minecraft Launcher"
+        ));
+        assert!(!game_window_matches(
+            r"C:\Java\bin\javaw.exe",
+            "SunAwtFrame",
+            "Minecraft Launcher"
+        ));
+    }
+
+    #[test]
+    fn game_detection_accepts_java_clients_only() {
+        assert!(game_window_matches(
+            r"C:\Java\bin\javaw.exe",
+            "GLFW30",
+            "Minecraft 1.8.9"
+        ));
+        assert!(game_window_matches(
+            r"C:\Java\bin\java.exe",
+            "LWJGL",
+            "Lunar Client"
+        ));
+        assert!(game_window_matches(
+            r"C:\Java\bin\javaw.exe",
+            "SunAwtFrame",
+            "Badlion Client"
+        ));
+    }
+
+    #[test]
+    fn game_detection_accepts_bedrock_and_reads_process_leaf() {
+        assert!(game_window_matches(
+            r"C:\Program Files\WindowsApps\Microsoft.MinecraftUWP\Minecraft.Windows.exe",
+            "ApplicationFrameWindow",
+            "Minecraft"
+        ));
+        assert_eq!(process_leaf(r"C:\Games\javaw.exe"), "javaw.exe");
+        assert_eq!(process_leaf("C:/Games/javaw.exe"), "javaw.exe");
+    }
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.0 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.1 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 593,408 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 595,968 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,13 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.0
+## What is in 2.10.1
 
+- **Game detection fixed**: a visible window is no longer enough. Droplet
+  resolves the owning process and accepts only `javaw.exe`, `java.exe` with a
+  game signature, or `Minecraft.Windows.exe`. Browsers, Discord, editors, and
+  the launcher are rejected. Two samples are required before the badge says
+  **Game detected**.
 - **Anchor ported from Hydrogen**: the literal `A6` order is kept: select
   Anchor, right-click, 37–43 ms, right-click, Glowstone, 37–43 ms, double
   Totem tap, configured wait, right-click. Anchor sliders expose **47–97 /
@@ -47,7 +52,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.0 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.1 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -92,13 +97,14 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **20 / 20**.
-- Portable executable: **593,408 bytes**,
-  `6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab`.
+- `cargo test --release`: **24 / 24**.
+- Portable executable: **595,968 bytes**,
+  `239792e66f5684f6ecfde7f7c5395e5bb11f8870d50d89f8288b262ba841d696`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
-- No live Minecraft client is available here, so hit registration and the new
-  Hydrogen Anchor sequence remain unverified in game.
+- No live Minecraft client is available here. The no-game footer was verified
+  from the 2.10.1 capture; live Anchor placement, Java/Bedrock positive
+  detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries
 

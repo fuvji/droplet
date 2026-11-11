@@ -1,5 +1,14 @@
 # release
 
+## 2.10.1 — 2026-11-11
+
+- Portable exe: 595,968 B,
+  `239792e66f5684f6ecfde7f7c5395e5bb11f8870d50d89f8288b262ba841d696`.
+- Tests: 24 / 24.
+- Changes: process-verified game detection; rejects browser, chat, editor, and
+  launcher titles; two-sample confirmation; 8-tick cold discovery. Anchor and
+  8 px surface unchanged from 2.10.0.
+
 ## 2.10.0 — 2026-11-11
 
 - Portable exe: 593,408 B,

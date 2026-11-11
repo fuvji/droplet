@@ -15,11 +15,14 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.0 portable exe: 593,408 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 20 / 20.
+- 2.10.1 portable exe: 595,968 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 24 / 24.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
 - Anchor defaults: 47/53 ms, Min 47-97, Max 53-103. Hydrogen A6 order;
   Air loop repeats while held.
+- Game detection checks the owning process (`javaw.exe`, `java.exe`, or
+  `Minecraft.Windows.exe`) and rejects browser, chat, editor, and launcher
+  titles. No live game process was available for the positive path.
 - No network, telemetry, game-memory access, capture evasion, anti-cheat
   bypass, or input disguise.
 

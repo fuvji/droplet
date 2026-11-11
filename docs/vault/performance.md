@@ -55,6 +55,15 @@ one codegen unit, panic-abort, stripped.
 - Startup remains a native exe with no installer or package registration. No
   instant-start or latency guarantee is made.
 
+## 2.10.1 changes
+
+- Game presence now resolves the owning process image instead of trusting a
+  window title. A cheap title/class prefilter limits process queries to likely
+  candidates; two samples confirm presence and a miss clears immediately.
+- Cold discovery runs every 8 ticks (1.28 s) instead of 12 (1.92 s). This is a
+  responsiveness change, not an input-latency measurement. Trigger routing is
+  unchanged; tests are 24 / 24. No startup or in-game speedup is claimed.
+
 ## Not measured
 
 - End-to-end input latency.
