@@ -1,5 +1,14 @@
 # release
 
+## 2.10.5 — 2026-11-11
+
+- Portable exe: 596,992 B,
+  `49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850`.
+- Tests: 25 / 25.
+- Changes: sprint/crosshair watcher gates cached; inactive loops skip the
+  settings snapshot and lock. Cadence and reset behavior unchanged. No size or
+  latency claim; artifact is 512 B larger than 2.10.4.
+
 ## 2.10.4 — 2026-11-11
 
 - Portable exe: 596,480 B,

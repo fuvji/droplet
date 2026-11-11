@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.4
+Version: 2.10.5
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,7 +15,7 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.4 portable executable: 596,480 bytes.
+- 2.10.5 portable executable: 596,992 bytes.
 - DWM supplies the antialiased 8 px corner when available; the GDI region is
   used only as a fallback, avoiding a hard second clip. The transparent
   quarter-rounds are click-through.
@@ -25,6 +25,8 @@ visible to screen capture.
   with no tile, plate, border, background, or shadow.
 - The focus-only gate is cached in an atomic updated on settings publish; the
   presence loop does not take the settings lock every 160 ms.
+- Sprint and crosshair enablement are cached too; those watchers skip the
+  settings lock while inactive, with cadence unchanged.
 - No zero-latency or end-to-end latency claim is made.
 - Download: https://fuvji.github.io/droplet/downloads/droplet.exe
 - Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.4 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.5 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 596,480 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 596,992 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,14 +28,17 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.4
+## What is in 2.10.5
 
+- **Idle watcher gates**: the sprint and crosshair watchers cache their enable
+  flags, so inactive loops skip the settings snapshot and its lock. The 8 ms /
+  100 ms cadence and sprint reset behavior are unchanged.
 - **Transparent brand mark**: the favicon tile is gone, and the site brand mark
   is one 27 px transparent rule with no plate, border, background, or shadow.
   The duplicate logo reset CSS is removed too.
 - **Leaner presence loop**: the focus-only gate is cached in an atomic updated
   when settings publish, so the 160 ms presence loop no longer clones the
-  settings snapshot or takes its lock. The executable is 512 bytes smaller.
+  settings snapshot or takes its lock.
 - **Click-through corners**: DWM's antialiased clip now owns the edge, and the
   transparent quarter-rounds return `HTTRANSPARENT` instead of swallowing
   clicks. The center and straight edges still hit the panel; the hard-region
@@ -68,7 +71,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.4 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.5 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -114,12 +117,12 @@ name, not a latency claim. Details and reproduction:
 ## Verify
 
 - `cargo test --release`: **25 / 25**.
-- Portable executable: **596,480 bytes**,
-  `c9732c9c5041274d3a72e0b89ff855801966d24ec91ab9cfb3b70cc4092922f2`.
+- Portable executable: **596,992 bytes**,
+  `49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.4 capture; live Anchor placement, Java/Bedrock positive
+  from the 2.10.5 capture; live Anchor placement, Java/Bedrock positive
   detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries

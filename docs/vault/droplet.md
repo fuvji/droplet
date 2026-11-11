@@ -15,8 +15,9 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.4 portable exe: 596,480 bytes. Single artifact; no MSIX/AppX or ZIP.
+- 2.10.5 portable exe: 596,992 bytes. Single artifact; no MSIX/AppX or ZIP.
 - Tests: 25 / 25.
+- Idle sprint/crosshair watchers skip the settings snapshot and lock.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
 - Anchor defaults: 47/53 ms, Min 47-97, Max 53-103. Hydrogen A6 order;
   Air loop repeats while held.

@@ -81,6 +81,15 @@ one codegen unit, panic-abort, stripped.
   and cold-discovery semantics are unchanged. No input-latency or frame-time
   speedup is claimed.
 
+## 2.10.5 changes
+
+- `Engine` caches sprint and totem enablement. The sprint watcher and crosshair
+  watcher skip the settings snapshot and lock while inactive.
+- The 8 ms / 100 ms cadence and sprint reset are unchanged. Trigger routing and
+  the release profile are unchanged.
+- The binary is 596,992 B, 512 B larger than 2.10.4. This is a lock-traffic
+  cleanup, not a size or end-to-end speed win.
+
 ## 2.10.4 changes
 
 - The site brand mark is one transparent rule; the favicon tile and duplicate

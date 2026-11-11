@@ -829,6 +829,11 @@ fn w_tap(s: &Settings, _ev: Ev) {
 // ------------------------------------------------------------------- watchers
 
 #[inline]
+pub fn sprint_reset() {
+    SPRINT_NEXT.store(0, Ordering::Relaxed);
+}
+
+#[inline]
 fn sprint_due(next: i64, now: i64) -> bool {
     next == 0 || now >= next
 }
@@ -843,10 +848,10 @@ fn sprint_deadline(now: i64, qpf: i64) -> i64 {
 /// repeating watcher in Droplet: while W is genuinely held it taps the sprint
 /// binding every 100 ms. The key is never held down between pulses, and the
 /// 8 ms watcher does no binding work until a pulse is actually due.
-pub fn sprint_tick(s: &Settings, active: bool) {
-    let want = s.master && s.sprint && active && input::physical_down(Ev::K(0x57));
+pub fn sprint_tick(s: &Settings) {
+    let want = s.master && s.sprint && input::physical_down(Ev::K(0x57));
     if !want {
-        SPRINT_NEXT.store(0, Ordering::Relaxed);
+        sprint_reset();
         return;
     }
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.10.5
+
+- Cache sprint/totem enablement in `Engine`; inactive sprint and crosshair
+  watchers skip the settings snapshot and lock. Cadence and reset semantics are
+  unchanged.
+- Portable executable: **596,992 bytes**, SHA-256
+  `49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850`.
+  Tests: **25 / 25**. This is 512 bytes larger than 2.10.4; no size win is
+  claimed.
+- No end-to-end latency or zero-latency claim. Trigger routing and the release
+  profile are unchanged.
+
 ## 2.10.4
 
 - Remove the favicon tile and all brand-mark plate styling. The site mark is

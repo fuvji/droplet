@@ -27,6 +27,8 @@ pub struct Engine {
     pub present: AtomicBool,
     pub gate: AtomicBool,
     focus_only: AtomicBool,
+    sprint_on: AtomicBool,
+    totem_on: AtomicBool,
     pub capture_key: Mutex<Option<&'static str>>,
     pub captured: Mutex<Option<(&'static str, String)>>,
     pub quitting: AtomicBool,
@@ -41,6 +43,8 @@ impl Engine {
             present: AtomicBool::new(false),
             gate: AtomicBool::new(false),
             focus_only: AtomicBool::new(s.focus_only),
+            sprint_on: AtomicBool::new(s.master && s.sprint),
+            totem_on: AtomicBool::new(s.master && s.totem),
             capture_key: Mutex::new(None),
             captured: Mutex::new(None),
             quitting: AtomicBool::new(false),
@@ -63,6 +67,8 @@ impl Engine {
         // settings publish, never on the input-hook hot path.
         *self.triggers.write().unwrap() = Arc::new(macros::TriggerMap::build(&s));
         self.focus_only.store(s.focus_only, Ordering::Relaxed);
+        self.sprint_on.store(s.master && s.sprint, Ordering::Relaxed);
+        self.totem_on.store(s.master && s.totem, Ordering::Relaxed);
         *self.st.write().unwrap() = Arc::new(s);
     }
 }
@@ -1146,9 +1152,10 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
     thread::spawn(move || {
         let probe = Probe::new();
         while !e.quitting.load(Ordering::Relaxed) {
-            let s = e.settings();
-            let armed = s.master && s.totem && e.focus.load(Ordering::Relaxed);
+            let armed = e.totem_on.load(Ordering::Relaxed)
+                && e.focus.load(Ordering::Relaxed);
             if armed {
+                let s = e.settings();
                 if let Some(p) = &probe {
                     macros::totem_watch(&s, p);
                 }
@@ -1159,11 +1166,19 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
 
     // Sprint pulse: physical W only, 100 ms cadence. Poll faster than the
     // deadline so the 100 ms schedule is not rounded up by the sleep interval.
+    // Both the gate and the feature switch are cached, so an idle loop does
+    // not clone the settings snapshot or touch its lock every 8 ms.
     let e = engine.clone();
     thread::spawn(move || {
         while !e.quitting.load(Ordering::Relaxed) {
-            let s = e.settings();
-            macros::sprint_tick(&s, e.gate.load(Ordering::Relaxed));
+            let armed = e.gate.load(Ordering::Relaxed)
+                && e.sprint_on.load(Ordering::Relaxed);
+            if armed {
+                let s = e.settings();
+                macros::sprint_tick(&s);
+            } else {
+                macros::sprint_reset();
+            }
             thread::sleep(Duration::from_millis(macros::SPRINT_TICK_MS));
         }
     });

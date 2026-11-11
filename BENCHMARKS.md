@@ -66,9 +66,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.4**
-- Portable executable: **596,480 bytes**
-- SHA-256: `c9732c9c5041274d3a72e0b89ff855801966d24ec91ab9cfb3b70cc4092922f2`
+- Version: **2.10.5**
+- Portable executable: **596,992 bytes**
+- SHA-256: `49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **25 / 25**
 - Runtime dependencies: **0**
@@ -92,12 +92,19 @@ floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
 
+2.10.5 caches the sprint and crosshair enable flags in `Engine`. The sprint
+watcher no longer takes the settings lock every 8 ms when the gate is closed or
+sprint is off, and the crosshair watcher skips it when unfocused or disabled.
+The 8 ms / 100 ms cadence and sprint reset are unchanged. The executable is
+596,992 bytes, 512 bytes larger than 2.10.4; this loop does not claim a size
+win. Trigger routing and tests are unchanged; no end-to-end or zero-latency
+claim is made.
+
 2.10.4 removes the web brand plate and duplicate brand CSS, and caches the
 focus-only gate in an atomic updated when settings publish. The 160 ms presence
 loop no longer clones the settings snapshot or takes the settings lock each
-tick. The executable is 596,480 bytes (512 bytes smaller). Trigger routing,
-corner behavior, and the 25 / 25 tests are unchanged; this is not an end-to-end
-latency or frame-time measurement, and no zero-latency claim is made.
+tick. The executable is 596,480 bytes (512 bytes smaller than 2.10.3). Trigger
+routing, corner behavior, and the 25 / 25 tests are unchanged.
 
 2.10.3 makes the DWM-composited rounded corners click-through. The hit test
 returns `HTTRANSPARENT` only in the transparent quarter-rounds and keeps the
