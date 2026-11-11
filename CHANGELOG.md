@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.9.3
+
+- Restored a tick-safe Anchor settle. Defaults are **55/65 ms**, with Min
+  **55-97 ms** and Max **65-103 ms**. The 55 ms floor crosses a 50 ms client
+  tick before the right-click; 37-43 ms could place-while-switching and use the
+  previous hotbar item.
+- Removed the remaining 1 px accent line from the top of the panel. DWM's
+  rounded clip and the edge-to-edge surface are now the only boundary, with no
+  painted outer rim and no bright top edge.
+- Retired MSIX/AppX, installer, and ZIP packaging. The published Windows
+  artifact is one direct **591,872-byte** `droplet.exe`, with SHA-256
+  `288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873`.
+  The installed AppX package was removed from the build machine.
+- Removed the package manifest, AppX assets, signing scripts, installer, and
+  package tools from the repository.
+- Updated the site, release ledger, workflow, and vault for the single-exe
+  download path. Tests remain **19 / 19**.
+- Boundaries unchanged: no streamproof mode, no game-memory access, no network
+  calls, no anti-cheat bypass, no input disguise, and no zero-latency or
+  instant-speed claim.
+
 ## 2.9.2
 
 - Fixed the coupled Min/Max sliders. `normalize_timing` now clamps each field

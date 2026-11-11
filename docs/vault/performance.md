@@ -37,6 +37,15 @@ one codegen unit, panic-abort, stripped.
 - The 2.9.2 System-tab paint snapshot read 2.15 ms. This is one sample, not a
   frame-time benchmark, and no render-speed claim is made.
 
+## 2.9.3 changes
+
+- Restored a 55 ms Anchor floor. The 37–43 ms path could right-click inside the
+  same 50 ms client tick as the slot change and use the previous item.
+- Removed the top accent line. The single-file exe is unchanged in size at
+  591,872 bytes; MSIX/AppX/ZIP packaging was retired.
+- Startup remains a native exe with no installer or package registration. No
+  instant-start or latency guarantee is made.
+
 ## Not measured
 
 - End-to-end input latency.

@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.9.2
+Version: 2.9.3
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,23 +15,22 @@ visible to screen capture.
 
 ## Current release
 
-- 2.9.2 portable executable: 591,872 bytes; signed MSIX: 301,609 bytes;
-  portable ZIP: 285,751 bytes.
-- Windows portable ZIP: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip
-- Windows MSIX: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix
+- 2.9.3 portable executable: 591,872 bytes.
+- Download: https://fuvji.github.io/droplet/downloads/droplet.exe
 - Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt
 - Release ledger: https://fuvji.github.io/droplet/releases.html
+- No MSIX, AppX, installer, or ZIP is published. The executable is direct.
 - Linux and macOS are not supported yet. The hook, window, and paint layers are
   Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
 - 19 release tests pass.
-- Compact 624x408 graphite acrylic overlay with a 13 px shared corner radius
-  and no painted outer rim.
+- Compact 624x408 graphite acrylic overlay with a 13 px shared corner radius,
+  no painted outer rim, and no top accent line.
 - Borderless module cards with the original 28x16 sliding knob switch. No
   module glyphs and no ON/OFF text.
 - Every trigger card switches between Hold (one-shot) and Toggle (latched repeat).
 - Min/Max sliders are independent; editing one never rewrites the other.
-- Anchor defaults to 37/43 ms, with Min 37-97 ms and Max 43-103 ms. Each slot
-  gets one configured settle before its action; there is no 50 ms floor.
+- Anchor defaults to 55/65 ms, with Min 55-97 ms and Max 65-103 ms. A 55 ms
+  minimum keeps every slot selection across a 50 ms client tick.
 - The tray icon was removed. A manual hide is sticky across focus changes.
   Ctrl + Right Shift shows or hides the panel.
 - Dash, Shield, and Pearl select the slot and click in one SendInput batch.
@@ -48,8 +47,3 @@ visible to screen capture.
 ## Links
 
 - Product page: https://fuvji.github.io/droplet/
-- Releases: https://fuvji.github.io/droplet/releases.html
-- Source: https://github.com/fuvji/droplet
-- Benchmarks: https://github.com/fuvji/droplet/blob/main/BENCHMARKS.md
-- Changelog: https://github.com/fuvji/droplet/blob/main/CHANGELOG.md
-- Sponsor page: https://fuvji.github.io/droplet/sponsors.html

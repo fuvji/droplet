@@ -6,8 +6,7 @@ document is not a licence to reuse the source. See [LICENSE](LICENSE).
 ## Build
 
 Requirements: a recent stable Rust toolchain, the
-`x86_64-pc-windows-gnu` target, Windows 10/11, and the project-local signing
-tools used by `scripts/build-msix.ps1`.
+`x86_64-pc-windows-gnu` target, and Windows 10/11.
 
 ```powershell
 rustup target add x86_64-pc-windows-gnu
@@ -18,19 +17,9 @@ cargo build --release
 The release binary is written to
 `target/x86_64-pc-windows-gnu/release/droplet.exe`. The project has no crate
 dependencies; `.cargo/config.toml` selects the GNU target and self-contained
-linking.
-
-## Package
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1
-```
-
-The script stages `packaging/AppxManifest.xml`, the package assets, and the
-release payload, then writes and signs `apps/droplet/droplet.msix`. The portable
-copy is `apps/droplet/droplet.exe`. Install with `Install-Droplet.cmd`; a new
-machine must trust the development certificate
-(`apps/droplet/droplet-dev.cer`) in `LocalMachine\TrustedPeople` once.
+linking. Copy that one file to `apps/droplet/droplet.exe` and
+`site/public/downloads/droplet.exe` for distribution. There is no MSIX, AppX,
+installer, or signing step.
 
 ## Site
 
@@ -45,7 +34,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/serve-site.ps1
 
 Open <http://127.0.0.1:4173/>. GitHub Pages serves the contents of
 `site/public/` from the `gh-pages` branch. `site/README.md` documents the
-release artifacts and site layout.
+release artifact and site layout.
 
 ## Verification
 
@@ -66,18 +55,16 @@ Before publishing, also check:
 - every local `href`/`src` in `site/public` resolves
 - all four captures are 624×408
 - the product page, `releases.html`, and `sponsors.html` have no console errors
-- every download and checksum link resolves
-- the MSIX signature is valid
+- the direct `droplet.exe` and `SHA256SUMS.txt` links resolve
 
 ## Repository
 
 <https://github.com/fuvji/droplet>
 
-Downloads are generated from the release build and published under
+The release artifact is generated from the release build and published under
 `site/public/downloads/`. The tag workflow in `.github/workflows/release.yml`
-builds a portable Windows ZIP and publishes it with the notes in `releases/`.
-Do not put credentials or signing private keys in the repository; the local
-development certificate and SDK cache are ignored by Git.
+builds and uploads the single Windows executable and its checksum with the notes
+in `releases/`. Do not put credentials or signing private keys in the repository.
 
 ## Design rules
 

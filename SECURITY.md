@@ -31,7 +31,7 @@ and the advisory is published once a build is available.
 ## Scope
 
 In scope: the overlay, input injection and safety gates, configuration and
-migration, packaging, and the static site.
+migration, the single-exe release, and the static site.
 
 Out of scope: Minecraft itself, third-party clients or mods, anti-cheat
 behavior, and reports that require an already-compromised machine.

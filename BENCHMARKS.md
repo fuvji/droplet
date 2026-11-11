@@ -66,13 +66,10 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.9.2**
+- Version: **2.9.3**
 - Portable executable: **591,872 bytes**
-- SHA-256: `2d4a915ca68b3c4ef944fe208b593f3c816f55b8b605a478d23a5cfd5d70cc46`
-- Signed MSIX: **301,609 bytes**
-- MSIX SHA-256: `94d47fd44f092b571ade122b2d020011da36b41cd185517895f28133040e6c87`
-- Portable ZIP: **285,751 bytes**
-- ZIP SHA-256: `928f816eb2dc4fa028273a9af9f8236e18a2e6c4db78ee612bd6a8d9fb2f5841`
+- SHA-256: `288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873`
+- Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **19 / 19**
 - Runtime dependencies: **0**
 - Network calls: **0**
@@ -92,10 +89,14 @@ Trigger routing was unchanged. The app's own System-tab paint snapshot read
 2.86 ms after that change versus 2.60 ms before; that single sample was not a
 benchmark and 2.9.1 did not claim a render-speed win.
 
-2.9.2 makes Min/Max sliders independent, restores the 28×16 knob switch, and
-removes the painted outer window hairline. It also removes the Anchor 50 ms
-floor and three fixed 50 ms slot sleeps; each slot now gets exactly one
-configured 37–43 ms settle before its right-click. The executable is 591,872
-bytes (512 bytes smaller). The System-tab paint snapshot in the 2.9.2 capture
-read **2.15 ms**; this is one UI sample, not a frame-time benchmark. The routing
-numbers are unchanged because the hook path did not change.
+2.9.2 made Min/Max sliders independent, restored the 28×16 knob switch, and
+removed the painted outer window hairline. It also removed the Anchor 50 ms
+floor and three fixed 50 ms slot sleeps; each slot received one configured
+settle before its right-click. The System-tab paint snapshot in the 2.9.2
+capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
+
+2.9.3 restores a **55 ms** Anchor floor because 37–43 ms could stay inside one
+50 ms client tick and use the previous hotbar item. The defaults are 55/65 ms.
+The remaining top accent strip is removed, and MSIX/AppX/ZIP packaging is
+retired: the release is one direct executable. The binary remains 591,872
+bytes. Trigger routing is unchanged; no startup or latency claim is made.

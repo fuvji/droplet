@@ -1,5 +1,14 @@
 # release
 
+## 2.9.3 — 2026-11-11
+
+- Portable exe: 591,872 B,
+  `288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873`.
+- Single direct executable; no MSIX/AppX, installer, or ZIP.
+- Tests: 19 / 19.
+- Changes: Anchor 55/65 ms safe settle; top accent line removed; packaging
+  retired; wider Anchor domains remain independent.
+
 ## 2.9.2 — 2026-11-11
 
 - Portable exe: 591,872 B,

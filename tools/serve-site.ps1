@@ -16,8 +16,7 @@ $mime = @{
     '.webm' = 'video/webm'
     '.xml'  = 'application/xml; charset=utf-8'
     '.txt'  = 'text/plain; charset=utf-8'
-    '.zip'  = 'application/zip'
-    '.msix' = 'application/octet-stream'
+    '.exe' = 'application/octet-stream'
 }
 
 $listener.Start()

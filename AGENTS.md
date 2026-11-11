@@ -12,19 +12,16 @@ cargo build --release
 ```
 
 The release uses fat LTO, one codegen unit, panic-abort, stripped symbols, and
-the `x86_64-pc-windows-gnu` target from `.cargo/config.toml`. Packaging:
+the `x86_64-pc-windows-gnu` target from `.cargo/config.toml`. The output is the
+single portable executable `apps/droplet/droplet.exe`. There is no MSIX/AppX,
+installer, or signing step.
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1
-```
+The site is static in `site/public/`; preview it with `tools/serve-site.ps1` and
+publish the directory to `gh-pages`.
 
-Outputs are lowercase: `apps/droplet/droplet.exe` and
-`apps/droplet/droplet.msix`. The site is static in `site/public/`; preview it
-with `tools/serve-site.ps1` and publish the directory to `gh-pages`.
-
-Before claiming a release is done, run the tests, rebuild the exe/MSIX,
-regenerate the four captures, check the site, and record the new SHA-256 values.
-Never claim a speedup without a measurement.
+Before claiming a release is done, run the tests, rebuild the exe, regenerate
+the four captures, check the site, and record the new SHA-256 value. Never claim
+a speedup without a measurement.
 
 ## Product boundaries
 
@@ -48,8 +45,8 @@ flag.
 - Navigation icons are original GDI+ line art with transparent backgrounds.
   No Mojang textures.
 - No module glyphs and no per-card outlines. Module cards are one surface with
-  a title and a text ON/OFF pill; one thin accent hairline; warm white on
-  graphite.
+  a title and the 28×16 sliding knob switch; no outer rim or top accent line;
+  warm white on graphite.
 - Keep the panel at 624×408 logical pixels unless the layout is reworked and
   recaptured.
 

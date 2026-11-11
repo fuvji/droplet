@@ -15,10 +15,10 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.9.2 portable exe: 591,872 bytes (512 bytes smaller than 2.9.1).
-- Signed MSIX: 301,609 bytes. Portable ZIP: 285,751 bytes.
-- Tests: 19 / 19. Package 2.9.2.0 installed Ok.
+- 2.9.3 portable exe: 591,872 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 19 / 19.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
+- Anchor defaults: 55/65 ms, Min 55-97, Max 65-103.
 - No network, telemetry, game-memory access, capture evasion, anti-cheat
   bypass, or input disguise.
 
@@ -26,8 +26,8 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 One 13 px radius. Event-driven paint. Borderless module cards with the original
 28×16 sliding knob switch and no module glyphs. Small original line icons remain
-in the navigation rail only. Graphite surface, warm white text, one thin accent
-hairline, and no painted outer rim. Min/Max sliders are independent.
+in the navigation rail only. Graphite surface, warm white text, no painted outer
+rim, and no top accent line. Min/Max sliders are independent.
 
 ## Current work
 

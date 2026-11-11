@@ -130,8 +130,8 @@ settings_schema! {
     // selected envelope; manual mode uses it directly.
     crystal_min:  "v5D1": i32 = 47i32;
     crystal_max:  "v5D2": i32 = 53i32;
-    anchor_min:   "v6D1": i32 = 37i32;
-    anchor_max:   "v6D2": i32 = 43i32;
+    anchor_min:   "v6D1": i32 = 55i32;
+    anchor_max:   "v6D2": i32 = 65i32;
     wtap_min:     "vCD1": i32 = 132i32;
     wtap_max:     "vCD2": i32 = 148i32;
     dash_cd:      "vDCd": i32 = 1i32;
@@ -452,13 +452,12 @@ impl Settings {
             }
             self.timing_rev = 2;
         }
-        // 2.9.0 restores the tighter Anchor window. Move the 2.8.0 shipped
-        // 47/53 pair once; a custom range is left untouched. This runs last so
-        // an older revision still passes through the W-Tap step above.
+        // Older Anchor windows migrate through normalize_timing below. Values
+        // under 55 ms are unsafe because they can stay inside one client tick.
         if self.timing_rev < 3 {
             if self.anchor_min == 47 && (self.anchor_max == 53 || self.anchor_max == 103) {
-                self.anchor_min = 37;
-                self.anchor_max = 43;
+                self.anchor_min = 55;
+                self.anchor_max = 65;
             }
             self.timing_rev = 3;
         }
@@ -473,10 +472,11 @@ impl Settings {
     pub fn normalize_timing(&mut self) {
         self.crystal_min = self.crystal_min.clamp(47, 97);
         self.crystal_max = self.crystal_max.clamp(53, 103);
-        // Anchor exposes a wider 37-97 / 43-103 window. There is no tick-floor
-        // rewrite here; the macro uses the configured value exactly.
-        self.anchor_min = self.anchor_min.clamp(37, 97);
-        self.anchor_max = self.anchor_max.clamp(43, 103);
+        // Anchor must cross a 50 ms client tick before the right-click. The
+        // 55 ms floor leaves 5 ms of scheduling margin; 37-49 ms can land in
+        // the same tick and use the previously selected item.
+        self.anchor_min = self.anchor_min.clamp(55, 97);
+        self.anchor_max = self.anchor_max.clamp(65, 103);
         self.fastuse_min = self.fastuse_min.clamp(47, 97);
         self.fastuse_max = self.fastuse_max.clamp(53, 103);
         self.wtap_min = self.wtap_min.clamp(50, 300);
@@ -568,7 +568,7 @@ mod tests {
     fn fast_timing_defaults_are_tight() {
         let s = Settings::default();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (37, 43));
+        assert_eq!((s.anchor_min, s.anchor_max), (55, 65));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
         assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
         assert_eq!(s.wtap_mode, "S");
@@ -603,7 +603,7 @@ mod tests {
         s.fastuse_max = 103;
         s.normalize();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (37, 43));
+        assert_eq!((s.anchor_min, s.anchor_max), (55, 65));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
         assert_eq!(s.timing_rev, 3);
 
@@ -611,7 +611,7 @@ mod tests {
         old_anchor.anchor_min = 37;
         old_anchor.anchor_max = 43;
         old_anchor.normalize();
-        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (37, 43));
+        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (55, 65));
     }
 
     #[test]
@@ -640,10 +640,10 @@ mod tests {
         s.normalize_timing();
         assert_eq!((s.crystal_min, s.crystal_max), (88, 103));
 
-        // Anchor now owns independent 37-97 and 43-103 domains.
+        // Anchor now owns independent 55-97 and 65-103 domains.
         s.anchor_min = 90;
         s.normalize_timing();
-        assert_eq!((s.anchor_min, s.anchor_max), (90, 43));
+        assert_eq!((s.anchor_min, s.anchor_max), (90, 65));
         s.anchor_max = 103;
         s.normalize_timing();
         assert_eq!((s.anchor_min, s.anchor_max), (90, 103));

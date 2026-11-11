@@ -231,10 +231,12 @@ fn wait_smart(s: &Settings, module: &str, min: i32, max: i32) {
     smart::wait(s.smart, module, min, max);
 }
 
-/// Anchor uses the configured Min/Max exactly. `smart::pick` orders the pair,
-/// so an independent Min above Max still executes inside the user's range.
+/// A slot selection must survive at least one 50 ms client tick. 55 ms leaves
+/// 5 ms of scheduling margin; the old 37-43 ms path could swap and right-click
+/// inside the same tick, so Anchor placed nothing. `smart::pick` also orders an
+/// independent Min/Max pair before the floor is applied.
 fn anchor_wait_ms(s: &Settings) -> i32 {
-    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max)
+    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max).max(55)
 }
 
 fn anchor_wait(s: &Settings) {
@@ -626,9 +628,9 @@ fn anchor_slots_ok(anchor: Key, glow: Key, totem: Key) -> bool {
 }
 
 /// Normal Anchor: place, one glowstone charge, switch off glowstone, detonate.
-/// Each slot selection is followed by exactly one configured Anchor wait before
-/// its action. This removes the old hardcoded 50 ms slot sleeps and the second
-/// wait after each action; the slider is now the only step delay.
+/// Each slot selection is followed by exactly one tick-safe Anchor wait before
+/// its action. This keeps one settle per slot and removes the old duplicate
+/// post-action waits.
 fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
     anchor_step(s, anchor);
     anchor_step(s, glow);
@@ -911,14 +913,21 @@ mod tests {
         let mut s = Settings::default();
         for _ in 0..100 {
             let wait = anchor_wait_ms(&s);
-            assert!((37..=43).contains(&wait), "wait={wait}");
+            assert!((55..=65).contains(&wait), "wait={wait}");
         }
 
-        s.anchor_min = 97;
+        s.anchor_min = 37;
         s.anchor_max = 43;
         for _ in 0..100 {
             let wait = anchor_wait_ms(&s);
-            assert!((43..=97).contains(&wait), "wait={wait}");
+            assert!(wait >= 55, "wait={wait}");
+        }
+
+        s.anchor_min = 97;
+        s.anchor_max = 65;
+        for _ in 0..100 {
+            let wait = anchor_wait_ms(&s);
+            assert!((65..=97).contains(&wait), "wait={wait}");
         }
     }
 

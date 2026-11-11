@@ -28,9 +28,9 @@ const FAST_MIN_LO: i32 = 47;
 const FAST_MIN_HI: i32 = 97;
 const FAST_MAX_LO: i32 = 53;
 const FAST_MAX_HI: i32 = 103;
-const ANCHOR_MIN_LO: i32 = 37;
+const ANCHOR_MIN_LO: i32 = 55;
 const ANCHOR_MIN_HI: i32 = 97;
-const ANCHOR_MAX_LO: i32 = 43;
+const ANCHOR_MAX_LO: i32 = 65;
 const ANCHOR_MAX_HI: i32 = 103;
 
 // ------------------------------------------------------------------ helpers
@@ -233,7 +233,6 @@ impl<'a> Ui<'a> {
     pub fn frame(&mut self) {
         let s = self.scale;
         self.c.rect(0.0, 0.0, WIN_W * s, WIN_H * s, self.th.bg);
-        self.c.rect(0.0, 0.0, WIN_W * s, 1.0 * s, with_alpha(self.th.accent, 80));
         self.c.rect(0.0, 0.0, RAIL_W * s, WIN_H * s, self.th.rail);
         self.c.rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 8));
         self.header();
