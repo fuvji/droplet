@@ -231,16 +231,21 @@ fn wait_smart(s: &Settings, module: &str, min: i32, max: i32) {
     smart::wait(s.smart, module, min, max);
 }
 
-/// A slot selection must survive at least one 50 ms client tick. 55 ms leaves
-/// 5 ms of scheduling margin; the old 37-43 ms path could swap and right-click
-/// inside the same tick, so Anchor placed nothing. `smart::pick` also orders an
-/// independent Min/Max pair before the floor is applied.
+/// Hydrogen's configurable Anchor wait, exposed as Min 47-97 and Max 53-103.
+/// Smart timing may bias the value inside the selected envelope but never
+/// moves the user's bounds. The pair is sorted before it is used.
 fn anchor_wait_ms(s: &Settings) -> i32 {
-    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max).max(55)
+    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max)
 }
 
 fn anchor_wait(s: &Settings) {
     input::sleep_ms(anchor_wait_ms(s) as f64);
+}
+
+/// Hydrogen's two fixed Anchor settles are 37-43 ms. They are deliberately
+/// not exposed as sliders: only the final settle uses the configured range.
+fn anchor_fixed_wait() {
+    input::wait_range(37, 43);
 }
 
 fn tap_exact_key(k: Option<Key>) {
@@ -592,15 +597,14 @@ fn crystal(s: &Settings, ev: Ev, latched: bool) {
     }
 }
 
-/// Anchor PvP, one complete action per press.
+/// Anchor PvP, ported from Hydrogen's `A6` branch.
 ///
-/// A charged anchor detonates when used without glowstone. The reliable
-/// sequence is: place -> charge once -> switch off glowstone -> detonate. One
-/// charge is enough for the PvP blast; extra charges add delay without
-/// improving reach. Every step keeps the one-tick floor, and all three slot
-/// keys must be valid and distinct. The busy guard prevents a second press
-/// from interleaving hotbar swaps with the sequence already in flight.
-fn anchor(s: &Settings, _ev: Ev, _latched: bool) {
+/// Literal order: select anchor, place, 37-43 ms, click again, select
+/// glowstone, 37-43 ms, tap totem twice, configured wait, detonate. The
+/// distinct-slot guard and busy guard are Droplet safety additions around the
+/// same sequence. When AIR is on, holding the trigger repeats the entire
+/// sequence after the final click, exactly like Hydrogen's `vE` loop.
+fn anchor(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.anchor {
         return;
     }
@@ -619,6 +623,11 @@ fn anchor(s: &Settings, _ev: Ev, _latched: bool) {
     }
 
     normal_anchor(s, anchor, glow, totem);
+    if !latched && s.anchor_air {
+        while input::raw_down(ev) {
+            normal_anchor(s, anchor, glow, totem);
+        }
+    }
 }
 
 /// All three Anchor slots must be valid and distinct. Sharing a slot silently
@@ -627,18 +636,17 @@ fn anchor_slots_ok(anchor: Key, glow: Key, totem: Key) -> bool {
     anchor != glow && anchor != totem && glow != totem
 }
 
-/// Normal Anchor: place, one glowstone charge, switch off glowstone, detonate.
-/// Each slot selection is followed by exactly one tick-safe Anchor wait before
-/// its action. This keeps one settle per slot and removes the old duplicate
-/// post-action waits.
+/// Hydrogen A6, with no extra clicks or hidden sleeps. The two fixed settles
+/// stay at the original 37-43 ms; the last settle is the user's Min/Max pair.
 fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
-    anchor_step(s, anchor);
-    anchor_step(s, glow);
-    anchor_step(s, totem);
-}
-
-fn anchor_step(s: &Settings, slot: Key) {
-    tap_exact_key(Some(slot));
+    tap_exact_key(Some(anchor));
+    rc_exact(s);
+    anchor_fixed_wait();
+    rc_exact(s);
+    tap_exact_key(Some(glow));
+    anchor_fixed_wait();
+    tap_exact_key(Some(totem));
+    tap_exact_key(Some(totem));
     anchor_wait(s);
     rc_exact(s);
 }
@@ -913,14 +921,14 @@ mod tests {
         let mut s = Settings::default();
         for _ in 0..100 {
             let wait = anchor_wait_ms(&s);
-            assert!((55..=65).contains(&wait), "wait={wait}");
+            assert!((47..=53).contains(&wait), "wait={wait}");
         }
 
         s.anchor_min = 37;
         s.anchor_max = 43;
         for _ in 0..100 {
             let wait = anchor_wait_ms(&s);
-            assert!(wait >= 55, "wait={wait}");
+            assert!((37..=43).contains(&wait), "wait={wait}");
         }
 
         s.anchor_min = 97;
@@ -929,6 +937,12 @@ mod tests {
             let wait = anchor_wait_ms(&s);
             assert!((65..=97).contains(&wait), "wait={wait}");
         }
+    }
+
+    #[test]
+    fn anchor_air_defaults_on_like_hydrogen() {
+        let s = Settings::default();
+        assert!(s.anchor_air);
     }
 
     #[test]

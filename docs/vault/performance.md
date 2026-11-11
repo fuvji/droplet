@@ -43,6 +43,15 @@ one codegen unit, panic-abort, stripped.
   same 50 ms client tick as the slot change and use the previous item.
 - Removed the top accent line. The single-file exe is unchanged in size at
   591,872 bytes; MSIX/AppX/ZIP packaging was retired.
+
+## 2.10.0 changes
+
+- Ported Hydrogen's `A6` Anchor order. The two early settles remain fixed at
+  37–43 ms; the final settle is 47–97 / 53–103 with 47/53 defaults.
+- Air loop repeats while the trigger is held. The shared corner radius drops
+  from 13 px to 8 px across paint, window region, DWM, and capture mask.
+- Trigger routing is unchanged at 0.45 ns indexed versus 202.39 ns scanned.
+  No startup or in-game latency speedup is claimed. Tests: 20 / 20.
 - Startup remains a native exe with no installer or package registration. No
   instant-start or latency guarantee is made.
 

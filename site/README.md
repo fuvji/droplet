@@ -10,11 +10,13 @@ Source: <https://github.com/fuvji/droplet>
 
 - `public/index.html` — product page: downloads, benchmark, previews, modules,
   audit, evidence vault, specs, sponsor inventory, FAQ, founder credit.
-- `public/releases.html` — detailed 2.9.3 release ledger and version history.
+- `public/releases.html` — detailed 2.10.0 release ledger and version history.
 - `public/sponsors.html` — direct sponsor inventory.
 - `public/style.css` — base visual system.
 - `public/refine.css` — editorial layer, download/vault cards, 3D previews,
   release ledger styles, and reduced-motion fallbacks.
+- `public/vault.css` — the Obsidian-style vault graph, local node map, and
+  graph-specific reduced-motion styles. No third-party assets.
 - `public/downloads.js` — local-only OS hint for the download cards. It sends
   nothing, stores nothing, and has no third-party imports.
 - `public/downloads/` — the direct portable exe, README, and SHA-256 list.
@@ -24,7 +26,7 @@ Source: <https://github.com/fuvji/droplet>
 
 ## Release artifacts
 
-`droplet.exe` (591,872 B) is the only published executable. It is unsigned and
+`droplet.exe` (593,408 B) is the only published executable. It is unsigned and
 is downloaded directly; there is no MSIX/AppX, installer, or ZIP wrapper. Linux
 and macOS packages are not published because the Win32/GDI+ core has not been
 ported.

@@ -102,13 +102,6 @@ pub fn wait_range(a: i32, b: i32) -> i32 {
     ms
 }
 
-/// Random wait with a floor, used by the tick-paced Anchor sequence.
-pub fn wait_range_floor(a: i32, b: i32, floor: i32) -> i32 {
-    let ms = rand_range(a, b).max(floor);
-    sleep_ms(ms as f64);
-    ms
-}
-
 // ------------------------------------------------------------------ inject
 
 #[inline]

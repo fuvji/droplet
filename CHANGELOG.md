@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.10.0
+
+- Ported Hydrogen's `A6` Anchor branch: select Anchor, right-click, 37-43 ms,
+  right-click, Glowstone, 37-43 ms, double Totem tap, configured wait, then
+  right-click.
+- Anchor sliders now expose Min **47-97 ms** and Max **53-103 ms**, with
+  defaults **47/53**. The old 55 ms floor is gone; the exact Hydrogen fixed
+  waits are retained.
+- Added the **Air loop** switch from Hydrogen's `vE`. Holding the trigger with
+  Air on repeats the sequence; Toggle mode still uses one latched worker.
+- Reduced the shared corner radius from 13 px to **8 px**, matching Windows'
+  smaller rounded clip across paint, window region, DWM, and capture mask.
+- Rebuilt the site with an Obsidian-style vault graph. The graph is inline SVG
+  and CSS; no third-party script or font was added.
+- Portable executable: **593,408 bytes**, SHA-256
+  `6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab`.
+  Tests: **20 / 20**. No live Minecraft client was available for the Anchor
+  sequence.
+- Boundaries unchanged: no game-memory access, network, telemetry, streamproof
+  mode, anti-cheat bypass, input disguise, or zero-latency claim.
+
 ## 2.9.3
 
 - Restored a tick-safe Anchor settle. Defaults are **55/65 ms**, with Min

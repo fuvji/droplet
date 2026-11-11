@@ -10,7 +10,7 @@ pub const WIN_W: f32 = 624.0;
 pub const WIN_H: f32 = 408.0;
 /// One radius for the window region. The panel is deliberately borderless; only
 /// DWM's rounded clip defines the edge.
-pub const CORNER_RADIUS: f32 = 13.0;
+pub const CORNER_RADIUS: f32 = 8.0;
 
 pub const HEADER_H: f32 = 44.0;
 const RAIL_W: f32 = 100.0;
@@ -28,9 +28,9 @@ const FAST_MIN_LO: i32 = 47;
 const FAST_MIN_HI: i32 = 97;
 const FAST_MAX_LO: i32 = 53;
 const FAST_MAX_HI: i32 = 103;
-const ANCHOR_MIN_LO: i32 = 55;
+const ANCHOR_MIN_LO: i32 = 47;
 const ANCHOR_MIN_HI: i32 = 97;
-const ANCHOR_MAX_LO: i32 = 65;
+const ANCHOR_MAX_LO: i32 = 53;
 const ANCHOR_MAX_HI: i32 = 103;
 
 // ------------------------------------------------------------------ helpers
@@ -853,14 +853,15 @@ impl<'a> Ui<'a> {
         self.row_switch(r, 3, "Auto inventory", "vI");
 
         let mut y = (HEADER_H + PAD) * s;
-        let r = Rect::new(x1, y, w, self.card_h(6));
+        let r = Rect::new(x1, y, w, self.card_h(7));
         self.card(r, "Anchor", Some("v6"));
         self.row_key(r, 0, "Trigger", "v6Bn", Some("v6Md"));
         self.row_slot(r, 1, "Anchor", "v6S1");
         self.row_slot(r, 2, "Glowstone", "v6S2");
         self.row_slot(r, 3, "Totem", "v6S3");
-        self.row_slider(r, 4, "Min delay", "v6D1", ANCHOR_MIN_LO, ANCHOR_MIN_HI, "ms");
-        self.row_slider(r, 5, "Max delay", "v6D2", ANCHOR_MAX_LO, ANCHOR_MAX_HI, "ms");
+        self.row_switch(r, 4, "Air loop", "vE");
+        self.row_slider(r, 5, "Min delay", "v6D1", ANCHOR_MIN_LO, ANCHOR_MIN_HI, "ms");
+        self.row_slider(r, 6, "Max delay", "v6D2", ANCHOR_MAX_LO, ANCHOR_MAX_HI, "ms");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));

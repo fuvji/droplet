@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.3 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.0 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 591,872 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 593,408 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,16 +28,17 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.9.3
+## What is in 2.10.0
 
-- **Anchor places reliably again**: defaults are **55/65 ms**, with Min
-  **55–97 ms** and Max **65–103 ms**. The 55 ms minimum crosses a 50 ms client
-  tick before the right-click; 37–43 ms could run inside one tick and use the
-  previously selected item.
+- **Anchor ported from Hydrogen**: the literal `A6` order is kept: select
+  Anchor, right-click, 37–43 ms, right-click, Glowstone, 37–43 ms, double
+  Totem tap, configured wait, right-click. Anchor sliders expose **47–97 /
+  53–103 ms** and ship at **47/53**. The **Air loop** switch restores Hydrogen's
+  held-repeat behavior.
 - **One portable exe**: MSIX/AppX, installer, and ZIP packaging are gone. The
   release is a single unsigned `droplet.exe` plus checksums.
-- **No top edge or outer rim**: the 1 px accent strip and painted outer hairline
-  are gone, leaving DWM's rounded clip to define the surface.
+- **8 px shared corner**: paint, window region, DWM clip, and capture mask now
+  use the same smaller radius. There is no top accent strip or painted rim.
 - **Independent sliders and knob switches** remain from 2.9.2.
 - **No unrestricted-speed mode**. Other modules keep their configured delays;
   the game tick and Windows scheduling remain the real boundary.
@@ -46,10 +47,11 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.9.3 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.0 System panel](site/public/assets/droplet-system.png)
 
-The panel is a native 624×408 acrylic surface. DWM supplies the rounded edge,
-the app paints edge-to-edge, and there is no outer stroke or top accent line.
+The panel is a native 624×408 acrylic surface. One 8 px radius paints and
+clips the window; DWM supplies the rounded edge, and there is no outer stroke
+or top accent line.
 Painting is event-driven; an idle panel does not schedule animation frames.
 Binding and slot chips borrow their labels instead of allocating a `String` per
 chip per frame.
@@ -58,7 +60,7 @@ chip per frame.
 
 | Module | Sequence | Mode |
 | --- | --- | --- |
-| Anchor | Place, charge once, switch off glowstone, detonate; 55–97 / 65–103 ms | one-shot |
+| Anchor | Hydrogen A6: anchor, click, fixed settle, click, glowstone, totem, detonate; 47–97 / 53–103 ms | one-shot / Air loop |
 | Auto Crystal | Obsidian, then crystal | one-shot / toggle |
 | Mace | Settled swap and hit | one-shot / toggle |
 | Shield | Axe select and hit in one batch; optional held stun | one-shot / toggle |
@@ -90,13 +92,13 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **19 / 19**.
-- Portable executable: **591,872 bytes**,
-  `288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873`.
+- `cargo test --release`: **20 / 20**.
+- Portable executable: **593,408 bytes**,
+  `6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here, so hit registration and the new
-  Anchor 55 ms settle remain unverified in game.
+  Hydrogen Anchor sequence remain unverified in game.
 
 ## Deliberate boundaries
 

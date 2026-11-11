@@ -15,16 +15,17 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.9.3 portable exe: 591,872 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 19 / 19.
+- 2.10.0 portable exe: 593,408 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 20 / 20.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
-- Anchor defaults: 55/65 ms, Min 55-97, Max 65-103.
+- Anchor defaults: 47/53 ms, Min 47-97, Max 53-103. Hydrogen A6 order;
+  Air loop repeats while held.
 - No network, telemetry, game-memory access, capture evasion, anti-cheat
   bypass, or input disguise.
 
 ## Design
 
-One 13 px radius. Event-driven paint. Borderless module cards with the original
+One 8 px radius. Event-driven paint. Borderless module cards with the original
 28×16 sliding knob switch and no module glyphs. Small original line icons remain
 in the navigation rail only. Graphite surface, warm white text, no painted outer
 rim, and no top accent line. Min/Max sliders are independent.
@@ -33,4 +34,5 @@ rim, and no top accent line. Min/Max sliders are independent.
 
 - Windows is the only port. Linux/macOS need a real platform layer.
 - Live Minecraft hit registration is unverified.
-- Downloads are Windows ZIP/MSIX only; no fake Linux/macOS artifacts.
+- The only Windows artifact is the direct `droplet.exe`; no ZIP/MSIX is
+  published. No fake Linux/macOS artifacts.

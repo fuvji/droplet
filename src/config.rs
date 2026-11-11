@@ -107,6 +107,7 @@ settings_schema! {
     breach:      "v3":  bool = false;
     potion:      "v4":  bool = true;
     anchor:      "v6":  bool = true;
+    anchor_air:  "vE":  bool = true;
     crystal:     "v5":  bool = true;
     pearl:       "v7":  bool = true;
     catch_w:     "v9":  bool = true;
@@ -130,8 +131,8 @@ settings_schema! {
     // selected envelope; manual mode uses it directly.
     crystal_min:  "v5D1": i32 = 47i32;
     crystal_max:  "v5D2": i32 = 53i32;
-    anchor_min:   "v6D1": i32 = 55i32;
-    anchor_max:   "v6D2": i32 = 65i32;
+    anchor_min:   "v6D1": i32 = 47i32;
+    anchor_max:   "v6D2": i32 = 53i32;
     wtap_min:     "vCD1": i32 = 132i32;
     wtap_max:     "vCD2": i32 = 148i32;
     dash_cd:      "vDCd": i32 = 1i32;
@@ -226,6 +227,7 @@ impl Settings {
             "v3" => self.breach,
             "v4" => self.potion,
             "v6" => self.anchor,
+            "vE" => self.anchor_air,
             "v5" => self.crystal,
             "v7" => self.pearl,
             "v9" => self.catch_w,
@@ -452,14 +454,18 @@ impl Settings {
             }
             self.timing_rev = 2;
         }
-        // Older Anchor windows migrate through normalize_timing below. Values
-        // under 55 ms are unsafe because they can stay inside one client tick.
-        if self.timing_rev < 3 {
-            if self.anchor_min == 47 && (self.anchor_max == 53 || self.anchor_max == 103) {
-                self.anchor_min = 55;
-                self.anchor_max = 65;
+        // Anchor now follows Hydrogen's 47/53 defaults. Migrate the old
+        // 55/65 and 37/43 shipped pairs once; a deliberate custom range is
+        // left alone.
+        if self.timing_rev < 4 {
+            if matches!(
+                (self.anchor_min, self.anchor_max),
+                (55, 65) | (37, 43) | (47, 103) | (37, 103)
+            ) {
+                self.anchor_min = 47;
+                self.anchor_max = 53;
             }
-            self.timing_rev = 3;
+            self.timing_rev = 4;
         }
         self.normalize_timing();
     }
@@ -472,11 +478,10 @@ impl Settings {
     pub fn normalize_timing(&mut self) {
         self.crystal_min = self.crystal_min.clamp(47, 97);
         self.crystal_max = self.crystal_max.clamp(53, 103);
-        // Anchor must cross a 50 ms client tick before the right-click. The
-        // 55 ms floor leaves 5 ms of scheduling margin; 37-49 ms can land in
-        // the same tick and use the previously selected item.
-        self.anchor_min = self.anchor_min.clamp(55, 97);
-        self.anchor_max = self.anchor_max.clamp(65, 103);
+        // Hydrogen's Anchor sliders expose 47-97 and 53-103. Min and Max
+        // remain independent; the pair is sorted when the macro reads it.
+        self.anchor_min = self.anchor_min.clamp(47, 97);
+        self.anchor_max = self.anchor_max.clamp(53, 103);
         self.fastuse_min = self.fastuse_min.clamp(47, 97);
         self.fastuse_max = self.fastuse_max.clamp(53, 103);
         self.wtap_min = self.wtap_min.clamp(50, 300);
@@ -568,7 +573,7 @@ mod tests {
     fn fast_timing_defaults_are_tight() {
         let s = Settings::default();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (55, 65));
+        assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
         assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
         assert_eq!(s.wtap_mode, "S");
@@ -584,7 +589,7 @@ mod tests {
         s.normalize();
         assert_eq!(s.wtap_mode, "S");
         assert_eq!((s.wtap_min, s.wtap_max), (132, 148));
-        assert_eq!(s.timing_rev, 3);
+        assert_eq!(s.timing_rev, 4);
 
         s.wtap_mode = "W".into();
         s.wtap_min = 100;
@@ -603,15 +608,15 @@ mod tests {
         s.fastuse_max = 103;
         s.normalize();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
-        assert_eq!((s.anchor_min, s.anchor_max), (55, 65));
+        assert_eq!((s.anchor_min, s.anchor_max), (47, 53));
         assert_eq!((s.fastuse_min, s.fastuse_max), (47, 53));
-        assert_eq!(s.timing_rev, 3);
+        assert_eq!(s.timing_rev, 4);
 
         let mut old_anchor = Settings::default();
         old_anchor.anchor_min = 37;
         old_anchor.anchor_max = 43;
         old_anchor.normalize();
-        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (55, 65));
+        assert_eq!((old_anchor.anchor_min, old_anchor.anchor_max), (47, 53));
     }
 
     #[test]
@@ -620,7 +625,7 @@ mod tests {
         s.crystal_max = 103;
         s.normalize();
         assert_eq!(s.crystal_max, 53);
-        assert_eq!(s.timing_rev, 3);
+        assert_eq!(s.timing_rev, 4);
 
         s.crystal_max = 103;
         s.normalize();
@@ -640,10 +645,10 @@ mod tests {
         s.normalize_timing();
         assert_eq!((s.crystal_min, s.crystal_max), (88, 103));
 
-        // Anchor now owns independent 55-97 and 65-103 domains.
+        // Anchor owns independent 47-97 and 53-103 domains.
         s.anchor_min = 90;
         s.normalize_timing();
-        assert_eq!((s.anchor_min, s.anchor_max), (90, 65));
+        assert_eq!((s.anchor_min, s.anchor_max), (90, 53));
         s.anchor_max = 103;
         s.normalize_timing();
         assert_eq!((s.anchor_min, s.anchor_max), (90, 103));

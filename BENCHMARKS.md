@@ -66,17 +66,14 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.9.3**
-- Portable executable: **591,872 bytes**
-- SHA-256: `288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873`
+- Version: **2.10.0**
+- Portable executable: **593,408 bytes**
+- SHA-256: `6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **19 / 19**
+- Release tests: **20 / 20**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**
-
-The signed MSIX is built from the same executable. Package signing is a local
-development-certificate build, not a Microsoft Store identity.
 
 2.9.0 changed GUI controls and input batching, not the trigger-routing lookup,
 so the 0.45 ns / 202.39 ns routing numbers remain the 2.6.0 measurement. The
@@ -95,8 +92,8 @@ floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
 
-2.9.3 restores a **55 ms** Anchor floor because 37–43 ms could stay inside one
-50 ms client tick and use the previous hotbar item. The defaults are 55/65 ms.
-The remaining top accent strip is removed, and MSIX/AppX/ZIP packaging is
-retired: the release is one direct executable. The binary remains 591,872
-bytes. Trigger routing is unchanged; no startup or latency claim is made.
+2.10.0 ports Hydrogen's `A6` Anchor branch: the two original 37–43 ms settles
+remain fixed, the final settle uses **47–97 / 53–103** with **47/53** defaults,
+and the Air loop restores the held-repeat path. The shared corner radius drops
+from 13 px to 8 px. The binary is 593,408 bytes; trigger routing is unchanged.
+No startup or latency claim is made.

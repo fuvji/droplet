@@ -1,5 +1,13 @@
 # release
 
+## 2.10.0 — 2026-11-11
+
+- Portable exe: 593,408 B,
+  `6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab`.
+- Tests: 20 / 20.
+- Changes: Hydrogen `A6` Anchor sequence; Anchor 47–97 / 53–103 with 47/53
+  defaults; Air loop; 8 px shared corner; vault-graph site.
+
 ## 2.9.3 — 2026-11-11
 
 - Portable exe: 591,872 B,
