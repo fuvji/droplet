@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.1
+Version: 2.10.2
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,7 +15,10 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.1 portable executable: 595,968 bytes.
+- 2.10.2 portable executable: 595,968 bytes.
+- DWM supplies the antialiased 8 px corner when available; the GDI region is
+  used only as a fallback, avoiding a hard second clip.
+- The favicon and site header/footer use the app's outlined droplet mark.
 - Download: https://fuvji.github.io/droplet/downloads/droplet.exe
 - Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt
 - Release ledger: https://fuvji.github.io/droplet/releases.html

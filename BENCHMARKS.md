@@ -66,9 +66,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.1**
+- Version: **2.10.2**
 - Portable executable: **595,968 bytes**
-- SHA-256: `239792e66f5684f6ecfde7f7c5395e5bb11f8870d50d89f8288b262ba841d696`
+- SHA-256: `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **24 / 24**
 - Runtime dependencies: **0**
@@ -92,13 +92,18 @@ floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
 
-2.10.1 fixes false game presence. The watcher now resolves the owning process
-image instead of trusting a title, rejects browsers, chat clients, editors, and
+2.10.2 prefers DWM's composited, antialiased corner on Windows 11 and uses the
+GDI rounded region only as a fallback. This removes a redundant hard clip; it
+is a visual fix, not a measured speedup. The web favicon and header/footer marks
+now use the app's outlined droplet instead of a different solid mark. The
+binary is 595,968 bytes; trigger routing is unchanged.
+
+2.10.1 fixed false game presence. The watcher resolves the owning process image
+instead of trusting a title, rejects browsers, chat clients, editors, and
 `MinecraftLauncher.exe`, and only accepts Java (`javaw.exe` / `java.exe` with a
 game signature) or Bedrock (`Minecraft.Windows.exe`). A cheap class/title
 prefilter avoids opening unrelated processes; two samples confirm presence, and
-a cold scan runs every 8 ticks (1.28 s). Trigger routing is unchanged. The
-binary is 595,968 bytes; no startup or in-game latency speedup is claimed.
+a cold scan runs every 8 ticks (1.28 s).
 
 2.10.0 ported Hydrogen's `A6` Anchor branch: the two original 37–43 ms settles
 remain fixed, the final settle uses **47–97 / 53–103** with **47/53** defaults,

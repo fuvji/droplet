@@ -1,5 +1,13 @@
 # release
 
+## 2.10.2 — 2026-11-11
+
+- Portable exe: 595,968 B,
+  `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`.
+- Tests: 24 / 24.
+- Changes: DWM-first antialiased corner with GDI region fallback; favicon and
+  site marks matched to the app's outlined droplet. 8 px radius unchanged.
+
 ## 2.10.1 — 2026-11-11
 
 - Portable exe: 595,968 B,

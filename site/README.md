@@ -10,7 +10,7 @@ Source: <https://github.com/fuvji/droplet>
 
 - `public/index.html` — product page: downloads, benchmark, previews, modules,
   audit, evidence vault, specs, sponsor inventory, FAQ, founder credit.
-- `public/releases.html` — detailed 2.10.1 release ledger and version history.
+- `public/releases.html` — detailed 2.10.2 release ledger and version history.
 - `public/sponsors.html` — direct sponsor inventory.
 - `public/style.css` — base visual system.
 - `public/refine.css` — editorial layer, download/vault cards, 3D previews,

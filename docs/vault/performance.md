@@ -64,6 +64,13 @@ one codegen unit, panic-abort, stripped.
   responsiveness change, not an input-latency measurement. Trigger routing is
   unchanged; tests are 24 / 24. No startup or in-game speedup is claimed.
 
+## 2.10.2 changes
+
+- The window now uses DWM's composited rounded clip when available and falls
+  back to the GDI region only when DWM cannot round the popup. This removes a
+  redundant hard clip; it is a visual fix and no frame-time or startup speedup
+  is claimed. The logical 8 px radius, capture mask, and routing are unchanged.
+
 ## Not measured
 
 - End-to-end input latency.

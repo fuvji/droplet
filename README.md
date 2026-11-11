@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.1 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.2 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -28,8 +28,13 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.1
+## What is in 2.10.2
 
+- **Cleaner corners**: Windows 11 now uses DWM's compositor-rounded, antialiased
+  corner. The GDI region is only a fallback when DWM cannot round the popup, so
+  the window is no longer clipped twice.
+- **Matched web mark**: the favicon and site header/footer now use the app's
+  outlined droplet silhouette instead of a different solid droplet.
 - **Game detection fixed**: a visible window is no longer enough. Droplet
   resolves the owning process and accepts only `javaw.exe`, `java.exe` with a
   game signature, or `Minecraft.Windows.exe`. Browsers, Discord, editors, and
@@ -42,8 +47,8 @@ published because those builds do not exist.
   held-repeat behavior.
 - **One portable exe**: MSIX/AppX, installer, and ZIP packaging are gone. The
   release is a single unsigned `droplet.exe` plus checksums.
-- **8 px shared corner**: paint, window region, DWM clip, and capture mask now
-  use the same smaller radius. There is no top accent strip or painted rim.
+- **8 px shared corner**: paint, fallback region, DWM clip, and capture mask
+  agree on the radius. There is no top accent strip or painted rim.
 - **Independent sliders and knob switches** remain from 2.9.2.
 - **No unrestricted-speed mode**. Other modules keep their configured delays;
   the game tick and Windows scheduling remain the real boundary.
@@ -52,7 +57,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.1 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.2 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -99,11 +104,11 @@ name, not a latency claim. Details and reproduction:
 
 - `cargo test --release`: **24 / 24**.
 - Portable executable: **595,968 bytes**,
-  `239792e66f5684f6ecfde7f7c5395e5bb11f8870d50d89f8288b262ba841d696`.
+  `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.1 capture; live Anchor placement, Java/Bedrock positive
+  from the 2.10.2 capture; live Anchor placement, Java/Bedrock positive
   detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries

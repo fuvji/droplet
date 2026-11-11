@@ -1403,15 +1403,17 @@ pub fn run() {
         let alpha = if acrylic != "none" { ACRYLIC_ALPHA } else { 255 };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
-        // DWM can return success for a layered popup while leaving its square
-        // frame visible. Enforce the radius with a region after the
-        // acrylic/alpha path so every Windows build clips the four corners.
-        // The same logical radius paints the hairline in ui::frame.
+        // The same logical radius paints the hairline in ui::frame and sizes
+        // the fallback region below.
         let radius = (ui::CORNER_RADIUS * dpi).round() as i32;
-        let _ = round_corners(hwnd, radius);
-        let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
-        if rgn != 0 {
-            win::SetWindowRgn(hwnd, rgn, 1);
+        // Prefer DWM's compositor-rounded corner on Windows 11: it is
+        // antialiased and follows the system DPI. Only install the hard
+        // GDI region as a fallback when DWM cannot round this popup.
+        if !round_corners(hwnd, radius) {
+            let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
+            if rgn != 0 {
+                win::SetWindowRgn(hwnd, rgn, 1);
+            }
         }
 
         let icon = native_icon();

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.10.2
+
+- Prefer DWM's compositor-rounded, antialiased corner on Windows 11. Keep the
+  GDI rounded region only as a fallback, so a working DWM clip is not clipped a
+  second time. The 8 px logical radius is unchanged.
+- Replace the different solid web droplet with the app's outlined droplet in
+  the favicon, header, and footer; cache-bust the icon URL.
+- Portable executable: **595,968 bytes**, SHA-256
+  `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`.
+  Tests: **24 / 24**.
+- Boundaries unchanged: no game-memory access, network, telemetry, streamproof
+  mode, anti-cheat bypass, input disguise, or zero-latency claim.
+
 ## 2.10.1
 
 - Fixed false **Game detected** status. Detection now resolves the owning
