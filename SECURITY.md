@@ -22,8 +22,8 @@ Use a [private security advisory](https://github.com/fuvji/droplet/security/advi
 Do not open a public issue for an unpatched vulnerability.
 
 Include the Droplet version, Windows version, the smallest reproduction, and
-whether the build is the portable executable or the MSIX package. A proof of
-concept helps; a live exploit against someone else's account does not.
+the SHA-256 of the executable. A proof of concept helps; a live exploit against
+someone else's account does not.
 
 Expect an acknowledgement within three days. Fixes ship as a patch release,
 and the advisory is published once a build is available.
