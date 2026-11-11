@@ -18,15 +18,16 @@ jobs:
           targets: x86_64-pc-windows-msvc
       - name: Test
         run: cargo test --release --target x86_64-pc-windows-msvc
-      - name: Build
-        run: cargo build --release --target x86_64-pc-windows-msvc
-      - name: Stage portable exe
+      - name: Stage verified exe
         shell: pwsh
         run: |
+          $expected = "288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873"
+          $artifact = "site/public/downloads/droplet.exe"
+          $actual = (Get-FileHash $artifact -Algorithm SHA256).Hash.ToLower()
+          if ($actual -ne $expected) { throw "Published exe hash does not match the release notes." }
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item "target/x86_64-pc-windows-msvc/release/droplet.exe" "dist/droplet.exe"
-          $hash = (Get-FileHash "dist/droplet.exe" -Algorithm SHA256).Hash.ToLower()
-          "Droplet $env:GITHUB_REF_NAME - SHA-256`n`n$hash  droplet.exe" |
+          Copy-Item $artifact "dist/droplet.exe"
+          "Droplet $env:GITHUB_REF_NAME - SHA-256`n`n$actual  droplet.exe" |
             Set-Content "dist/SHA256SUMS.txt" -Encoding ascii
       - name: Publish release
         shell: pwsh
