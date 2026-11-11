@@ -465,31 +465,22 @@ impl Settings {
         self.normalize_timing();
     }
 
-    /// Enforce the slider domains without re-running legacy migrations. This is
-    /// called after every numeric edit so a Min drag above Max automatically
-    /// lifts Max (and a Max drag below Min cannot create an inverted range).
+    /// Enforce each slider's own domain without re-running legacy migrations.
+    /// The two halves of a Min/Max pair are deliberately independent: editing
+    /// one must never move the other. Callers that execute a pair sort it at
+    /// read time (`smart::pick` already does this), so an inverted range is a
+    /// valid temporary edit rather than a reason to rewrite the other slider.
     pub fn normalize_timing(&mut self) {
-        fn pair(min: &mut i32, max: &mut i32) {
-            *min = (*min).clamp(47, 97);
-            *max = (*max).clamp(53, 103);
-            if *min > *max {
-                *max = *min;
-            }
-        }
-        pair(&mut self.crystal_min, &mut self.crystal_max);
-        // Anchor exposes the tighter 37-43 ms window. The macro still applies
-        // the 50 ms tick floor before the next hotbar action.
-        self.anchor_min = self.anchor_min.clamp(37, 43);
-        self.anchor_max = self.anchor_max.clamp(37, 43);
-        if self.anchor_min > self.anchor_max {
-            self.anchor_max = self.anchor_min;
-        }
-        pair(&mut self.fastuse_min, &mut self.fastuse_max);
+        self.crystal_min = self.crystal_min.clamp(47, 97);
+        self.crystal_max = self.crystal_max.clamp(53, 103);
+        // Anchor exposes a wider 37-97 / 43-103 window. There is no tick-floor
+        // rewrite here; the macro uses the configured value exactly.
+        self.anchor_min = self.anchor_min.clamp(37, 97);
+        self.anchor_max = self.anchor_max.clamp(43, 103);
+        self.fastuse_min = self.fastuse_min.clamp(47, 97);
+        self.fastuse_max = self.fastuse_max.clamp(53, 103);
         self.wtap_min = self.wtap_min.clamp(50, 300);
         self.wtap_max = self.wtap_max.clamp(50, 300);
-        if self.wtap_min > self.wtap_max {
-            self.wtap_max = self.wtap_min;
-        }
     }
 
 }
@@ -607,7 +598,8 @@ mod tests {
     fn previous_defaults_migrate_to_tight_profile() {
         let mut s = Settings::default();
         s.crystal_max = 103;
-        s.anchor_max = 103;
+        s.anchor_min = 47;
+        s.anchor_max = 53;
         s.fastuse_max = 103;
         s.normalize();
         assert_eq!((s.crystal_min, s.crystal_max), (47, 53));
@@ -636,27 +628,40 @@ mod tests {
     }
 
     #[test]
-    fn timing_edits_stay_inside_domains_and_ordered() {
+    fn timing_edits_are_independent_and_stay_inside_domains() {
         let mut s = Settings::default();
-        s.crystal_min = 999;
-        s.crystal_max = 1;
-        s.normalize_timing();
-        assert_eq!((s.crystal_min, s.crystal_max), (97, 97));
 
-        s.anchor_min = 47;
+        // Moving Min must leave Max untouched, even when the two cross.
+        s.crystal_min = 88;
+        s.normalize_timing();
+        assert_eq!((s.crystal_min, s.crystal_max), (88, 53));
+
+        s.crystal_max = 103;
+        s.normalize_timing();
+        assert_eq!((s.crystal_min, s.crystal_max), (88, 103));
+
+        // Anchor now owns independent 37-97 and 43-103 domains.
+        s.anchor_min = 90;
+        s.normalize_timing();
+        assert_eq!((s.anchor_min, s.anchor_max), (90, 43));
+        s.anchor_max = 103;
+        s.normalize_timing();
+        assert_eq!((s.anchor_min, s.anchor_max), (90, 103));
+
+        s.anchor_min = 999;
         s.anchor_max = 999;
         s.normalize_timing();
-        assert_eq!((s.anchor_min, s.anchor_max), (43, 43));
+        assert_eq!((s.anchor_min, s.anchor_max), (97, 103));
 
-        s.fastuse_min = 60;
-        s.fastuse_max = 53;
+        s.fastuse_min = 90;
+        s.fastuse_max = 60;
         s.normalize_timing();
-        assert_eq!((s.fastuse_min, s.fastuse_max), (60, 60));
+        assert_eq!((s.fastuse_min, s.fastuse_max), (90, 60));
 
         s.wtap_min = 300;
         s.wtap_max = 50;
         s.normalize_timing();
-        assert_eq!((s.wtap_min, s.wtap_max), (300, 300));
+        assert_eq!((s.wtap_min, s.wtap_max), (300, 50));
     }
 
     #[test]

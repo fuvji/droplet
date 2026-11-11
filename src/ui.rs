@@ -8,9 +8,8 @@ use crate::gp::{Canvas, Fonts};
 
 pub const WIN_W: f32 = 624.0;
 pub const WIN_H: f32 = 408.0;
-/// One radius for the painted hairline and the window region. The region is
-/// built from this exact value so the clip and the stroke cannot disagree at
-/// the corners; the stroke sits half a pixel inside it.
+/// One radius for the window region. The panel is deliberately borderless; only
+/// DWM's rounded clip defines the edge.
 pub const CORNER_RADIUS: f32 = 13.0;
 
 pub const HEADER_H: f32 = 44.0;
@@ -29,8 +28,10 @@ const FAST_MIN_LO: i32 = 47;
 const FAST_MIN_HI: i32 = 97;
 const FAST_MAX_LO: i32 = 53;
 const FAST_MAX_HI: i32 = 103;
-const ANCHOR_MIN: i32 = 37;
-const ANCHOR_MAX: i32 = 43;
+const ANCHOR_MIN_LO: i32 = 37;
+const ANCHOR_MIN_HI: i32 = 97;
+const ANCHOR_MAX_LO: i32 = 43;
+const ANCHOR_MAX_HI: i32 = 103;
 
 // ------------------------------------------------------------------ helpers
 
@@ -244,17 +245,8 @@ impl<'a> Ui<'a> {
             _ => self.tab_system(),
         }
         self.footer();
-        // Keep the hairline one pixel inside DWM's rounded clip. Drawing it
-        // on the exact edge caused the corner to look clipped on some scales.
-        self.c.round_stroke(
-            1.0,
-            1.0,
-            WIN_W * s - 2.0,
-            WIN_H * s - 2.0,
-            (CORNER_RADIUS - 0.5) * s,
-            with_alpha(self.th.text, 10),
-            0.75,
-        );
+        // No painted outer stroke. DWM supplies the rounded clip and the app
+        // paints the surface edge-to-edge, so there is no double-thickness rim.
     }
 
     fn header(&mut self) {
@@ -443,30 +435,30 @@ impl<'a> Ui<'a> {
             if on { self.th.card_on } else { self.th.card },
         );
         let color = if active { self.th.text } else { self.th.dim };
-        let tr = Rect::new(r.x + 12.0 * s, r.y + 4.0 * s, r.w - 66.0 * s, 17.0 * s);
+        let tr = Rect::new(r.x + 12.0 * s, r.y + 4.0 * s, r.w - 60.0 * s, 17.0 * s);
         self.label(tr.x, tr.y, tr.w, tr.h, title, 11.5, false, color);
         if let Some(k) = toggle {
-            let sw = Rect::new(r.x + r.w - 42.0 * s, r.y + 4.0 * s, 32.0 * s, 17.0 * s);
+            let sw = Rect::new(r.x + r.w - 40.0 * s, r.y + 4.0 * s, 28.0 * s, 16.0 * s);
             self.switch(sw.x, sw.y, k, on);
         }
     }
 
+    /// The original sliding switch: a 28x16 track and a plain knob. No ON/OFF
+    /// text, no glyph, and no outline; the knob position carries the state.
     fn switch(&mut self, x: f32, y: f32, key: &'static str, on: bool) {
         let s = self.scale;
-        let w = 32.0 * s;
-        let h = 17.0 * s;
+        let w = 28.0 * s;
+        let h = 16.0 * s;
         let r = Rect::new(x, y, w, h);
         let hot = self.hovered(r);
         let t = self.anim(wid(key, 11), if on { 1.0 } else { 0.0 });
         let hv = self.anim(wid(key, 12), if hot { 1.0 } else { 0.0 });
-        let bg = if on {
-            with_alpha(self.th.accent, (15.0 + 11.0 * t + 5.0 * hv) as u8)
-        } else {
-            with_alpha(self.th.text, (5.0 + 6.0 * hv) as u8)
-        };
-        self.c.round_rect(r.x, r.y, w, h, h * 0.5, bg);
-        let fg = if on { self.th.accent } else { mix(self.th.faint, self.th.text, hv) };
-        self.label_center(r.x, r.y - 0.5 * s, w, h, if on { "ON" } else { "OFF" }, 7.5, false, fg);
+        let track = mix(self.th.track, self.th.text, (0.045 + 0.035 * hv) * (1.0 - t));
+        let track = mix(track, self.th.accent, t);
+        self.c.round_rect(r.x, r.y, w, h, h * 0.5, track);
+        let knob = if on { 0xFF07_0708 } else { mix(self.th.dim, self.th.text, 0.35 + 0.65 * hv) };
+        let kx = r.x + 3.0 * s + (w - 16.0 * s) * t;
+        self.c.circle(kx + 5.0 * s, r.y + h * 0.5, 5.0 * s, knob);
         if self.pressed && hot {
             self.acts.push(Act::Toggle(key));
         }
@@ -555,9 +547,9 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         let y = self.row_y(card, i);
         let on = self.s.bool_at(key);
-        let lr = Rect::new(card.x + 12.0 * s, y, card.w - 58.0 * s, ROW_H * s);
+        let lr = Rect::new(card.x + 12.0 * s, y, card.w - 56.0 * s, ROW_H * s);
         self.label(lr.x, lr.y, lr.w, lr.h, label, 9.5, false, self.th.dim);
-        let sw = Rect::new(card.x + card.w - 42.0 * s, y + 2.0 * s, 32.0 * s, 17.0 * s);
+        let sw = Rect::new(card.x + card.w - 40.0 * s, y + 2.5 * s, 28.0 * s, 16.0 * s);
         self.switch(sw.x, sw.y, key, on);
     }
 
@@ -868,8 +860,8 @@ impl<'a> Ui<'a> {
         self.row_slot(r, 1, "Anchor", "v6S1");
         self.row_slot(r, 2, "Glowstone", "v6S2");
         self.row_slot(r, 3, "Totem", "v6S3");
-        self.row_slider(r, 4, "Min delay", "v6D1", ANCHOR_MIN, ANCHOR_MAX, "ms");
-        self.row_slider(r, 5, "Max delay", "v6D2", ANCHOR_MIN, ANCHOR_MAX, "ms");
+        self.row_slider(r, 4, "Min delay", "v6D1", ANCHOR_MIN_LO, ANCHOR_MIN_HI, "ms");
+        self.row_slider(r, 5, "Max delay", "v6D2", ANCHOR_MAX_LO, ANCHOR_MAX_HI, "ms");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));
@@ -945,7 +937,7 @@ impl<'a> Ui<'a> {
 
         let r = Rect::new(x1, y, w, self.card_h(1));
         self.card(r, "Danger zone", None);
-        self.row_danger(r, 0, "Hold 1s");
+        self.row_danger(r, 0, "Self-destruct");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));

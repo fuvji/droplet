@@ -66,11 +66,13 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.9.1**
-- Portable executable: **592,384 bytes**
-- SHA-256: `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`
-- Signed MSIX: **301,774 bytes**
-- MSIX SHA-256: `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`
+- Version: **2.9.2**
+- Portable executable: **591,872 bytes**
+- SHA-256: `2d4a915ca68b3c4ef944fe208b593f3c816f55b8b605a478d23a5cfd5d70cc46`
+- Signed MSIX: **301,609 bytes**
+- MSIX SHA-256: `94d47fd44f092b571ade122b2d020011da36b41cd185517895f28133040e6c87`
+- Portable ZIP: **285,751 bytes**
+- ZIP SHA-256: `928f816eb2dc4fa028273a9af9f8236e18a2e6c4db78ee612bd6a8d9fb2f5841`
 - Release tests: **19 / 19**
 - Runtime dependencies: **0**
 - Network calls: **0**
@@ -84,8 +86,16 @@ so the 0.45 ns / 202.39 ns routing numbers remain the 2.6.0 measurement. The
 larger 2.9.0 executable reflects the icon, power-control, and download surface
 of that release; it was not presented as a size reduction.
 
-2.9.1 removes the module glyph painter, every per-card outline stroke, and the
-Anchor floor row. The executable is 9,216 bytes smaller (592,384 vs 601,600).
-Trigger routing is unchanged. The app's own System-tab paint snapshot read
-2.86 ms after the change versus 2.60 ms before; that single sample is not a
-benchmark and this release does not claim a render-speed win.
+2.9.1 removed the module glyph painter, every per-card outline stroke, and the
+Anchor floor row. The executable was 9,216 bytes smaller (592,384 vs 601,600).
+Trigger routing was unchanged. The app's own System-tab paint snapshot read
+2.86 ms after that change versus 2.60 ms before; that single sample was not a
+benchmark and 2.9.1 did not claim a render-speed win.
+
+2.9.2 makes Min/Max sliders independent, restores the 28×16 knob switch, and
+removes the painted outer window hairline. It also removes the Anchor 50 ms
+floor and three fixed 50 ms slot sleeps; each slot now gets exactly one
+configured 37–43 ms settle before its right-click. The executable is 591,872
+bytes (512 bytes smaller). The System-tab paint snapshot in the 2.9.2 capture
+read **2.15 ms**; this is one UI sample, not a frame-time benchmark. The routing
+numbers are unchanged because the hook path did not change.

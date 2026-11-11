@@ -1,4 +1,4 @@
-Droplet 2.9.1 — Windows x64 portable
+Droplet 2.9.2 — Windows x64 portable
 
 Run droplet.exe. Windows 10 19041 or newer, x64.
 The panel starts hidden. Press Ctrl + Right Shift to show or hide it.

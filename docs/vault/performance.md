@@ -27,6 +27,16 @@ one codegen unit, panic-abort, stripped.
   change versus 2.60 ms before; that is not a benchmark and no render speedup
   is claimed.
 
+## 2.9.2 changes
+
+- Removed the anchor 50 ms tick floor and three hardcoded 50 ms slot sleeps.
+  Each slot now gets one configured 37–43 ms settle before its action.
+- That removes three fixed 50 ms sleeps and two extra post-action waits from a
+  normal anchor cycle. It does not create an unrestricted mode and is not
+  validated in a live client.
+- The 2.9.2 System-tab paint snapshot read 2.15 ms. This is one sample, not a
+  frame-time benchmark, and no render-speed claim is made.
+
 ## Not measured
 
 - End-to-end input latency.

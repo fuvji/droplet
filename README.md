@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.1 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with text ON/OFF pills.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.2 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,8 +19,8 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable ZIP](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip) | 285,770 B | **Available** |
-| Windows 10/11 x64 | [Signed MSIX](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix) | 301,774 B | **Available** |
+| Windows 10/11 x64 | [Portable ZIP](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip) | 285,751 B | **Available** |
+| Windows 10/11 x64 | [Signed MSIX](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix) | 301,609 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -29,41 +29,47 @@ The portable exe is unsigned; the MSIX uses the project development
 certificate. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img`
 is published because those builds do not exist.
 
-## What is in 2.9.1
+## What is in 2.9.2
 
-- **Text ON/OFF pills** on every module card. The round power glyphs and every
-  module icon are gone; each card is one borderless surface.
-- **Smaller binary**: the 2.9.1 portable executable is 592,384 bytes, 9,216
-  bytes smaller than 2.9.0, after deleting the glyph painter and per-card
-  outline draws.
+- **Independent Min/Max sliders**. Editing one no longer rewrites the other.
+  Each field is clamped only to its own domain; an inverted pair is sorted when
+  the macro reads it.
+- **The old knob switch is back**. Every module uses the original 28×16 track
+  with a plain 5 px-radius knob. There is no ON/OFF text and no glyph; position
+  carries the state.
+- **Wider Anchor timing**: Min **37–97 ms**, Max **43–103 ms**, defaults **37/43**.
+  Each Anchor slot now gets exactly one configured wait before its action. The
+  old 50 ms floor and the three hardcoded 50 ms slot sleeps are gone.
+- **Cleaner edge**: the painted outer hairline is removed. DWM's border was
+  already suppressed, so the panel no longer has a double rim at the corners.
+- **Danger zone restored**: the action is labelled **Self-destruct** again and
+  keeps its one-second hold, data purge, and portable-executable recycle.
+- **Smaller binary**: the 2.9.2 portable executable is 591,872 bytes, 512 bytes
+  smaller than 2.9.1. The signed MSIX is 301,609 bytes.
 - **Compact Dash** card without the redundant `Clicks 1x` row.
 - **Sticky hide**: the tray icon is gone, and a manual hide is no longer undone
   by an alt-tab or focus change. `Ctrl + Right Shift` shows or hides the panel.
-- **Instant close**: the close button stops the watchers and exits.
-- **One-second self-destruct hold** with a visible progress percentage.
-- **Anchor 37–43 ms** default and slider window. The macro still applies the
-  50 ms Minecraft tick floor; the card no longer repeats it.
 - **Same-frame input** for Dash, Shield, and Pearl: slot selection and click
   share one `SendInput` batch. Ordinary input only; the focus gate remains.
 - **Faster hook rejection**: unbound keys are rejected by the prebuilt trigger
   table before either settings `Arc` is cloned.
-- **Downloads and a release ledger** on the website, plus a tag-driven Windows
-  release workflow.
+- **No unrestricted-speed mode**. Other modules keep their configured delays;
+  the 50 ms game tick and Windows scheduling remain the real boundary.
 
 ## GUI
 
-![Droplet 2.9.1 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.9.2 System panel](site/public/assets/droplet-system.png)
 
-The panel is a native 624×408 acrylic surface. The painted hairline and the
-Win32 window region share one 13 px radius. Painting is event-driven; an idle
-panel does not schedule animation frames. Binding and slot chips borrow their
-labels instead of allocating a `String` per chip per frame.
+The panel is a native 624×408 acrylic surface. DWM supplies the rounded edge
+and the app paints edge-to-edge, with no outer stroke. Painting is event-driven;
+an idle panel does not schedule animation frames. Binding and slot chips borrow
+their labels instead of allocating a `String` per chip per frame.
 
 ## Modules
 
 | Module | Sequence | Mode |
 | --- | --- | --- |
-| Anchor | Place, charge once, switch off glowstone, detonate | one-shot |
+| Anchor | Place, charge once, switch off glowstone, detonate; 37–97 / 43–103 ms | one-shot |
 | Auto Crystal | Obsidian, then crystal | one-shot / toggle |
 | Mace | Settled swap and hit | one-shot / toggle |
 | Shield | Axe select and hit in one batch; optional held stun | one-shot / toggle |
@@ -96,13 +102,13 @@ name, not a latency claim. Details and reproduction:
 ## Verify
 
 - `cargo test --release`: **19 / 19**.
-- Portable executable: **592,384 bytes**,
-  `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`.
-- Signed MSIX: **301,774 bytes**,
-  `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`.
-- Portable ZIP: **285,770 bytes**,
-  `8be91f12560842686ecf306b48f4026a78abef9358d79f4a1ee1a6e2c3d36920`.
-- Package version: **2.9.1.0**, signature **Valid**, installed status **Ok**.
+- Portable executable: **591,872 bytes**,
+  `2d4a915ca68b3c4ef944fe208b593f3c816f55b8b605a478d23a5cfd5d70cc46`.
+- Signed MSIX: **301,609 bytes**,
+  `94d47fd44f092b571ade122b2d020011da36b41cd185517895f28133040e6c87`.
+- Portable ZIP: **285,751 bytes**,
+  `928f816eb2dc4fa028273a9af9f8236e18a2e6c4db78ee612bd6a8d9fb2f5841`.
+- Package version: **2.9.2.0**, signature **Valid**, installed status **Ok**.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here, so hit registration and the new
   same-frame input ordering remain unverified in game.
@@ -115,7 +121,9 @@ Droplet is local and visible by design.
 - No network calls, telemetry, analytics, or silent auto-updater.
 - No streamproof/capture-evasion mode, process hiding, scan evasion, log
   erasure, anti-cheat bypass, or input-device disguise.
-- No zero-latency, “quantum speed”, or “100% no restriction” claim.
+- No zero-latency, “quantum speed”, “100% raw speed”, or “no restriction”
+  claim. Droplet removes its own avoidable routing and redundant sleeps; it
+  cannot remove the game loop, device path, or OS scheduler.
 - The focus and master gates stop every macro when they are not satisfied.
 - The portable exe is unsigned; SmartScreen may warn.
 - Windows only for now. Linux and macOS require a real platform port, not a

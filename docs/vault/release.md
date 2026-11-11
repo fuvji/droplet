@@ -1,5 +1,19 @@
 # release
 
+## 2.9.2 — 2026-11-11
+
+- Portable exe: 591,872 B,
+  `2d4a915ca68b3c4ef944fe208b593f3c816f55b8b605a478d23a5cfd5d70cc46`.
+- MSIX: 301,609 B,
+  `94d47fd44f092b571ade122b2d020011da36b41cd185517895f28133040e6c87`.
+- Portable ZIP: 285,751 B,
+  `928f816eb2dc4fa028273a9af9f8236e18a2e6c4db78ee612bd6a8d9fb2f5841`.
+- Tests: 19 / 19.
+- Package: 2.9.2.0, signature Valid, installed Ok.
+- Changes: independent sliders; 28×16 knob switch; Anchor 37–97 / 43–103,
+  defaults 37/43; fixed Anchor sleeps removed; outer rim removed; Self-destruct
+  label restored.
+
 ## 2.9.1 — 2026-11-11
 
 - Portable exe: 592,384 B,

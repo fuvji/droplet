@@ -231,24 +231,14 @@ fn wait_smart(s: &Settings, module: &str, min: i32, max: i32) {
     smart::wait(s.smart, module, min, max);
 }
 
-/// Anchor steps are aligned to a Minecraft tick. A 47 ms configured value is
-/// legal in the UI, but sending the next hotbar/use action less than one tick
-/// later is what makes an in-game cycle skip or double-fire. The clamp keeps the
-/// configured 47-53 envelope while guaranteeing the game can observe each step.
+/// Anchor uses the configured Min/Max exactly. `smart::pick` orders the pair,
+/// so an independent Min above Max still executes inside the user's range.
 fn anchor_wait_ms(s: &Settings) -> i32 {
-    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max).max(input::TICK_MS)
+    smart::pick(s.smart, "v6", s.anchor_min, s.anchor_max)
 }
 
 fn anchor_wait(s: &Settings) {
     input::sleep_ms(anchor_wait_ms(s) as f64);
-}
-
-/// Select a hotbar slot and let the client observe the selection before the
-/// following use input. Without this settle, a sequence can occasionally use the
-/// previous item and look like it skipped a cycle.
-fn tap_slot(k: Option<Key>) {
-    tap_exact_key(k);
-    input::sleep_ms(input::TICK_MS as f64);
 }
 
 fn tap_exact_key(k: Option<Key>) {
@@ -636,23 +626,18 @@ fn anchor_slots_ok(anchor: Key, glow: Key, totem: Key) -> bool {
 }
 
 /// Normal Anchor: place, one glowstone charge, switch off glowstone, detonate.
-/// Each hotbar slot gets one settle tick before its action. The old path also
-/// inserted an extra tick after the final slot and held the busy guard for a
-/// trailing blast tick; both duplicated a boundary the game had already
-/// observed. Removing those two waits trims 100 ms without going below the
-/// 50 ms tick floor.
+/// Each slot selection is followed by exactly one configured Anchor wait before
+/// its action. This removes the old hardcoded 50 ms slot sleeps and the second
+/// wait after each action; the slider is now the only step delay.
 fn normal_anchor(s: &Settings, anchor: Key, glow: Key, totem: Key) {
-    tap_slot(Some(anchor));
-    rc_exact(s);
-    anchor_wait(s);
+    anchor_step(s, anchor);
+    anchor_step(s, glow);
+    anchor_step(s, totem);
+}
 
-    tap_slot(Some(glow));
-    rc_exact(s);
+fn anchor_step(s: &Settings, slot: Key) {
+    tap_exact_key(Some(slot));
     anchor_wait(s);
-
-    // Switching away from glowstone is the detonation input. tap_slot already
-    // waits one full tick for the selection before the final right-click.
-    tap_slot(Some(totem));
     rc_exact(s);
 }
 
@@ -922,15 +907,19 @@ mod tests {
     }
 
     #[test]
-    fn anchor_waits_are_never_shorter_than_one_tick() {
+    fn anchor_waits_follow_the_configured_range() {
         let mut s = Settings::default();
-        s.anchor_min = 47;
-        s.anchor_max = 53;
-        assert!(anchor_wait_ms(&s) >= input::TICK_MS);
+        for _ in 0..100 {
+            let wait = anchor_wait_ms(&s);
+            assert!((37..=43).contains(&wait), "wait={wait}");
+        }
+
         s.anchor_min = 97;
-        s.anchor_max = 103;
-        let wait = anchor_wait_ms(&s);
-        assert!((97..=103).contains(&wait), "wait={wait}");
+        s.anchor_max = 43;
+        for _ in 0..100 {
+            let wait = anchor_wait_ms(&s);
+            assert!((43..=97).contains(&wait), "wait={wait}");
+        }
     }
 
     #[test]

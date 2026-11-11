@@ -9,7 +9,7 @@
   <Identity
     Name="DropletMacroSuite"
     Publisher="CN=Droplet Macro Suite"
-    Version="2.9.1.0"
+    Version="2.9.2.0"
     ProcessorArchitecture="x64" />
 
   <Properties>

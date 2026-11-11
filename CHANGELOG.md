@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.9.2
+
+- Fixed the coupled Min/Max sliders. `normalize_timing` now clamps each field
+  to its own domain and never rewrites the partner. Execution sorts an inverted
+  pair at read time, so only the slider the user drags changes.
+- Restored the original 28×16 sliding knob switch on every module and switch
+  row. The text ON/OFF pills and power glyphs are gone again.
+- Anchor now exposes Min **37–97 ms** and Max **43–103 ms**, with defaults
+  **37/43**. The macro uses the configured value exactly; the old 50 ms floor,
+  the three hardcoded 50 ms slot sleeps, and the second wait after each action
+  were removed. Each slot gets one configured settle before its action.
+- Restored the **Self-destruct** label in the Danger zone. The one-second hold,
+  data purge, and portable-executable recycle are unchanged.
+- Removed the painted outer window hairline. DWM's border is already suppressed,
+  so the panel no longer shows a double-thickness rim.
+- Release binary: 591,872 bytes (512 bytes smaller than 2.9.1), SHA-256
+  `2d4a915ca68b3c4ef944fe208b593f3c816f55b8b605a478d23a5cfd5d70cc46`.
+  Signed MSIX: 301,609 bytes, SHA-256
+  `94d47fd44f092b571ade122b2d020011da36b41cd185517895f28133040e6c87`.
+  Portable ZIP: 285,751 bytes, SHA-256
+  `928f816eb2dc4fa028273a9af9f8236e18a2e6c4db78ee612bd6a8d9fb2f5841`.
+  Tests: 19/19; package 2.9.2.0 installed Ok.
+- Boundaries unchanged: no streamproof mode, no capture evasion, no game-memory
+  access, no network calls, no anti-cheat bypass, no input disguise, and no
+  zero-latency, unrestricted-speed, or auto-update claim.
+
 ## 2.9.1
 
 - Removed every module glyph and the per-card outline. Module cards are now a
