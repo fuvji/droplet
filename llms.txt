@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.0
+Version: 2.10.1
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,14 +15,17 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.0 portable executable: 593,408 bytes.
+- 2.10.1 portable executable: 595,968 bytes.
 - Download: https://fuvji.github.io/droplet/downloads/droplet.exe
 - Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt
 - Release ledger: https://fuvji.github.io/droplet/releases.html
 - No MSIX, AppX, installer, or ZIP is published. The executable is direct.
 - Linux and macOS are not supported yet. The hook, window, and paint layers are
   Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
-- 20 release tests pass.
+- 24 release tests pass.
+- Game detection resolves the owning process: Java (`javaw.exe`/`java.exe` with
+  a game signature) or Bedrock (`Minecraft.Windows.exe`). Browsers, Discord,
+  editors, and the launcher are rejected, and two samples confirm presence.
 - Compact 624x408 graphite acrylic overlay with an 8 px shared corner radius,
   no painted outer rim, and no top accent line.
 - Borderless module cards with the original 28x16 sliding knob switch. No
