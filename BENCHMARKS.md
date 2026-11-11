@@ -66,11 +66,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.9.0**
-- Portable executable: **601,600 bytes**
-- SHA-256: `3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9`
-- Signed MSIX: **306,082 bytes**
-- MSIX SHA-256: `c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215`
+- Version: **2.9.1**
+- Portable executable: **592,384 bytes**
+- SHA-256: `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`
+- Signed MSIX: **301,774 bytes**
+- MSIX SHA-256: `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`
 - Release tests: **19 / 19**
 - Runtime dependencies: **0**
 - Network calls: **0**
@@ -81,5 +81,11 @@ development-certificate build, not a Microsoft Store identity.
 
 2.9.0 changed GUI controls and input batching, not the trigger-routing lookup,
 so the 0.45 ns / 202.39 ns routing numbers remain the 2.6.0 measurement. The
-larger 2.9.0 executable reflects the new icon, power-control, and download
-surface; it is not presented as a size reduction.
+larger 2.9.0 executable reflects the icon, power-control, and download surface
+of that release; it was not presented as a size reduction.
+
+2.9.1 removes the module glyph painter, every per-card outline stroke, and the
+Anchor floor row. The executable is 9,216 bytes smaller (592,384 vs 601,600).
+Trigger routing is unchanged. The app's own System-tab paint snapshot read
+2.86 ms after the change versus 2.60 ms before; that single sample is not a
+benchmark and this release does not claim a render-speed win.

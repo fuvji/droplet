@@ -1,5 +1,30 @@
 # Changelog
 
+## 2.9.1
+
+- Removed every module glyph and the per-card outline. Module cards are now a
+  single borderless surface with the title on the left and a compact text
+  ON/OFF pill on the right. The navigation rail keeps its small line icons.
+- Retired the Anchor `Tick floor` row. The macro still applies the 50 ms
+  Minecraft tick floor before the next hotbar action.
+- Deleted the glyph painter, the card-code helper, the diamond path helper,
+  the per-card `round_stroke` call, and the unused luminance field. The
+  portable executable is **592,384 bytes**, 9,216 bytes smaller than 2.9.0.
+- Thinned the single outer window hairline from 1.0 to 0.75 logical pixels.
+- Removed `site/public/assets/module-icons.svg` and the module icon markup, so
+  the module section ships less HTML, CSS, and one fewer request.
+- Release binary: 592,384 bytes, SHA-256
+  `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`.
+  Signed MSIX: 301,774 bytes, SHA-256
+  `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`.
+  Portable ZIP: `285,770` bytes, SHA-256 `8be91f12560842686ecf306b48f4026a78abef9358d79f4a1ee1a6e2c3d36920`. Tests: 19/19.
+- No routing or behavior change: 0.45 ns indexed vs 202.39 ns scanned. The
+  app's System-tab paint snapshot was 2.86 ms after this change versus 2.60 ms
+  before; that single sample is not presented as a speedup.
+- Boundaries unchanged: no streamproof mode, no capture evasion, no
+  game-memory access, no network calls, no anti-cheat bypass, no input
+  disguise, and no zero-latency or auto-update claim.
+
 ## 2.9.0
 
 - Replaced module pill switches with round power buttons and gave every module

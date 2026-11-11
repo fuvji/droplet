@@ -19,6 +19,14 @@ one codegen unit, panic-abort, stripped.
 - The icon and power-control additions increased the exe from 594,944 to
   601,600 bytes. This is not presented as a size reduction.
 
+## 2.9.1 changes
+
+- Removed the module glyph painter, per-card outline strokes, and the Anchor
+  floor row. The exe fell from 601,600 to 592,384 bytes.
+- No routing change. A single System-tab paint snapshot read 2.86 ms after the
+  change versus 2.60 ms before; that is not a benchmark and no render speedup
+  is claimed.
+
 ## Not measured
 
 - End-to-end input latency.

@@ -883,7 +883,7 @@ body {
   }
 }
 
-/* ----------------------------------------------------------- 2.9.0 layer */
+/* ----------------------------------------------------------- 2.9.1 layer */
 
 .hero-download-note {
   margin: 14px 0 0;
@@ -1043,24 +1043,7 @@ body {
   text-transform: none;
 }
 
-/* Module icon language */
-
-.module-icon {
-  display: block;
-  width: 24px;
-  height: 24px;
-  margin-bottom: 12px;
-  overflow: visible;
-  color: var(--cool);
-}
-
-.module-card {
-  position: relative;
-}
-
-.module-card small {
-  letter-spacing: 0.04em;
-}
+/* Module cards */
 
 /* Benchmark scale */
 

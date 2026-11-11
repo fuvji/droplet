@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.9.0
+Version: 2.9.1
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,7 +15,7 @@ visible to screen capture.
 
 ## Current release
 
-- 2.9.0 portable executable: 601,600 bytes; signed MSIX: 306,082 bytes.
+- 2.9.1 portable executable: 592,384 bytes; signed MSIX: 301,774 bytes.
 - Windows portable ZIP: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip
 - Windows MSIX: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix
 - Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt
@@ -24,9 +24,9 @@ visible to screen capture.
   Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
 - 19 release tests pass.
 - Compact 624x408 graphite acrylic overlay with a 13 px shared corner radius.
-- Round power buttons and original transparent 18 px item-style line glyphs.
+- Borderless module cards with compact text ON/OFF pills. No module glyphs.
 - Every trigger card switches between Hold (one-shot) and Toggle (latched repeat).
-- Anchor defaults to a 37-43 ms window and still applies the 50 ms game tick floor.
+- Anchor defaults to a 37-43 ms window and still applies the 50 ms game tick floor; the card no longer prints a separate floor row.
 - The tray icon was removed. A manual hide is sticky across focus changes.
   Ctrl + Right Shift shows or hides the panel.
 - Dash, Shield, and Pearl select the slot and click in one SendInput batch.

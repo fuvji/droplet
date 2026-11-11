@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.0 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with round power buttons.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.9.1 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with text ON/OFF pills.">
 
 # droplet
 
@@ -19,8 +19,8 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable ZIP](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip) | 289,296 B | **Available** |
-| Windows 10/11 x64 | [Signed MSIX](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix) | 306,082 B | **Available** |
+| Windows 10/11 x64 | [Portable ZIP](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip) | 285,770 B | **Available** |
+| Windows 10/11 x64 | [Signed MSIX](https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix) | 301,774 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -29,21 +29,20 @@ The portable exe is unsigned; the MSIX uses the project development
 certificate. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img`
 is published because those builds do not exist.
 
-## What is in 2.9.0
+## What is in 2.9.1
 
-- **Round power controls** on every module card, with distinct on, off, and
-  hover states and no background plate.
-- **Original item-style line glyphs** for all modules: pearl, shield, spear,
-  mace, potion, crystal, anchor, totem, grass block, sword, player head,
-  repeater, and chest. They are drawn from GDI+ primitives, not copied Mojang
-  textures, and every icon is transparent.
+- **Text ON/OFF pills** on every module card. The round power glyphs and every
+  module icon are gone; each card is one borderless surface.
+- **Smaller binary**: the 2.9.1 portable executable is 592,384 bytes, 9,216
+  bytes smaller than 2.9.0, after deleting the glyph painter and per-card
+  outline draws.
 - **Compact Dash** card without the redundant `Clicks 1x` row.
 - **Sticky hide**: the tray icon is gone, and a manual hide is no longer undone
   by an alt-tab or focus change. `Ctrl + Right Shift` shows or hides the panel.
 - **Instant close**: the close button stops the watchers and exits.
 - **One-second self-destruct hold** with a visible progress percentage.
-- **Anchor 37–43 ms** default and slider window, with the 50 ms Minecraft tick
-  floor stated on the card and still applied by the macro.
+- **Anchor 37–43 ms** default and slider window. The macro still applies the
+  50 ms Minecraft tick floor; the card no longer repeats it.
 - **Same-frame input** for Dash, Shield, and Pearl: slot selection and click
   share one `SendInput` batch. Ordinary input only; the focus gate remains.
 - **Faster hook rejection**: unbound keys are rejected by the prebuilt trigger
@@ -53,7 +52,7 @@ is published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.9.0 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.9.1 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. The painted hairline and the
 Win32 window region share one 13 px radius. Painting is event-driven; an idle
@@ -97,11 +96,13 @@ name, not a latency claim. Details and reproduction:
 ## Verify
 
 - `cargo test --release`: **19 / 19**.
-- Portable executable: **601,600 bytes**,
-  `3c40feceec36e830cbf571614372b41f68c96bc2db417bf1c3d2fa8822db5dd9`.
-- Signed MSIX: **306,082 bytes**,
-  `c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215`.
-- Package version: **2.9.0.0**, signature **Valid**, installed status **Ok**.
+- Portable executable: **592,384 bytes**,
+  `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`.
+- Signed MSIX: **301,774 bytes**,
+  `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`.
+- Portable ZIP: **285,770 bytes**,
+  `8be91f12560842686ecf306b48f4026a78abef9358d79f4a1ee1a6e2c3d36920`.
+- Package version: **2.9.1.0**, signature **Valid**, installed status **Ok**.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here, so hit registration and the new
   same-frame input ordering remain unverified in game.

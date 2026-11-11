@@ -1705,25 +1705,13 @@ h1 em {
 
 .module-card {
   position: relative;
-  min-height: 148px;
+  min-height: 124px;
   padding: 16px 16px 14px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.008));
   transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-}
-
-.module-card::after {
-  position: absolute;
-  right: -28px;
-  bottom: -35px;
-  width: 90px;
-  height: 90px;
-  content: "";
-  border: 1px solid rgba(209, 209, 209, 0.08);
-  border-radius: 50%;
-  transition: transform 220ms ease, border-color 220ms ease;
 }
 
 .module-card:hover {
@@ -1733,11 +1721,6 @@ h1 em {
   transform: translateY(-4px);
 }
 
-.module-card:hover::after {
-  border-color: rgba(209, 209, 209, 0.22);
-  transform: scale(1.2);
-}
-
 .module-code {
   color: var(--cyan);
   font-family: var(--mono);
@@ -1745,7 +1728,7 @@ h1 em {
 }
 
 .module-card h3 {
-  margin-top: 26px;
+  margin-top: 0;
   color: var(--ink-soft);
   font-size: 15px;
   line-height: 1.15;

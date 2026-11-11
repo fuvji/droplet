@@ -15,8 +15,8 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.9.0 portable exe: 601,600 bytes.
-- Signed MSIX: 306,082 bytes.
+- 2.9.1 portable exe: 592,384 bytes (9,216 bytes smaller than 2.9.0).
+- Signed MSIX: 301,774 bytes.
 - Tests: 19 / 19.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
 - No network, telemetry, game-memory access, capture evasion, anti-cheat
@@ -24,9 +24,9 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Design
 
-One 13 px radius. Event-driven paint. Round power controls. Original
-transparent item-style line glyphs. Graphite surface, warm white text, one
-accent hairline.
+One 13 px radius. Event-driven paint. Borderless module cards with text ON/OFF
+pills and no module glyphs. Small original line icons remain in the navigation
+rail only. Graphite surface, warm white text, one thin accent hairline.
 
 ## Current work
 

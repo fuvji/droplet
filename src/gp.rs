@@ -317,21 +317,6 @@ impl Canvas {
         unsafe { (api().GdipDrawLine)(self.g, self.pen, x1, y1, x2, y2) };
     }
 
-    /// Filled diamond (the wordmark glyph).
-    pub fn diamond(&mut self, cx: f32, cy: f32, radius: f32, color: u32) {
-        let api = api();
-        let p = self.reset_path();
-        unsafe {
-            (api.GdipAddPathLine)(p, cx, cy - radius, cx + radius * 0.78, cy);
-            (api.GdipAddPathLine)(p, cx + radius * 0.78, cy, cx, cy + radius);
-            (api.GdipAddPathLine)(p, cx, cy + radius, cx - radius * 0.78, cy);
-            (api.GdipAddPathLine)(p, cx - radius * 0.78, cy, cx, cy - radius);
-            (api.GdipClosePathFigure)(p);
-            self.fill_color(color);
-            (api.GdipFillPath)(self.g, self.brush, p);
-        }
-    }
-
     /// Filled water droplet: apex at (`cx`, `top`), bowl `w` wide and `h` tall.
     pub fn drop(&mut self, cx: f32, top: f32, w: f32, h: f32, color: u32) {
         if w <= 0.0 || h <= 0.0 {

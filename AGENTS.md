@@ -45,9 +45,11 @@ flag.
 
 - One logical `CORNER_RADIUS` across paint, window region, and capture mask.
 - Event-driven paint; no idle animation timer.
-- Icons are original GDI+ line art with transparent backgrounds. No Mojang
-  textures.
-- Round power controls; one accent hairline; warm white on graphite.
+- Navigation icons are original GDI+ line art with transparent backgrounds.
+  No Mojang textures.
+- No module glyphs and no per-card outlines. Module cards are one surface with
+  a title and a text ON/OFF pill; one thin accent hairline; warm white on
+  graphite.
 - Keep the panel at 624×408 logical pixels unless the layout is reworked and
   recaptured.
 

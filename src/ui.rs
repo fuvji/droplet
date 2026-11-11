@@ -77,31 +77,6 @@ fn wid(s: &str, slot: u32) -> u64 {
     h
 }
 
-fn card_mono(title: &str) -> &'static str {
-    match title {
-        "Shield" => "SH",
-        "Mace" => "MC",
-        "Breach" => "BR",
-        "Potion" => "PT",
-        "Auto Use" => "AU",
-        "Dash" => "DS",
-        "Auto Crystal" => "AC",
-        "Anchor" => "AN",
-        "Hover Totem" => "HT",
-        "Pearl" => "PL",
-        "Fast Use" => "FU",
-        "W-Tap" => "WT",
-        "Sprint" => "SP",
-        "Ghost Click" => "GC",
-        "Behaviour" => "BH",
-        "Session" => "SE",
-        "Performance" => "PF",
-        "Danger zone" => "DZ",
-        "Color" => "CL",
-        _ => "",
-    }
-}
-
 // ------------------------------------------------------------------- theme
 
 pub struct Theme {
@@ -115,7 +90,6 @@ pub struct Theme {
     pub dim: u32,
     pub faint: u32,
     pub accent: u32,
-    pub on_accent: u32,
     pub chip: u32,
     pub track: u32,
     pub danger: u32,
@@ -125,9 +99,6 @@ impl Theme {
     pub fn new(s: &Settings) -> Theme {
         let (r, g, b) = s.theme_rgb();
         let accent = 0xFF00_0000 | ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
-        // Keep switch labels and the knob readable on both dark and light
-        // accents. This is a cheap perceptual threshold, not a full WCAG pass.
-        let luma = 0.2126 * r as f32 + 0.7152 * g as f32 + 0.0722 * b as f32;
         Theme {
             bg: 0xFF07_0708,
             rail: 0xFF0A_0A0C,
@@ -139,7 +110,6 @@ impl Theme {
             dim: 0xFF9C_9C_A2,
             faint: 0xFF68_686E,
             accent,
-            on_accent: if luma > 150.0 { 0xFF07_0708 } else { 0xFFF4_F3EF },
             chip: 0xFF1C_1C20,
             track: 0xFF2C_2C31,
             danger: 0xFFD2_6E6E,
@@ -282,8 +252,8 @@ impl<'a> Ui<'a> {
             WIN_W * s - 2.0,
             WIN_H * s - 2.0,
             (CORNER_RADIUS - 0.5) * s,
-            with_alpha(self.th.text, 14),
-            1.0,
+            with_alpha(self.th.text, 10),
+            0.75,
         );
     }
 
@@ -456,215 +426,51 @@ impl<'a> Ui<'a> {
         }
     }
 
-    /// Original 18 px item-style line glyphs. These are drawn from primitives,
-    /// not copied game textures, so the app carries no Mojang art and every
-    /// icon is transparent: no chip, plate, or square background.
-    fn item_icon(&mut self, title: &str, x: f32, y: f32, sz: f32, color: u32) {
-        let s = self.scale;
-        let w = 1.15 * s;
-        let cx = x + sz * 0.5;
-        let cy = y + sz * 0.5;
-        match title {
-            "Shield" => {
-                self.c.line(cx, y + sz * 0.10, x + sz * 0.88, y + sz * 0.28, color, w);
-                self.c.line(x + sz * 0.88, y + sz * 0.28, x + sz * 0.78, y + sz * 0.68, color, w);
-                self.c.line(x + sz * 0.78, y + sz * 0.68, cx, y + sz * 0.94, color, w);
-                self.c.line(cx, y + sz * 0.94, x + sz * 0.22, y + sz * 0.68, color, w);
-                self.c.line(x + sz * 0.22, y + sz * 0.68, x + sz * 0.12, y + sz * 0.28, color, w);
-                self.c.line(x + sz * 0.12, y + sz * 0.28, cx, y + sz * 0.10, color, w);
-            }
-            "Mace" | "Breach" => {
-                self.c.line(x + sz * 0.22, y + sz * 0.86, x + sz * 0.62, y + sz * 0.44, color, w);
-                self.c.round_rect(x + sz * 0.54, y + sz * 0.06, sz * 0.36, sz * 0.36, sz * 0.10, color);
-                self.c.line(x + sz * 0.18, y + sz * 0.56, x + sz * 0.34, y + sz * 0.56, color, w);
-                if title == "Breach" {
-                    self.c.line(x + sz * 0.62, y + sz * 0.04, x + sz * 0.70, y + sz * 0.16, color, 1.0 * s);
-                    self.c.line(x + sz * 0.90, y + sz * 0.24, x + sz * 0.78, y + sz * 0.32, color, 1.0 * s);
-                }
-            }
-            "Potion" | "Auto Use" => {
-                self.c.line(cx, y + sz * 0.06, cx, y + sz * 0.18, color, w);
-                self.c.round_rect(x + sz * 0.38, y + sz * 0.16, sz * 0.24, sz * 0.14, 2.0 * s, color);
-                self.c.round_rect(x + sz * 0.24, y + sz * 0.30, sz * 0.52, sz * 0.58, sz * 0.18, with_alpha(color, 42));
-                self.c.round_stroke(x + sz * 0.24, y + sz * 0.30, sz * 0.52, sz * 0.58, sz * 0.18, color, w);
-                self.c.line(x + sz * 0.32, y + sz * 0.58, x + sz * 0.68, y + sz * 0.58, with_alpha(color, 120), 1.0 * s);
-                if title == "Auto Use" {
-                    self.c.diamond(x + sz * 0.86, y + sz * 0.20, sz * 0.11, color);
-                }
-            }
-            "Dash" => {
-                self.c.line(x + sz * 0.14, y + sz * 0.86, x + sz * 0.72, y + sz * 0.28, color, w);
-                self.c.diamond(x + sz * 0.82, y + sz * 0.18, sz * 0.13, color);
-                self.c.line(x + sz * 0.10, y + sz * 0.58, x + sz * 0.30, y + sz * 0.58, with_alpha(color, 150), 1.0 * s);
-                self.c.line(x + sz * 0.18, y + sz * 0.74, x + sz * 0.36, y + sz * 0.74, with_alpha(color, 110), 1.0 * s);
-            }
-            "Auto Crystal" => {
-                self.c.diamond(cx, y + sz * 0.40, sz * 0.31, with_alpha(color, 60));
-                self.c.diamond(cx, y + sz * 0.40, sz * 0.31, color);
-                self.c.line(x + sz * 0.20, y + sz * 0.84, x + sz * 0.80, y + sz * 0.84, color, w);
-                self.c.line(cx, y + sz * 0.63, cx, y + sz * 0.84, color, w);
-            }
-            "Anchor" => {
-                self.c.line(cx, y + sz * 0.18, cx, y + sz * 0.86, color, w);
-                self.c.line(x + sz * 0.28, y + sz * 0.36, x + sz * 0.72, y + sz * 0.36, color, w);
-                self.c.line(cx, y + sz * 0.86, x + sz * 0.18, y + sz * 0.64, color, w);
-                self.c.line(cx, y + sz * 0.86, x + sz * 0.82, y + sz * 0.64, color, w);
-                self.c.round_stroke(cx - 3.0 * s, y + 0.04 * sz, 6.0 * s, 6.0 * s, 3.0 * s, color, w);
-            }
-            "Hover Totem" => {
-                self.c.round_rect(x + sz * 0.28, y + sz * 0.10, sz * 0.44, sz * 0.78, 2.0 * s, with_alpha(color, 32));
-                self.c.round_stroke(x + sz * 0.28, y + sz * 0.10, sz * 0.44, sz * 0.78, 2.0 * s, color, w);
-                self.c.circle(cx - 2.4 * s, y + sz * 0.38, 1.1 * s, color);
-                self.c.circle(cx + 2.4 * s, y + sz * 0.38, 1.1 * s, color);
-                self.c.line(cx - 2.0 * s, y + sz * 0.58, cx + 2.0 * s, y + sz * 0.58, color, 1.0 * s);
-                self.c.line(x + sz * 0.28, y + sz * 0.70, x + sz * 0.72, y + sz * 0.70, with_alpha(color, 140), 1.0 * s);
-            }
-            "Pearl" => {
-                self.c.round_stroke(x + sz * 0.20, y + sz * 0.20, sz * 0.60, sz * 0.60, sz * 0.30, color, w);
-                self.c.circle(cx - 2.0 * s, cy - 2.0 * s, 1.5 * s, color);
-                self.c.line(cx + 1.0 * s, cy + 3.0 * s, cx + 3.5 * s, cy + 4.0 * s, with_alpha(color, 150), 1.0 * s);
-            }
-            "Fast Use" => {
-                self.c.line(x + sz * 0.16, y + sz * 0.36, cx, y + sz * 0.16, color, w);
-                self.c.line(cx, y + sz * 0.16, x + sz * 0.84, y + sz * 0.36, color, w);
-                self.c.line(x + sz * 0.16, y + sz * 0.36, x + sz * 0.16, y + sz * 0.76, color, w);
-                self.c.line(x + sz * 0.84, y + sz * 0.36, x + sz * 0.84, y + sz * 0.76, color, w);
-                self.c.line(x + sz * 0.16, y + sz * 0.76, cx, y + sz * 0.94, color, w);
-                self.c.line(x + sz * 0.84, y + sz * 0.76, cx, y + sz * 0.94, color, w);
-                self.c.line(cx, y + sz * 0.16, cx, y + sz * 0.60, with_alpha(color, 130), 1.0 * s);
-            }
-            "W-Tap" => {
-                self.c.line(x + sz * 0.20, y + sz * 0.80, x + sz * 0.74, y + sz * 0.18, color, w);
-                self.c.line(x + sz * 0.62, y + sz * 0.16, x + sz * 0.84, y + sz * 0.10, color, w);
-                self.c.line(x + sz * 0.20, y + sz * 0.80, x + sz * 0.34, y + sz * 0.94, color, w);
-                self.c.line(x + sz * 0.28, y + sz * 0.66, x + sz * 0.46, y + sz * 0.84, color, w);
-            }
-            "Sprint" => {
-                self.c.round_rect(cx - 4.5 * s, y + sz * 0.10, 9.0 * s, 9.0 * s, 3.0 * s, with_alpha(color, 40));
-                self.c.round_stroke(cx - 4.5 * s, y + sz * 0.10, 9.0 * s, 9.0 * s, 3.0 * s, color, w);
-                self.c.line(cx - 6.0 * s, y + sz * 0.84, cx - 6.0 * s, y + sz * 0.64, color, w);
-                self.c.line(cx - 6.0 * s, y + sz * 0.64, cx, y + sz * 0.60, color, w);
-                self.c.line(cx, y + sz * 0.60, cx + 6.0 * s, y + sz * 0.64, color, w);
-                self.c.line(cx + 6.0 * s, y + sz * 0.64, cx + 6.0 * s, y + sz * 0.84, color, w);
-            }
-            "Ghost Click" => {
-                self.c.round_rect(x + sz * 0.14, y + sz * 0.18, sz * 0.72, sz * 0.64, 3.0 * s, with_alpha(color, 24));
-                self.c.round_stroke(x + sz * 0.14, y + sz * 0.18, sz * 0.72, sz * 0.64, 3.0 * s, color, w);
-                self.c.circle(x + sz * 0.34, cy, 1.5 * s, color);
-                self.c.circle(x + sz * 0.66, cy, 1.5 * s, color);
-                self.c.line(x + sz * 0.34, cy, x + sz * 0.66, cy, with_alpha(color, 130), 1.0 * s);
-            }
-            "Color" => {
-                self.c.circle(x + sz * 0.30, y + sz * 0.34, 3.2 * s, with_alpha(color, 80));
-                self.c.circle(x + sz * 0.68, y + sz * 0.34, 3.2 * s, with_alpha(color, 150));
-                self.c.circle(cx, y + sz * 0.72, 3.2 * s, color);
-            }
-            "Behaviour" => {
-                self.c.line(x + sz * 0.12, y + sz * 0.32, x + sz * 0.88, y + sz * 0.32, color, w);
-                self.c.line(x + sz * 0.12, y + sz * 0.68, x + sz * 0.88, y + sz * 0.68, color, w);
-                self.c.circle(x + sz * 0.68, y + sz * 0.32, 2.0 * s, color);
-                self.c.circle(x + sz * 0.34, y + sz * 0.68, 2.0 * s, color);
-            }
-            "Session" => {
-                for gy in 0..2 {
-                    for gx in 0..2 {
-                        self.c.circle(
-                            x + sz * (0.32 + gx as f32 * 0.36),
-                            y + sz * (0.32 + gy as f32 * 0.36),
-                            1.8 * s,
-                            with_alpha(color, if gx + gy == 0 { 220 } else { 110 }),
-                        );
-                    }
-                }
-            }
-            "Performance" => {
-                self.c.line(cx + 3.0 * s, y + sz * 0.08, cx - 4.0 * s, y + sz * 0.52, color, w);
-                self.c.line(cx - 4.0 * s, y + sz * 0.52, cx + 1.0 * s, y + sz * 0.52, color, w);
-                self.c.line(cx + 1.0 * s, y + sz * 0.52, cx - 3.0 * s, y + sz * 0.94, color, w);
-            }
-            "Danger zone" => {
-                self.c.line(cx, y + sz * 0.10, x + sz * 0.90, y + sz * 0.90, color, w);
-                self.c.line(x + sz * 0.90, y + sz * 0.90, x + sz * 0.10, y + sz * 0.90, color, w);
-                self.c.line(x + sz * 0.10, y + sz * 0.90, cx, y + sz * 0.10, color, w);
-                self.c.line(cx, y + sz * 0.38, cx, y + sz * 0.62, color, w);
-                self.c.circle(cx, y + sz * 0.76, 1.2 * s, color);
-            }
-            _ => {
-                self.c.diamond(cx, cy, sz * 0.30, color);
-            }
-        }
-    }
-
     // ---- card chrome
 
     fn card(&mut self, r: Rect, title: &str, toggle: Option<&'static str>) {
         let s = self.scale;
         let on = toggle.map(|k| self.s.bool_at(k)).unwrap_or(true);
         let active = toggle.is_none() || on;
-        self.c.round_rect(r.x, r.y, r.w, r.h, 12.0 * s, if on { self.th.card_on } else { self.th.card });
-        self.c.round_stroke(
+        // One surface, no outline. Per-card strokes read as extra thickness
+        // at fractional DPI and cost a path draw on every repaint.
+        self.c.round_rect(
             r.x,
             r.y,
             r.w,
             r.h,
             12.0 * s,
-            if on { self.th.border_on } else { self.th.border },
-            1.0,
+            if on { self.th.card_on } else { self.th.card },
         );
         let color = if active { self.th.text } else { self.th.dim };
-        let hue = if title == "Danger zone" { self.th.danger } else { self.th.accent };
-        let chip = Rect::new(r.x + 10.0 * s, r.y + 4.0 * s, 18.0 * s, 18.0 * s);
-        self.item_icon(title, chip.x, chip.y, chip.w, if active { hue } else { self.th.faint });
-        let tr = Rect::new(chip.x + chip.w + 6.0 * s, r.y + 4.0 * s, r.w - 10.0 * s - chip.w - 6.0 * s - 36.0 * s, 17.0 * s);
+        let tr = Rect::new(r.x + 12.0 * s, r.y + 4.0 * s, r.w - 66.0 * s, 17.0 * s);
         self.label(tr.x, tr.y, tr.w, tr.h, title, 11.5, false, color);
         if let Some(k) = toggle {
-            let sw = Rect::new(r.x + r.w - 10.0 * s - 18.0 * s, r.y + 4.0 * s, 18.0 * s, 18.0 * s);
+            let sw = Rect::new(r.x + r.w - 42.0 * s, r.y + 4.0 * s, 32.0 * s, 17.0 * s);
             self.switch(sw.x, sw.y, k, on);
         }
     }
 
     fn switch(&mut self, x: f32, y: f32, key: &'static str, on: bool) {
         let s = self.scale;
-        let w = 18.0 * s;
-        let h = 18.0 * s;
+        let w = 32.0 * s;
+        let h = 17.0 * s;
         let r = Rect::new(x, y, w, h);
         let hot = self.hovered(r);
         let t = self.anim(wid(key, 11), if on { 1.0 } else { 0.0 });
         let hv = self.anim(wid(key, 12), if hot { 1.0 } else { 0.0 });
-        let cx = x + w * 0.5;
-        let cy = y + h * 0.5;
-        if t > 0.01 {
-            self.c.circle(cx, cy, 8.6 * s, with_alpha(self.th.accent, (8.0 + 12.0 * t) as u8));
-        }
-        let ring = mix(self.th.track, self.th.accent, t.max(hv * 0.6));
-        self.c.round_stroke(x + 1.0 * s, y + 1.0 * s, w - 2.0 * s, h - 2.0 * s, (w - 2.0 * s) * 0.5, ring, 1.1 * s);
-        let glyph = if on { self.th.text } else { mix(self.th.faint, self.th.text, hv) };
-        self.c.line(cx, cy - 4.4 * s, cx, cy + 0.2 * s, glyph, 1.3 * s);
-        // Open-top arc: eight points, skipping the top gap of the power mark.
-        let pts = [
-            (0.72, -0.70),
-            (0.98, 0.0),
-            (0.72, 0.70),
-            (0.0, 0.98),
-            (-0.72, 0.70),
-            (-0.98, 0.0),
-            (-0.72, -0.70),
-        ];
-        for i in 0..pts.len() - 1 {
-            self.c.line(
-                cx + pts[i].0 * 4.2 * s,
-                cy + pts[i].1 * 4.2 * s,
-                cx + pts[i + 1].0 * 4.2 * s,
-                cy + pts[i + 1].1 * 4.2 * s,
-                glyph,
-                1.2 * s,
-            );
-        }
+        let bg = if on {
+            with_alpha(self.th.accent, (15.0 + 11.0 * t + 5.0 * hv) as u8)
+        } else {
+            with_alpha(self.th.text, (5.0 + 6.0 * hv) as u8)
+        };
+        self.c.round_rect(r.x, r.y, w, h, h * 0.5, bg);
+        let fg = if on { self.th.accent } else { mix(self.th.faint, self.th.text, hv) };
+        self.label_center(r.x, r.y - 0.5 * s, w, h, if on { "ON" } else { "OFF" }, 7.5, false, fg);
         if self.pressed && hot {
             self.acts.push(Act::Toggle(key));
         }
     }
-
     fn chip(&mut self, r: Rect, key: &'static str) {
         let s = self.scale;
         // Borrow the stored binding directly: the paint path used to allocate a
@@ -751,7 +557,7 @@ impl<'a> Ui<'a> {
         let on = self.s.bool_at(key);
         let lr = Rect::new(card.x + 12.0 * s, y, card.w - 58.0 * s, ROW_H * s);
         self.label(lr.x, lr.y, lr.w, lr.h, label, 9.5, false, self.th.dim);
-        let sw = Rect::new(card.x + card.w - 10.0 * s - 18.0 * s, y + 2.0 * s, 18.0 * s, 18.0 * s);
+        let sw = Rect::new(card.x + card.w - 42.0 * s, y + 2.0 * s, 32.0 * s, 17.0 * s);
         self.switch(sw.x, sw.y, key, on);
     }
 
@@ -1056,7 +862,7 @@ impl<'a> Ui<'a> {
         self.row_switch(r, 3, "Auto inventory", "vI");
 
         let mut y = (HEADER_H + PAD) * s;
-        let r = Rect::new(x1, y, w, self.card_h(7));
+        let r = Rect::new(x1, y, w, self.card_h(6));
         self.card(r, "Anchor", Some("v6"));
         self.row_key(r, 0, "Trigger", "v6Bn", Some("v6Md"));
         self.row_slot(r, 1, "Anchor", "v6S1");
@@ -1064,7 +870,6 @@ impl<'a> Ui<'a> {
         self.row_slot(r, 3, "Totem", "v6S3");
         self.row_slider(r, 4, "Min delay", "v6D1", ANCHOR_MIN, ANCHOR_MAX, "ms");
         self.row_slider(r, 5, "Max delay", "v6D2", ANCHOR_MIN, ANCHOR_MAX, "ms");
-        self.row_value(r, 6, "Tick floor", "50 ms");
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));

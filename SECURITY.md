@@ -9,8 +9,8 @@ install a background service.
 
 | Version | Supported |
 | --- | --- |
-| 2.6.x | Yes |
-| 2.5.x and older | No |
+| 2.9.x | Yes |
+| 2.8.x and older | No |
 
 Only builds from the [project site](https://fuvji.github.io/droplet/)
 or [GitHub](https://github.com/fuvji/droplet) are supported. Verify the release

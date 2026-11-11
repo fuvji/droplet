@@ -10,7 +10,7 @@ Source: <https://github.com/fuvji/droplet>
 
 - `public/index.html` — product page: downloads, benchmark, previews, modules,
   audit, evidence vault, specs, sponsor inventory, FAQ, founder credit.
-- `public/releases.html` — detailed 2.9.0 release ledger and version history.
+- `public/releases.html` — detailed 2.9.1 release ledger and version history.
 - `public/sponsors.html` — direct sponsor inventory.
 - `public/style.css` — base visual system.
 - `public/refine.css` — editorial layer, download/vault cards, 3D previews,
@@ -24,9 +24,9 @@ Source: <https://github.com/fuvji/droplet>
 
 ## Release artifacts
 
-`droplet-windows-x64.zip` (289,296 B) contains the unsigned portable
+`droplet-windows-x64.zip` (285,770 B) contains the unsigned portable
 `droplet.exe`, the license, README, and checksums. `droplet-windows-x64.msix`
-(306,082 B) is signed with the project development certificate. Linux and
+(301,774 B) is signed with the project development certificate. Linux and
 macOS packages are not published because the Win32/GDI+ core has not been
 ported.
 

@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Droplet releases — 2.9.0 ledger</title>
-  <meta name="description" content="Droplet 2.9.0 release notes, Windows downloads, SHA-256 checksums, verification, and the full version ledger.">
+  <title>Droplet releases — 2.9.1 ledger</title>
+  <meta name="description" content="Droplet 2.9.1 release notes, Windows downloads, SHA-256 checksums, verification, and the full version ledger.">
   <link rel="canonical" href="https://fuvji.github.io/droplet/releases.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Droplet releases — 2.9.0 ledger">
-  <meta property="og:description" content="Downloads, hashes, GUI changes, input batching, and honest limits for Droplet 2.9.0.">
+  <meta property="og:title" content="Droplet releases — 2.9.1 ledger">
+  <meta property="og:description" content="Downloads, hashes, GUI changes, input batching, and honest limits for Droplet 2.9.1.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/releases.html">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.0">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.1">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=2.9.0-1">
-  <link rel="stylesheet" href="refine.css?v=2.9.0-1">
+  <link rel="stylesheet" href="style.css?v=2.9.1-1">
+  <link rel="stylesheet" href="refine.css?v=2.9.1-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -27,7 +27,7 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.9.0</span>
+        <span class="brand-version">2.9.1</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html#download">Download</a>
@@ -44,8 +44,8 @@
     <section class="page-hero release-hero wrap" aria-labelledby="release-title">
       <div>
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-11</p>
-        <h1 id="release-title">Droplet<br><em>2.9.0.</em></h1>
-        <p class="lede">A GUI and distribution release: round power controls, transparent item-style glyphs, a compact Dash card, a sticky hidden state, same-frame input batching for three modules, and real Windows downloads.</p>
+        <h1 id="release-title">Droplet<br><em>2.9.1.</em></h1>
+        <p class="lede">A size and polish release: borderless module cards, compact text ON/OFF pills, every module glyph removed, the Anchor tick-floor row retired, and a smaller Windows build.</p>
         <div class="actions">
           <a class="button button-primary" href="downloads/droplet-windows-x64.zip" download>Portable ZIP <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="downloads/SHA256SUMS.txt">Checksums</a>
@@ -56,12 +56,12 @@
           <li>No streamproof mode</li>
         </ul>
       </div>
-      <aside class="console-card" aria-label="2.9.0 release card">
-        <div class="console-head"><span>Release / 2.9.0</span><span class="status-live"><i aria-hidden="true"></i>Signed</span></div>
+      <aside class="console-card" aria-label="2.9.1 release card">
+        <div class="console-head"><span>Release / 2.9.1</span><span class="status-live"><i aria-hidden="true"></i>Signed</span></div>
         <div class="console-main">
           <span class="console-label">Portable executable</span>
-          <div class="console-value">601,600<small>B</small></div>
-          <p>The MSIX is 306,082 bytes. Both artifacts are built from the same source and verified with SHA-256.</p>
+          <div class="console-value">592,384<small>B</small></div>
+          <p>The MSIX is 301,774 bytes. Both artifacts are built from the same source and verified with SHA-256.</p>
           <div class="signal-bars" aria-hidden="true">
             <i class="sh18"></i><i class="sh34"></i><i class="sh24"></i><i class="sh48"></i>
             <i class="sh40"></i><i class="sh66"></i><i class="sh54"></i><i class="sh82"></i>
@@ -72,8 +72,8 @@
           <div class="signal-caption"><span>release tests 19 / 19</span><span>routing 0.45 ns</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Version</dt><dd>2.9.0</dd></div>
-          <div><dt>Package</dt><dd>2.9.0.0</dd></div>
+          <div><dt>Version</dt><dd>2.9.1</dd></div>
+          <div><dt>Package</dt><dd>2.9.1.0</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
           <div><dt>Network</dt><dd>None</dd></div>
         </dl>
@@ -89,8 +89,8 @@
       <table class="release-table">
         <thead><tr><th>Artifact</th><th>Size / SHA-256</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><a href="downloads/droplet-windows-x64.zip" download>droplet-windows-x64.zip</a></td><td>289,296 B<br><code>251932da68bbe2c27f5f3670a12f1ea2a454fda7ecb157227ae1c2a66e15e47d</code></td><td>Unzip, run <code>droplet.exe</code>. No installer.</td></tr>
-          <tr><td><a href="downloads/droplet-windows-x64.msix" download>droplet-windows-x64.msix</a></td><td>306,082 B<br><code>c569446ec120c8548b009e4714d3e6d3b3df5001fa4a51ae2bf60f6c2f84a215</code></td><td>Signed with the Droplet development certificate.</td></tr>
+          <tr><td><a href="downloads/droplet-windows-x64.zip" download>droplet-windows-x64.zip</a></td><td>285,770 B<br><code>8be91f12560842686ecf306b48f4026a78abef9358d79f4a1ee1a6e2c3d36920</code></td><td>Unzip, run <code>droplet.exe</code>. No installer.</td></tr>
+          <tr><td><a href="downloads/droplet-windows-x64.msix" download>droplet-windows-x64.msix</a></td><td>301,774 B<br><code>92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045</code></td><td>Signed with the Droplet development certificate.</td></tr>
           <tr><td><a href="downloads/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td>exe · MSIX · ZIP</td><td>Verify before running.</td></tr>
           <tr><td>Linux / macOS</td><td>Not built</td><td>The core is Win32/GDI+. A real port is a separate project; no fake package is offered.</td></tr>
         </tbody>
@@ -99,19 +99,20 @@
 
     <section class="section wrap" aria-labelledby="notes-title">
       <div class="section-head">
-        <div><p class="section-tag"><span aria-hidden="true"></span>2.9.0 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
+        <div><p class="section-tag"><span aria-hidden="true"></span>2.9.1 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
         <p class="section-lede">A readable ledger. Every item is implemented in the source or measured on the release build; the unverified items are labelled.</p>
       </div>
       <div class="download-grid">
         <article class="release-block">
           <h3>GUI</h3>
           <ul>
-            <li>Round power buttons replace the pill switches on every module.</li>
-            <li>Original 18 px item-style line glyphs replace two-letter codes. No Mojang textures, no icon backgrounds.</li>
+            <li>Text ON/OFF pills replace the round power glyphs on every module card.</li>
+            <li>All module glyphs are removed. Cards are one borderless surface: title left, ON/OFF pill right.</li>
             <li>Dash loses the redundant “Clicks 1x” row and shrinks by one row.</li>
             <li>Behaviour no longer shows a Capture row. The public audit still states ordinary visible composition.</li>
-            <li>Anchor ships at 37–43 ms with the 50 ms tick floor shown in the card.</li>
-            <li>Deeper graphite palette, warm white text, accent hairline, same 13 px corner.</li>
+            <li>Anchor ships at 37–43 ms. The separate tick-floor row is gone; the macro still enforces the 50 ms floor.</li>
+            <li>Deeper graphite palette, warm white text, one thin accent hairline, same 13 px corner.</li>
+            <li>The portable executable is 592,384 bytes — 9,216 bytes smaller than 2.9.0.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -143,6 +144,7 @@
         <p class="section-lede">The versioned notes in the repository are the source of truth. This page is a readable mirror, not an automatically generated feed.</p>
       </div>
       <div class="release-timeline">
+        <article><strong>2.9.1</strong><div><h3>Borderless cards, text controls</h3><p>Module glyphs removed, text ON/OFF pills, borderless cards, Anchor tick-floor row retired, 592,384-byte exe and 301,774-byte MSIX.</p></div></article>
         <article><strong>2.9.0</strong><div><h3>Power controls and downloads</h3><p>Round power buttons, transparent item glyphs, compact Dash, sticky hide, 1 s self-destruct, same-frame Dash/Shield/Pearl input, Windows ZIP and MSIX, GitHub release workflow.</p></div></article>
         <article><strong>2.8.0</strong><div><h3>Fitted corners and lighter paint</h3><p>One 13 px radius across paint, window region, and capture mask; allocation-free binding chips; 594,944-byte binary; editorial site rebuild.</p></div></article>
         <article><strong>2.7.0</strong><div><h3>Accent and per-module modes</h3><p>RGB presets and channel sliders, Hold/Toggle chips on every trigger card, and tighter fast-module defaults.</p></div></article>
@@ -158,7 +160,7 @@
       <div class="download-verify">
         <span>Windows PowerShell</span>
         <code>Get-FileHash .\droplet-windows-x64.zip -Algorithm SHA256</code>
-        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.9.0.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.9.1.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>

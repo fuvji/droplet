@@ -1,5 +1,18 @@
 # release
 
+## 2.9.1 — 2026-11-11
+
+- Portable exe: 592,384 B,
+  `c0b5c64793d3a94f70c4141903715f58a3458665db3c0db5e51ca38ae297fe8a`.
+- MSIX: 301,774 B,
+  `92768f518581cfd2662f8e83506ec27127742833ea6d995b32d507a5dc3f3045`.
+- Portable ZIP: 285,770 B,
+  `8be91f12560842686ecf306b48f4026a78abef9358d79f4a1ee1a6e2c3d36920`.
+- Tests: 19 / 19.
+- Package: 2.9.1.0, signature Valid, installed Ok.
+- Changes: module glyphs and card outlines removed; text ON/OFF pills; Anchor
+  floor row retired; exe 9,216 bytes smaller.
+
 ## 2.9.0 — 2026-11-11
 
 - Portable exe: 601,600 B,

@@ -3,7 +3,7 @@
 Droplet is funded by direct sponsorships. The product site does not load a
 third-party ad client, tracking pixel, cookie banner, or analytics script.
 
-Sponsor page: <https://fuvji.github.io/droplet/sponsors.html.html>
+Sponsor page: <https://fuvji.github.io/droplet/sponsors.html>
 
 Inquiry: <https://github.com/fuvji/droplet/issues/new?title=Sponsorship%20inquiry&body=Company%3A%0APlacement%3A%0ABudget%3A%0ALink%3A>
 
@@ -40,7 +40,7 @@ The public site does not measure traffic, so no audience counts are claimed.
 
 The sponsor page is plain HTML/CSS. A sponsor link is ordinary outbound
 navigation. Adding an ad network would require a visible change to the privacy
-and security model, and is not part of 2.6.1.
+and security model, and is not part of 2.9.1.
 
 ## Current status
 
