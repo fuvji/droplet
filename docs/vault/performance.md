@@ -81,6 +81,17 @@ one codegen unit, panic-abort, stripped.
   and cold-discovery semantics are unchanged. No input-latency or frame-time
   speedup is claimed.
 
+## 2.10.4 changes
+
+- The site brand mark is one transparent rule; the favicon tile and duplicate
+  plate CSS are gone. This is source/dead-style debloat, not a render-speed
+  claim.
+- `Engine` caches `focus_only` in an atomic updated by `publish`. The presence
+  loop no longer clones the settings snapshot or takes its lock every 160 ms.
+- Trigger routing remains 0.45 ns indexed versus 202.39 ns scanned. The release
+  profile is unchanged. No end-to-end latency, game-tick, or zero-latency claim
+  is made.
+
 ## Not measured
 
 - End-to-end input latency.

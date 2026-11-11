@@ -50,12 +50,6 @@ body {
   gap: 12px;
 }
 
-.brand-mark {
-  width: 27px;
-  height: 27px;
-  border-radius: 9px;
-}
-
 .brand-name {
   font-family: var(--display);
   font-size: 17px;

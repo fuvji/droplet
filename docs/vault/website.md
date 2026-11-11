@@ -9,14 +9,15 @@ Canonical: <https://fuvji.github.io/droplet/>
 - `releases.html` — detailed release ledger and artifact table.
 - `sponsors.html` — direct sponsor inventory.
 - `downloads.js` — local-only OS hint; no storage, no network.
-- `downloads/` — ZIP, MSIX, README, SHA-256 list.
+- `downloads/` — direct exe, README, and SHA-256 list; no ZIP or MSIX.
 
 ## Visual system
 
-Graphite, warm white, one thin accent hairline. Module cards are borderless
-with text ON/OFF pills and no module glyphs. Oversized display type, thin rules,
-generous section spacing, restrained hover motion, 3D preview tilt. Reduced
-motion disables transforms.
+Graphite, warm white, one thin accent hairline. The brand mark and favicon are
+transparent outlined droplets: no plate, border, background, or shadow. Module
+cards are borderless with text ON/OFF pills and no module glyphs. Oversized
+display type, thin rules, generous section spacing, restrained hover motion, 3D
+preview tilt. Reduced motion disables transforms.
 
 ## Honesty rules
 

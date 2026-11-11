@@ -26,6 +26,7 @@ pub struct Engine {
     pub focus: AtomicBool,
     pub present: AtomicBool,
     pub gate: AtomicBool,
+    focus_only: AtomicBool,
     pub capture_key: Mutex<Option<&'static str>>,
     pub captured: Mutex<Option<(&'static str, String)>>,
     pub quitting: AtomicBool,
@@ -39,6 +40,7 @@ impl Engine {
             focus: AtomicBool::new(false),
             present: AtomicBool::new(false),
             gate: AtomicBool::new(false),
+            focus_only: AtomicBool::new(s.focus_only),
             capture_key: Mutex::new(None),
             captured: Mutex::new(None),
             quitting: AtomicBool::new(false),
@@ -60,6 +62,7 @@ impl Engine {
         // Bindings can change from the panel. Rebuild the event index once per
         // settings publish, never on the input-hook hot path.
         *self.triggers.write().unwrap() = Arc::new(macros::TriggerMap::build(&s));
+        self.focus_only.store(s.focus_only, Ordering::Relaxed);
         *self.st.write().unwrap() = Arc::new(s);
     }
 }
@@ -1119,8 +1122,9 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
             let present = hits >= 2;
             let focus = present && root == game;
 
-            let s = e.settings();
-            let gate = focus || !s.focus_only;
+            // The presence loop only needs this one boolean; avoid cloning the
+            // whole settings snapshot and taking the settings lock every tick.
+            let gate = focus || !e.focus_only.load(Ordering::Relaxed);
             let was_gate = e.gate.swap(gate, Ordering::Relaxed);
             if !gate && was_gate {
                 // A latched Toggle worker must not outlive the foreground gate.

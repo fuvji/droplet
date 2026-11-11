@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.10.4
+
+- Remove the favicon tile and all brand-mark plate styling. The site mark is
+  now one transparent 27 px rule; duplicate reset CSS is deleted.
+- Cache the focus-only setting in an atomic updated by `Engine::publish`, so the
+  160 ms presence loop no longer takes the settings lock or clones the settings
+  snapshot every tick. Presence and gate semantics are unchanged.
+- Portable executable: **596,480 bytes**, SHA-256
+  `c9732c9c5041274d3a72e0b89ff855801966d24ec91ab9cfb3b70cc4092922f2`.
+  Tests: **25 / 25**.
+- No end-to-end latency or zero-latency claim. Trigger routing and the release
+  profile are unchanged; the game tick and Windows scheduling remain.
+
 ## 2.10.3
 
 - Make the transparent quarter-rounds click-through when DWM owns the corner

@@ -1,5 +1,14 @@
 # release
 
+## 2.10.4 — 2026-11-11
+
+- Portable exe: 596,480 B,
+  `c9732c9c5041274d3a72e0b89ff855801966d24ec91ab9cfb3b70cc4092922f2`.
+- Tests: 25 / 25.
+- Changes: transparent brand mark with no favicon tile or plate CSS; cached
+  focus-only gate avoids a settings lock in the presence loop. Trigger routing
+  and 8 px corners are unchanged. No zero-latency claim.
+
 ## 2.10.3 — 2026-11-11
 
 - Portable exe: 596,992 B,
