@@ -13,18 +13,19 @@
   <meta property="og:title" content="Droplet — Minecraft Zero Macro">
   <meta property="og:description" content="A compact, local Windows keyboard-and-mouse macro suite for Minecraft Java. Pre-indexed routing, exact sequences, no telemetry, no network calls, and no game-memory access.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.3">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.0">
   <meta property="og:image:width" content="624">
   <meta property="og:image:height" content="408">
   <meta property="og:image:alt" content="The Droplet Minecraft Macro Suite Core panel at native 624 by 408 size.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Droplet — Minecraft Zero Macro">
   <meta name="twitter:description" content="A compact, local Minecraft Java macro suite for Windows. Exact sequences, visible composition, no game-memory access.">
-  <meta name="twitter:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.3">
+  <meta name="twitter:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.0">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="alternate" type="text/plain" href="llms.txt" title="Droplet plain-text summary">
-  <link rel="stylesheet" href="style.css?v=2.9.3-1">
-  <link rel="stylesheet" href="refine.css?v=2.9.3-1">
+  <link rel="stylesheet" href="style.css?v=2.10.0-1">
+  <link rel="stylesheet" href="refine.css?v=2.10.0-1">
+  <link rel="stylesheet" href="vault.css?v=2.10.0">
   <script src="downloads.js" defer></script>
 </head>
 <body>
@@ -40,7 +41,7 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.9.3</span>
+        <span class="brand-version">2.10.0</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="#download">Download</a>
@@ -48,6 +49,7 @@
         <a href="#interface">Interface</a>
         <a href="#modules">Modules</a>
         <a href="#audit">Audit</a>
+        <a href="#vault-graph">Vault</a>
         <a href="releases.html">Releases</a>
         <a href="https://github.com/fuvji/droplet">Source</a>
       </nav>
@@ -57,6 +59,35 @@
 
   <main id="main">
     <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-vault" aria-hidden="true">
+        <svg viewBox="0 0 760 520" focusable="false">
+          <g class="hv-line">
+            <path d="M54 128 168 78 278 152 408 92 652 138"/>
+            <path d="M54 128 122 300 286 384 408 92"/>
+            <path d="M168 78 286 384"/>
+            <path d="M278 152 286 384 470 448 652 138"/>
+            <path d="M408 92 652 138 592 330 470 448"/>
+            <path class="is-hot" d="M382 250 470 448"/>
+          </g>
+          <g class="hv-node">
+            <circle class="hv-ring" cx="382" cy="250" r="38"/>
+            <circle cx="382" cy="250" r="4"/>
+            <circle cx="54" cy="128" r="3"/>
+            <circle cx="168" cy="78" r="2.5"/>
+            <circle cx="278" cy="152" r="3"/>
+            <circle class="is-soft" cx="408" cy="92" r="4"/>
+            <circle cx="652" cy="138" r="3"/>
+            <circle class="is-soft" cx="122" cy="300" r="2.5"/>
+            <circle cx="286" cy="384" r="3"/>
+            <circle class="is-soft" cx="470" cy="448" r="2.5"/>
+            <circle cx="592" cy="330" r="3"/>
+            <text x="54" y="116">CORE</text>
+            <text x="654" y="126">CRYSTAL</text>
+            <text x="300" y="376">SYSTEM</text>
+            <text x="382" y="208" text-anchor="middle">DROPLET</text>
+          </g>
+        </svg>
+      </div>
       <div class="hero-copy">
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Minecraft Java <span aria-hidden="true">/</span> Windows 10–11 <span aria-hidden="true">/</span> Native Rust</p>
         <h1 id="hero-title">Minecraft<br><em>Zero Macro.</em></h1>
@@ -65,7 +96,7 @@
           <a class="button button-primary" href="downloads/droplet.exe" download data-download-primary><span data-download-label>Download exe</span> <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="#performance">Read the measurements</a>
         </div>
-        <p class="hero-download-note">2.9.3 · Windows x64 · single portable exe</p>
+        <p class="hero-download-note">2.10.0 · Windows x64 · single portable exe</p>
         <ul class="hero-notes" aria-label="Product boundaries">
           <li>Keyboard + mouse only</li>
           <li>Visible to capture</li>
@@ -73,9 +104,9 @@
         </ul>
       </div>
 
-      <aside class="console-card" aria-label="Droplet 2.9.3 runtime card">
+      <aside class="console-card" aria-label="Droplet 2.10.0 runtime card">
         <div class="console-head">
-          <span>Runtime / 2.9.3</span>
+          <span>Runtime / 2.10.0</span>
           <span class="status-live"><i aria-hidden="true"></i>Local</span>
         </div>
         <div class="console-main">
@@ -92,8 +123,8 @@
           <div class="signal-caption"><span>binding scan 202.39 ns</span><span>index 0.45 ns</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Release tests</dt><dd>19 / 19</dd></div>
-          <div><dt>Release binary</dt><dd>591,872 B</dd></div>
+          <div><dt>Release tests</dt><dd>20 / 20</dd></div>
+          <div><dt>Release binary</dt><dd>593,408 B</dd></div>
           <div><dt>Game tick</dt><dd>50 ms</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
         </dl>
@@ -106,8 +137,8 @@
 
     <section class="proof-rail wrap" aria-label="Measured release facts">
       <div><strong>445×</strong><span>routing lookup reduction</span></div>
-      <div><strong>591,872</strong><span>bytes · release exe</span></div>
-      <div><strong>19 / 19</strong><span>release tests passing</span></div>
+      <div><strong>593,408</strong><span>bytes · release exe</span></div>
+      <div><strong>20 / 20</strong><span>release tests passing</span></div>
       <div><strong>0</strong><span>network calls</span></div>
     </section>
 
@@ -119,13 +150,129 @@
       <a class="text-link" href="sponsors.html">Open sponsor inventory <span aria-hidden="true">↗</span></a>
     </aside>
 
+    <section class="section wrap vault-section" id="vault-graph" aria-labelledby="vault-graph-title">
+      <div class="section-head vault-head">
+        <div>
+          <p class="section-tag"><span aria-hidden="true"></span>Vault graph</p>
+          <h2 id="vault-graph-title">A local graph,<br><em>not a cloud.</em></h2>
+          <div class="vault-kicker">
+            <span><i aria-hidden="true"></i>All modules</span>
+            <span>Drawn inline</span>
+            <span>No outbound edges</span>
+          </div>
+        </div>
+        <p class="section-lede">An Obsidian-style map of the shipped modules. Every node is a local panel; every edge is a sequence Droplet already runs. The graph is inline SVG and CSS, with no graph library, remote font, or analytics.</p>
+      </div>
+      <div class="vault-shell">
+        <div class="vault-toolbar">
+          <span><i aria-hidden="true"></i>Vault / 2.10.0</span>
+          <span>Nodes 13</span>
+          <span>Edges 18</span>
+          <span>Outbound 0</span>
+        </div>
+        <div class="vault-canvas">
+          <svg class="vault-map" viewBox="0 0 1040 540" role="img" aria-labelledby="vault-map-title">
+            <title id="vault-map-title">Droplet's local vault graph: one engine connected to Core, Crystal, Assist, and System modules.</title>
+            <defs>
+              <radialGradient id="vault-core-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="#f5f6f8" stop-opacity=".18"/>
+                <stop offset="1" stop-color="#f5f6f8" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse class="vault-orbit" cx="520" cy="270" rx="356" ry="196"/>
+            <ellipse class="vault-orbit" cx="520" cy="270" rx="270" ry="320" transform="rotate(34 520 270)"/>
+            <g class="vault-links">
+              <path class="vault-link is-hot" d="M520 270 C430 220 350 180 270 148"/>
+              <path class="vault-link" d="M520 270 C390 300 270 300 150 300"/>
+              <path class="vault-link" d="M520 270 C440 350 360 400 300 430"/>
+              <path class="vault-link is-hot" d="M520 270 C620 200 700 160 800 138"/>
+              <path class="vault-link is-hot" d="M520 270 C590 250 640 240 690 238"/>
+              <path class="vault-link" d="M800 138 C850 190 890 230 912 270"/>
+              <path class="vault-link" d="M520 270 C590 330 640 380 690 420"/>
+              <path class="vault-link" d="M520 270 C660 320 770 350 868 380"/>
+              <path class="vault-link" d="M690 420 C760 440 810 450 858 466"/>
+              <path class="vault-link" d="M520 270 C490 340 450 400 420 452"/>
+              <path class="vault-link" d="M520 270 C520 360 520 440 520 500"/>
+              <path class="vault-link" d="M520 270 C490 210 450 140 410 92"/>
+              <path class="vault-link" d="M800 138 C780 170 720 200 690 238"/>
+              <path class="vault-link" d="M270 148 C300 240 360 380 420 452"/>
+              <path class="vault-link" d="M300 430 C380 470 450 490 520 500"/>
+              <path class="vault-link" d="M912 270 C900 320 890 350 868 380"/>
+              <path class="vault-link" d="M690 238 C650 190 560 140 410 92"/>
+              <path class="vault-link" d="M868 380 C870 420 864 450 858 466"/>
+            </g>
+            <circle class="vault-glow" cx="520" cy="270" r="145"/>
+            <g class="vault-node is-core" transform="translate(520 270)">
+              <circle class="vault-halo" r="76"/>
+              <circle class="vault-ring" r="47"/>
+              <circle class="vault-dot" r="4"/>
+              <text class="vault-label" y="-2" text-anchor="middle">DROPLET</text>
+              <text class="vault-sub" y="16" text-anchor="middle">LOCAL ENGINE</text>
+            </g>
+            <g class="vault-node is-hot" transform="translate(270 148)">
+              <circle class="vault-halo" r="24"/><circle class="vault-ring" r="14"/><circle class="vault-dot" r="3"/>
+              <text class="vault-label" y="-26" text-anchor="middle">CORE</text>
+            </g>
+            <g class="vault-node" transform="translate(150 300)">
+              <circle class="vault-halo" r="22"/><circle class="vault-ring" r="12"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-24" text-anchor="middle">HASH</text>
+            </g>
+            <g class="vault-node" transform="translate(300 430)">
+              <circle class="vault-halo" r="24"/><circle class="vault-ring" r="14"/><circle class="vault-dot" r="3"/>
+              <text class="vault-label" y="-26" text-anchor="middle">SYSTEM</text>
+            </g>
+            <g class="vault-node is-hot" transform="translate(800 138)">
+              <circle class="vault-halo" r="26"/><circle class="vault-ring" r="15"/><circle class="vault-dot" r="3"/>
+              <text class="vault-label" y="-28" text-anchor="middle">CRYSTAL</text>
+            </g>
+            <g class="vault-node" transform="translate(690 238)">
+              <circle class="vault-halo" r="23"/><circle class="vault-ring" r="13"/><circle class="vault-dot" r="3"/>
+              <text class="vault-label" y="-25" text-anchor="middle">ANCHOR</text>
+            </g>
+            <g class="vault-node" transform="translate(912 270)">
+              <circle class="vault-halo" r="22"/><circle class="vault-ring" r="12"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-24" text-anchor="middle">PEARL</text>
+            </g>
+            <g class="vault-node" transform="translate(690 420)">
+              <circle class="vault-halo" r="23"/><circle class="vault-ring" r="13"/><circle class="vault-dot" r="3"/>
+              <text class="vault-label" y="-25" text-anchor="middle">TOTEM</text>
+            </g>
+            <g class="vault-node" transform="translate(868 380)">
+              <circle class="vault-halo" r="22"/><circle class="vault-ring" r="12"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-24" text-anchor="middle">ASSIST</text>
+            </g>
+            <g class="vault-node" transform="translate(858 466)">
+              <circle class="vault-halo" r="21"/><circle class="vault-ring" r="11"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-23" text-anchor="middle">TIMING</text>
+            </g>
+            <g class="vault-node" transform="translate(420 452)">
+              <circle class="vault-halo" r="21"/><circle class="vault-ring" r="11"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-23" text-anchor="middle">INPUT</text>
+            </g>
+            <g class="vault-node" transform="translate(520 500)">
+              <circle class="vault-halo" r="20"/><circle class="vault-ring" r="10"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-22" text-anchor="middle">AUDIT</text>
+            </g>
+            <g class="vault-node" transform="translate(410 92)">
+              <circle class="vault-halo" r="21"/><circle class="vault-ring" r="11"/><circle class="vault-dot" r="2.5"/>
+              <text class="vault-label" y="-23" text-anchor="middle">DASH</text>
+            </g>
+          </svg>
+        </div>
+        <div class="vault-legend">
+          <span>Engine</span><span>Module group</span><span>Local sequence</span><span>No remote nodes</span>
+        </div>
+        <p class="vault-note">The graph is a map of shipped code, not a service diagram. Droplet has no server, account, telemetry, or outbound edge.</p>
+      </div>
+    </section>
+
     <section class="section wrap" id="download" aria-labelledby="download-title">
       <div class="section-head">
         <div>
           <p class="section-tag"><span aria-hidden="true"></span>Download</p>
           <h2 id="download-title">Take the<br><em>small build.</em></h2>
         </div>
-        <p class="section-lede">One direct executable and nothing else. No installer, package registration, runtime downloader, account, or telemetry. The executable is 591,872 bytes and runs locally.</p>
+        <p class="section-lede">One direct executable and nothing else. No installer, package registration, runtime downloader, account, or telemetry. The executable is 593,408 bytes and runs locally.</p>
       </div>
 
       <div class="download-grid" data-platform-grid>
@@ -137,7 +284,7 @@
             <a class="button button-primary" href="downloads/droplet.exe" download>Download exe <span aria-hidden="true">↓</span></a>
             <a class="text-link" href="downloads/SHA256SUMS.txt">Checksums <span aria-hidden="true">↗</span></a>
           </div>
-          <small>591,872 B · single exe · no MSIX or ZIP</small>
+          <small>593,408 B · single exe · no MSIX or ZIP</small>
         </article>
         <article class="download-card is-muted" data-os="linux">
           <div class="download-head"><span class="download-icon">LNX</span><span class="download-state is-pending">Port tracked</span></div>
@@ -180,7 +327,7 @@
               <strong>202.39 <small>ns</small></strong>
             </div>
             <div class="benchmark-row is-fast">
-              <div class="bench-label"><span>Indexed route</span><small>2.9.3</small></div>
+              <div class="bench-label"><span>Indexed route</span><small>2.10.0</small></div>
               <div class="bench-track"><i class="bar-thin"></i></div>
               <strong>0.45 <small>ns</small></strong>
             </div>
@@ -210,7 +357,7 @@
       </div>
 
       <div class="measure-card">
-        <div class="measure-head"><span>Measurement detail</span><span>Release 2.9.3</span></div>
+        <div class="measure-head"><span>Measurement detail</span><span>Release 2.10.0</span></div>
         <table class="measure-table">
           <thead><tr><th>Metric</th><th>Result</th><th>Method</th></tr></thead>
           <tbody>
@@ -255,16 +402,16 @@
 
       <figure class="media-frame">
         <div class="media-bar">
-          <span class="media-title">CORE / 2.9.3</span>
+          <span class="media-title">CORE / 2.10.0</span>
           <span class="media-meta">624 × 408</span>
           <span class="media-live"><i aria-hidden="true"></i>Native capture</span>
         </div>
         <div class="media-image">
-          <img src="assets/droplet-core.png?v=2.9.3" width="624" height="408" alt="The Droplet 2.9.3 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
+          <img src="assets/droplet-core.png?v=2.10.0" width="624" height="408" alt="The Droplet 2.10.0 Core panel showing Shield, Mace, Potion, Breach, Auto Use, and Dash modules with their bindings and timing controls." loading="lazy" decoding="async">
           <span class="scanline" aria-hidden="true"></span>
         </div>
         <figcaption class="media-caption">
-          <span>Core tab, native size, captured from the 2.9.3 build.</span>
+          <span>Core tab, native size, captured from the 2.10.0 build.</span>
           <span>Windows 11 / 100% DPI</span>
         </figcaption>
       </figure>
@@ -283,19 +430,19 @@
         </div>
         <div class="preview-stage">
           <figure class="preview-pane pane-core">
-            <img src="assets/droplet-core.png?v=2.9.3" width="624" height="408" alt="Native Core tab with Shield, Mace, Potion, Breach, Auto Use, and Dash controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-core.png?v=2.10.0" width="624" height="408" alt="Native Core tab with Shield, Mace, Potion, Breach, Auto Use, and Dash controls." loading="lazy" decoding="async">
             <figcaption><span>Core / combat modules</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-crystal">
-            <img src="assets/droplet-crystal.png?v=2.9.3" width="624" height="408" alt="Native Crystal tab with Auto Crystal, Anchor, Hover Totem, and Pearl controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-crystal.png?v=2.10.0" width="624" height="408" alt="Native Crystal tab with Auto Crystal, Anchor, Hover Totem, and Pearl controls." loading="lazy" decoding="async">
             <figcaption><span>Crystal / anchor + totem</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-assist">
-            <img src="assets/droplet-assist.png?v=2.9.3" width="624" height="408" alt="Native Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap timing controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-assist.png?v=2.10.0" width="624" height="408" alt="Native Assist tab with Fast Use, Sprint, Ghost Click, and W-Tap timing controls." loading="lazy" decoding="async">
             <figcaption><span>Assist / timing tools</span><span>Native 624 × 408</span></figcaption>
           </figure>
           <figure class="preview-pane pane-system">
-            <img src="assets/droplet-system.png?v=2.9.3" width="624" height="408" alt="Native System tab with appearance, session, danger zone, and performance controls." loading="lazy" decoding="async">
+            <img src="assets/droplet-system.png?v=2.10.0" width="624" height="408" alt="Native System tab with appearance, session, danger zone, and performance controls." loading="lazy" decoding="async">
             <figcaption><span>System / appearance + session</span><span>Native 624 × 408</span></figcaption>
           </figure>
         </div>
@@ -304,7 +451,7 @@
       <ul class="anatomy" aria-label="Panel highlights">
         <li><span>01</span><b>RGB accent</b><small>Six presets and three channel sliders persist one hex value.</small></li>
         <li><span>02</span><b>Hold / Toggle</b><small>A mode chip on every trigger row, latched per module.</small></li>
-        <li><span>03</span><b>Independent timing</b><small>Min and Max never move each other; Anchor starts at 55 / 65 ms.</small></li>
+        <li><span>03</span><b>Independent timing</b><small>Min and Max never move each other; Anchor starts at 47 / 53 ms.</small></li>
       </ul>
 
       <ul class="interface-facts" aria-label="Interface details">
@@ -319,10 +466,10 @@
         <div class="capture-frame">
           <div class="capture-chrome"><span>UI REEL / FOUR TABS</span><span>624 × 408 STILLS</span><span class="status-live"><i aria-hidden="true"></i>Visible</span></div>
           <div class="capture-image capture-reel" role="img" aria-label="Silent CSS crossfade of the native Core, Crystal, Assist, and System panels. Native stills, not gameplay.">
-            <img class="reel-frame" src="assets/droplet-core.png?v=2.9.3" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-2" src="assets/droplet-crystal.png?v=2.9.3" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-3" src="assets/droplet-assist.png?v=2.9.3" width="624" height="408" alt="" loading="lazy" decoding="async">
-            <img class="reel-frame reel-4" src="assets/droplet-system.png?v=2.9.3" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame" src="assets/droplet-core.png?v=2.10.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-2" src="assets/droplet-crystal.png?v=2.10.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-3" src="assets/droplet-assist.png?v=2.10.0" width="624" height="408" alt="" loading="lazy" decoding="async">
+            <img class="reel-frame reel-4" src="assets/droplet-system.png?v=2.10.0" width="624" height="408" alt="" loading="lazy" decoding="async">
             <span class="capture-tag">NATIVE UI / NOT GAMEPLAY</span>
           </div>
           <div class="capture-caption"><span>Core → Crystal → Assist → System</span><span>Silent stills, crossfaded</span></div>
@@ -356,7 +503,7 @@
       </div>
 
       <div class="module-grid">
-        <article class="module-card"><h3>Anchor</h3><p>Place, charge, clear, detonate.</p><small>55&ndash;97 / 65&ndash;103 ms</small></article>
+        <article class="module-card"><h3>Anchor</h3><p>Hydrogen A6 order; Air loop while held.</p><small>47&ndash;97 / 53&ndash;103 ms</small></article>
         <article class="module-card"><h3>Crystal</h3><p>Obsidian, then crystal.</p><small>one-shot</small></article>
         <article class="module-card"><h3>Mace</h3><p>Swap with settled timing.</p><small>one-shot</small></article>
         <article class="module-card"><h3>Shield</h3><p>Axe select and hit in one batch.</p><small>held option</small></article>
@@ -380,11 +527,11 @@
           <p class="section-tag"><span aria-hidden="true"></span>Audit</p>
           <h2 id="audit-title">Small,<br><em>and checked.</em></h2>
           <p class="section-lede">The boundaries are part of the product. These are source-verified or measured on the release build; live Minecraft hit registration is still a separate test.</p>
-          <div class="audit-stamp"><strong>19 / 19</strong><span>release tests passing</span></div>
+          <div class="audit-stamp"><strong>20 / 20</strong><span>release tests passing</span></div>
         </div>
 
         <div class="audit-panel">
-          <div class="audit-head"><span>Release audit</span><span>2.9.3 / 2026-11-11</span></div>
+          <div class="audit-head"><span>Release audit</span><span>2.10.0 / 2026-11-11</span></div>
           <ul class="audit-list">
             <li><span class="audit-name">Trigger routing</span><span class="audit-value">0.45 ns indexed</span><span class="audit-state is-pass">measured</span></li>
             <li><span class="audit-name">Runtime dependencies</span><span class="audit-value">0</span><span class="audit-state is-pass">pass</span></li>
@@ -393,7 +540,7 @@
             <li><span class="audit-name">Game memory</span><span class="audit-value">No reads / writes</span><span class="audit-state is-pass">pass</span></li>
             <li><span class="audit-name">Capture status</span><span class="audit-value">Visible</span><span class="audit-state is-boundary">boundary</span></li>
             <li><span class="audit-name">Source distribution</span><span class="audit-value">Public repository</span><span class="audit-state is-pass">transparent</span></li>
-            <li><span class="audit-name">Release binary</span><span class="audit-value">591,872 B</span><span class="audit-state is-pass">measured</span></li>
+            <li><span class="audit-name">Release binary</span><span class="audit-value">593,408 B</span><span class="audit-state is-pass">measured</span></li>
             <li><span class="audit-name">Live Minecraft</span><span class="audit-value">Pending</span><span class="audit-state is-open">unverified</span></li>
           </ul>
           <div class="audit-foot"><span>No streamproof mode. No capture exclusion.</span><span>Stable, visible desktop composition.</span></div>
@@ -454,11 +601,12 @@
             <p class="section-lede">No framework, no runtime downloader, no telemetry. Just a focused Windows executable and the parts Windows already provides.</p>
           </div>
           <dl class="spec-list">
-            <div class="spec-row"><dt>Version</dt><dd>2.9.3</dd></div>
+            <div class="spec-row"><dt>Version</dt><dd>2.10.0</dd></div>
             <div class="spec-row"><dt>Runtime</dt><dd>Rust · zero crates</dd></div>
             <div class="spec-row"><dt>Panel</dt><dd>624 × 408 acrylic overlay</dd></div>
+            <div class="spec-row"><dt>Corner</dt><dd>8 px · paint + clip + capture mask</dd></div>
             <div class="spec-row"><dt>Trigger path</dt><dd>Prebuilt index · one array read</dd></div>
-            <div class="spec-row"><dt>Release binary</dt><dd>591,872 bytes</dd></div>
+            <div class="spec-row"><dt>Release binary</dt><dd>593,408 bytes</dd></div>
             <div class="spec-row"><dt>Input</dt><dd>Win32 SendInput only</dd></div>
             <div class="spec-row"><dt>Timing</dt><dd>Local cadence brain + optional profile</dd></div>
             <div class="spec-row"><dt>Network</dt><dd>None</dd></div>
@@ -478,7 +626,8 @@
             <li>No telemetry, analytics, network calls, or game-memory access.</li>
           </ul>
           <div class="release-notes">
-            <div><span>2.9.3</span><p>Anchor 55/65 ms safe settle, the top accent strip and outer rim removed, and MSIX/ZIP packaging retired for one direct 591,872-byte exe.</p></div>
+            <div><span>2.10.0</span><p>Hydrogen's A6 Anchor order, 47/53 ms defaults with Air loop, one 8 px corner across paint and mask, and a local vault-graph site rebuild.</p></div>
+            <div><span>2.9.3</span><p>Anchor 55/65 ms safe settle, the top accent strip and outer rim removed, and MSIX/ZIP packaging retired for one direct 593,408-byte exe.</p></div>
             <div><span>2.9.2</span><p>Independent Min/Max sliders, the 28×16 knob switch restored, Anchor 37–97 / 43–103, redundant Anchor sleeps removed, and Self-destruct restored.</p></div>
             <div><span>2.9.1</span><p>Borderless module cards, text ON/OFF pills, all module glyphs removed, a 592,384-byte binary, and the Anchor tick-floor row retired.</p></div>
             <div><span>2.9.0</span><p>Round power controls, transparent item glyphs, a compact Dash card, sticky hide, one-second self-destruct, same-frame Dash/Shield/Pearl input, and Windows downloads with checksums.</p></div>

@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Droplet releases — 2.9.3 ledger</title>
-  <meta name="description" content="Droplet 2.9.3 release notes, Windows downloads, SHA-256 checksums, verification, and the full version ledger.">
+  <title>Droplet releases — 2.10.0 ledger</title>
+  <meta name="description" content="Droplet 2.10.0 release notes, Windows downloads, SHA-256 checksums, verification, and the full version ledger.">
   <link rel="canonical" href="https://fuvji.github.io/droplet/releases.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Droplet releases — 2.9.3 ledger">
-  <meta property="og:description" content="Downloads, hashes, GUI changes, input batching, and honest limits for Droplet 2.9.3.">
+  <meta property="og:title" content="Droplet releases — 2.10.0 ledger">
+  <meta property="og:description" content="Downloads, hashes, GUI changes, input batching, and honest limits for Droplet 2.10.0.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/releases.html">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.9.3">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.0">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=2.9.3-1">
-  <link rel="stylesheet" href="refine.css?v=2.9.3-1">
+  <link rel="stylesheet" href="style.css?v=2.10.0-1">
+  <link rel="stylesheet" href="refine.css?v=2.10.0-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -27,13 +27,14 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.9.3</span>
+        <span class="brand-version">2.10.0</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html#download">Download</a>
         <a href="index.html#performance">Performance</a>
         <a href="index.html#interface">Interface</a>
         <a href="index.html#audit">Audit</a>
+        <a href="index.html#vault-graph">Vault</a>
         <a href="https://github.com/fuvji/droplet">Source</a>
       </nav>
       <a class="header-action" href="downloads/droplet.exe" download>Download <span aria-hidden="true">↓</span></a>
@@ -44,23 +45,23 @@
     <section class="page-hero release-hero wrap" aria-labelledby="release-title">
       <div>
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-11</p>
-        <h1 id="release-title">Droplet<br><em>2.9.3.</em></h1>
-        <p class="lede">A reliability release: Anchor gets a 55 ms tick-safe floor, the last top accent strip and outer rim are removed, and the Windows build is now one direct 591,872-byte exe with no MSIX, AppX, installer, or ZIP.</p>
+        <h1 id="release-title">Droplet<br><em>2.10.0.</em></h1>
+        <p class="lede">An Anchor-and-surface release: the Hydrogen A6 order arrives with 47/53 ms defaults and the Air loop, one 8 px corner now clips paint, window, and capture, and the site gains a local vault graph.</p>
         <div class="actions">
           <a class="button button-primary" href="downloads/droplet.exe" download>Download exe <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="downloads/SHA256SUMS.txt">Checksums</a>
         </div>
         <ul class="hero-notes" aria-label="Release boundaries">
           <li>Windows x64 only</li>
-          <li>19 / 19 tests</li>
+          <li>20 / 20 tests</li>
           <li>No streamproof mode</li>
         </ul>
       </div>
-      <aside class="console-card" aria-label="2.9.3 release card">
-        <div class="console-head"><span>Release / 2.9.3</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
+      <aside class="console-card" aria-label="2.10.0 release card">
+        <div class="console-head"><span>Release / 2.10.0</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
         <div class="console-main">
           <span class="console-label">Portable executable</span>
-          <div class="console-value">591,872<small>B</small></div>
+          <div class="console-value">593,408<small>B</small></div>
           <p>One direct executable, verified with SHA-256. No MSIX/AppX, installer, or ZIP.</p>
           <div class="signal-bars" aria-hidden="true">
             <i class="sh18"></i><i class="sh34"></i><i class="sh24"></i><i class="sh48"></i>
@@ -69,10 +70,10 @@
             <i class="sh43"></i><i class="sh51"></i><i class="sh32"></i><i class="sh22"></i>
             <i class="sh36"></i><i class="sh16"></i>
           </div>
-          <div class="signal-caption"><span>release tests 19 / 19</span><span>routing 0.45 ns</span></div>
+          <div class="signal-caption"><span>release tests 20 / 20</span><span>routing 0.45 ns</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Version</dt><dd>2.9.3</dd></div>
+          <div><dt>Version</dt><dd>2.10.0</dd></div>
           <div><dt>Artifact</dt><dd>exe only</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
           <div><dt>Network</dt><dd>None</dd></div>
@@ -89,7 +90,7 @@
       <table class="release-table">
         <thead><tr><th>Artifact</th><th>Size / SHA-256</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>591,872 B<br><code>288b1019d61e46805fff31737ab926c52bc20541a53ef05841c8b356a27f5873</code></td><td>Download and run. No installer or package registration.</td></tr>
+          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>593,408 B<br><code>6b43e15ebf6ad4e7ca0cb10b0be085acfa2b47839faf6dcb15a7c1fc52a9f0ab</code></td><td>Download and run. No installer or package registration.</td></tr>
           <tr><td><a href="downloads/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td>exe</td><td>Verify before running.</td></tr>
           <tr><td>Linux / macOS</td><td>Not built</td><td>The core is Win32/GDI+. A real port is a separate project; no fake package is offered.</td></tr>
         </tbody>
@@ -98,31 +99,31 @@
 
     <section class="section wrap" aria-labelledby="notes-title">
       <div class="section-head">
-        <div><p class="section-tag"><span aria-hidden="true"></span>2.9.3 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
+        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.0 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
         <p class="section-lede">A readable ledger. Every item is implemented in the source or measured on the release build; the unverified items are labelled.</p>
       </div>
       <div class="download-grid">
         <article class="release-block">
           <h3>GUI</h3>
           <ul>
-            <li>Anchor now defaults to 55 / 65 ms, with Min 55–97 ms and Max 65–103 ms. The 55 ms minimum crosses a 50 ms client tick before the right-click.</li>
-            <li>The 1 px accent strip at the top and the painted outer hairline are gone. DWM's rounded clip and the edge-to-edge surface are the only boundary.</li>
+            <li>Anchor exposes Min 47–97 ms and Max 53–103 ms, with 47 / 53 ms defaults. The old 55 ms floor and its separate controls are gone.</li>
+            <li>A new Air loop switch, on by default, restores Hydrogen's held-repeat path for Anchor.</li>
+            <li>One 8 px radius now paints the surface, shapes the window region, follows DWM's clip, and masks the captures. There is no outer rim or top accent line.</li>
             <li>The original 28×16 sliding switch remains: plain track, 5 px knob, no ON/OFF text, no glyph, no outline.</li>
             <li>Min and Max remain independent. Editing one clamps only that field; an inverted pair is sorted when the macro reads it.</li>
             <li>The Danger zone control remains labelled Self-destruct, with the one-second hold and progress.</li>
-            <li>Cards remain borderless; the navigation rail keeps its original line icons and the 13 px shared radius.</li>
-            <li>The executable remains 591,872 bytes. The published payload is now one file instead of ZIP + MSIX.</li>
+            <li>Cards remain borderless; the navigation rail keeps its original line icons. The executable is 593,408 bytes.</li>
           </ul>
         </article>
         <article class="release-block">
           <h3>Behaviour and input</h3>
           <ul>
-            <li>Anchor applies a 55 ms floor to every slot settle. The previous 37–43 ms path could switch and right-click inside one client tick, so the placement used the previous item.</li>
-            <li>The sequence still uses one settle per slot and no duplicate post-action wait. Defaults execute three 55–65 ms settles.</li>
+            <li>Anchor now follows Hydrogen's literal A6 order: select, right-click, fixed 37–43 ms settle, right-click, Glowstone, another fixed 37–43 ms settle, double Totem tap, configured final settle, right-click.</li>
+            <li>The two early settles stay fixed at 37–43 ms; only the final settle uses the visible 47–97 / 53–103 ms sliders. This keeps the port honest rather than folding every wait into one number.</li>
+            <li>Air loop repeats the sequence while the binding is held. Releasing the key stops the loop; the one-shot path still runs once.</li>
             <li>Other modules keep their configured delays. The game tick and Windows scheduling remain.</li>
             <li>Self-destruct still holds for one second, purges Droplet's data, and recycles the portable executable.</li>
             <li>Dash, Shield, and Pearl still select and click in one SendInput batch.</li>
-            <li>Unbound keys still skip the macro router before cloning either Arc.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -130,7 +131,7 @@
           <ul>
             <li>No streamproof or capture-evasion mode.</li>
             <li>No anti-cheat bypass, process hiding, log erasure, or input disguise.</li>
-            <li>No unrestricted or “100% no restriction” mode and no instant-speed claim. Anchor keeps a real tick-safe floor; the game loop remains.</li>
+            <li>No unrestricted or “100% no restriction” mode and no instant-speed claim. Anchor keeps its fixed early settles and a configured final settle; the game loop remains.</li>
             <li>No MSIX/AppX, installer, or ZIP. The exe is the only Windows artifact.</li>
             <li>No zero-latency claim and no silent auto-updater.</li>
             <li>No Linux or macOS package until the platform layer exists.</li>
@@ -145,6 +146,7 @@
         <p class="section-lede">The versioned notes in the repository are the source of truth. This page is a readable mirror, not an automatically generated feed.</p>
       </div>
       <div class="release-timeline">
+        <article><strong>2.10.0</strong><div><h3>Hydrogen Anchor, tighter corner</h3><p>Literal A6 Anchor order, 47/53 ms defaults with Air loop, one 8 px radius across paint and capture, and a local vault-graph site.</p></div></article>
         <article><strong>2.9.3</strong><div><h3>Reliable Anchor, exe only</h3><p>Anchor 55/65 ms safe settle, top accent strip and outer rim removed, and MSIX/AppX/ZIP packaging retired for one direct 591,872-byte exe.</p></div></article>
         <article><strong>2.9.2</strong><div><h3>Independent sliders, knob switches</h3><p>Min/Max no longer rewrite each other, the 28×16 knob switch returns, Anchor 37–97 / 43–103 with 37/43 defaults, outer rim removed, Self-destruct restored. Last release with ZIP/MSIX artifacts.</p></div></article>
         <article><strong>2.9.1</strong><div><h3>Borderless cards, text controls</h3><p>Module glyphs removed, text ON/OFF pills, borderless cards, Anchor tick-floor row retired, 592,384-byte exe and 301,774-byte MSIX.</p></div></article>
@@ -163,7 +165,7 @@
       <div class="download-verify">
         <span>Windows PowerShell</span>
         <code>Get-FileHash .\droplet.exe -Algorithm SHA256</code>
-        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.9.3.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.0.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>
