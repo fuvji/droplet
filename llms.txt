@@ -1,0 +1,50 @@
+# Droplet
+
+Canonical: https://fuvji.github.io/droplet/
+Source: https://github.com/fuvji/droplet
+Version: 2.9.1
+Platform: Windows 10/11 x64
+Licence: proprietary, public source for inspection
+Founder: @epufk
+
+Droplet is a small, local keyboard-and-mouse macro suite for Minecraft Java,
+branded Minecraft Zero Macro. It is a native Rust overlay with no runtime
+dependencies, no network calls, no telemetry, and no game-memory access. It
+injects ordinary keyboard and mouse input through Win32 SendInput and remains
+visible to screen capture.
+
+## Current release
+
+- 2.9.1 portable executable: 592,384 bytes; signed MSIX: 301,774 bytes.
+- Windows portable ZIP: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.zip
+- Windows MSIX: https://fuvji.github.io/droplet/downloads/droplet-windows-x64.msix
+- Checksums: https://fuvji.github.io/droplet/downloads/SHA256SUMS.txt
+- Release ledger: https://fuvji.github.io/droplet/releases.html
+- Linux and macOS are not supported yet. The hook, window, and paint layers are
+  Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
+- 19 release tests pass.
+- Compact 624x408 graphite acrylic overlay with a 13 px shared corner radius.
+- Borderless module cards with compact text ON/OFF pills. No module glyphs.
+- Every trigger card switches between Hold (one-shot) and Toggle (latched repeat).
+- Anchor defaults to a 37-43 ms window and still applies the 50 ms game tick floor; the card no longer prints a separate floor row.
+- The tray icon was removed. A manual hide is sticky across focus changes.
+  Ctrl + Right Shift shows or hides the panel.
+- Dash, Shield, and Pearl select the slot and click in one SendInput batch.
+- Pre-indexed trigger routing: 0.45 ns indexed versus 202.39 ns scanned (445x,
+  routing only, not end-to-end latency).
+- No streamproof or capture-concealment mode, no process hiding, no scan
+  evasion, no anti-cheat bypass, no log erasure, and no zero-latency claim.
+- No silent auto-updater. An update check would require a network path and a
+  signed channel, which conflicts with the current no-network design.
+- The site uses one local script for OS detection on the download page. It
+  sends no data. There are no analytics, cookies, third-party scripts, external
+  fonts, or ad clients.
+
+## Links
+
+- Product page: https://fuvji.github.io/droplet/
+- Releases: https://fuvji.github.io/droplet/releases.html
+- Source: https://github.com/fuvji/droplet
+- Benchmarks: https://github.com/fuvji/droplet/blob/main/BENCHMARKS.md
+- Changelog: https://github.com/fuvji/droplet/blob/main/CHANGELOG.md
+- Sponsor page: https://fuvji.github.io/droplet/sponsors.html
