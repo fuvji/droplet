@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.2 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.3 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 595,968 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 596,992 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,15 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.2
+## What is in 2.10.3
 
+- **Click-through corners**: DWM's antialiased clip now owns the edge, and the
+  transparent quarter-rounds return `HTTRANSPARENT` instead of swallowing
+  clicks. The center and straight edges still hit the panel; the hard-region
+  fallback is unchanged.
+- **Less redundant presence work**: once the foreground window is the verified
+  game, the watcher reuses that HWND instead of resolving its process image
+  every 160 ms. Presence, focus, and the cold-discovery scan are unchanged.
 - **Cleaner corners**: Windows 11 now uses DWM's compositor-rounded, antialiased
   corner. The GDI region is only a fallback when DWM cannot round the popup, so
   the window is no longer clipped twice.
@@ -57,7 +64,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.2 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.3 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -102,13 +109,13 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **24 / 24**.
-- Portable executable: **595,968 bytes**,
-  `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`.
+- `cargo test --release`: **25 / 25**.
+- Portable executable: **596,992 bytes**,
+  `c78625faa251ff71934e6e2d08a06b13b8280deb1c247a27536199e039cc9613`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.2 capture; live Anchor placement, Java/Bedrock positive
+  from the 2.10.3 capture; live Anchor placement, Java/Bedrock positive
   detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries

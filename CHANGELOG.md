@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.10.3
+
+- Make the transparent quarter-rounds click-through when DWM owns the corner
+  clip. The center and straight edges remain client-side, and the Windows 10
+  GDI-region fallback is unchanged.
+- Reuse an already-verified foreground game HWND in the presence watcher instead
+  of re-resolving the same process image every 160 ms. Presence/focus semantics
+  and the cold-discovery scan are unchanged; no latency speedup is claimed.
+- Add a pure unit test for the rounded-corner hit geometry. Portable executable:
+  **596,992 bytes**, SHA-256
+  `c78625faa251ff71934e6e2d08a06b13b8280deb1c247a27536199e039cc9613`.
+  Tests: **25 / 25**.
+- Boundaries unchanged: no game-memory access, network, telemetry, streamproof
+  mode, anti-cheat bypass, input disguise, or zero-latency claim.
+
 ## 2.10.2
 
 - Prefer DWM's compositor-rounded, antialiased corner on Windows 11. Keep the

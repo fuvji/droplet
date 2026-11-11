@@ -15,8 +15,8 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.2 portable exe: 595,968 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 24 / 24.
+- 2.10.3 portable exe: 596,992 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 25 / 25.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
 - Anchor defaults: 47/53 ms, Min 47-97, Max 53-103. Hydrogen A6 order;
   Air loop repeats while held.
@@ -28,12 +28,14 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Design
 
-One 8 px radius. Corners prefer DWM's antialiased compositor clip; the GDI
-region is a fallback only. The favicon and site marks use the app's outlined
-droplet. Event-driven paint. Borderless module cards with the original 28×16
-sliding knob switch and no module glyphs. Small original line icons remain
-in the navigation rail only. Graphite surface, warm white text, no painted outer
-rim, and no top accent line. Min/Max sliders are independent.
+One 8 px radius. Corners prefer DWM's antialiased compositor clip; the transparent
+quarter-rounds are click-through and the GDI region is a fallback only. The
+presence watcher reuses a verified foreground game HWND. The favicon and site
+marks use the app's outlined droplet. Event-driven paint. Borderless module
+cards with the original 28×16 sliding knob switch and no module glyphs. Small
+original line icons remain in the navigation rail only. Graphite surface, warm
+white text, no painted outer rim, and no top accent line. Min/Max sliders are
+independent.
 
 ## Current work
 

@@ -1,5 +1,14 @@
 # release
 
+## 2.10.3 — 2026-11-11
+
+- Portable exe: 596,992 B,
+  `c78625faa251ff71934e6e2d08a06b13b8280deb1c247a27536199e039cc9613`.
+- Tests: 25 / 25.
+- Changes: DWM-rounded transparent corners are click-through; the presence
+  watcher reuses an already-verified foreground game HWND. 8 px radius and
+  captures are unchanged. No latency speedup is claimed.
+
 ## 2.10.2 — 2026-11-11
 
 - Portable exe: 595,968 B,

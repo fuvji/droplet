@@ -71,6 +71,16 @@ one codegen unit, panic-abort, stripped.
   redundant hard clip; it is a visual fix and no frame-time or startup speedup
   is claimed. The logical 8 px radius, capture mask, and routing are unchanged.
 
+## 2.10.3 changes
+
+- The DWM-rounded transparent quarter-rounds now return `HTTRANSPARENT`; the
+  center and straight edges remain client-side. The 8 px fallback region is
+  unchanged. This is an interaction fix, not a rendering-speed measurement.
+- Once a foreground game HWND is verified, the presence watcher reuses it
+  instead of resolving the same process image every 160 ms. Presence, focus,
+  and cold-discovery semantics are unchanged. No input-latency or frame-time
+  speedup is claimed.
+
 ## Not measured
 
 - End-to-end input latency.

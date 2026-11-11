@@ -66,11 +66,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.2**
-- Portable executable: **595,968 bytes**
-- SHA-256: `7fe0b990119f9e07a5dfb3a7a895fa1ba3aa1a8028e6cfee4570fe85884f7e1d`
+- Version: **2.10.3**
+- Portable executable: **596,992 bytes**
+- SHA-256: `c78625faa251ff71934e6e2d08a06b13b8280deb1c247a27536199e039cc9613`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **24 / 24**
+- Release tests: **25 / 25**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**
@@ -91,6 +91,14 @@ removed the painted outer window hairline. It also removed the Anchor 50 ms
 floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
+
+2.10.3 makes the DWM-composited rounded corners click-through. The hit test
+returns `HTTRANSPARENT` only in the transparent quarter-rounds and keeps the
+straight edges and center client-side; the hard-region fallback is unchanged.
+The 8 px radius and captures are unchanged. The presence watcher also reuses an
+already-verified foreground game HWND instead of re-resolving the same process
+image every 160 ms. That removes redundant discovery work; no input-latency or
+frame-time speedup is claimed. Tests are 25 / 25.
 
 2.10.2 prefers DWM's composited, antialiased corner on Windows 11 and uses the
 GDI rounded region only as a fallback. This removes a redundant hard clip; it

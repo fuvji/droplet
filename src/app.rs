@@ -68,6 +68,7 @@ static ENGINE: OnceLock<Arc<Engine>> = OnceLock::new();
 static mut APP: *mut App = std::ptr::null_mut();
 static MAIN_HWND: AtomicIsize = AtomicIsize::new(0);
 static GAME: AtomicIsize = AtomicIsize::new(0);
+static DWM_ROUNDED: AtomicBool = AtomicBool::new(false);
 static HOOK_TID: AtomicU32 = AtomicU32::new(0);
 
 pub fn main_hwnd() -> HWND {
@@ -650,7 +651,13 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
         }
         win::WM_ERASEBKGND => 1,
         win::WM_MOUSEACTIVATE => win::WM_MOUSEACTIVATE_NOACTIVATE,
-        win::WM_NCHITTEST => win::HTCLIENT,
+        win::WM_NCHITTEST => {
+            if DWM_ROUNDED.load(Ordering::Relaxed) && corner_hit(hwnd, lp, app.dpi) {
+                win::HTTRANSPARENT
+            } else {
+                win::HTCLIENT
+            }
+        }
         win::WM_MOUSEMOVE => {
             if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
                 return 0;
@@ -949,6 +956,46 @@ fn process_leaf(image: &str) -> &str {
     image.rsplit(|c| c == '\\' || c == '/').next().unwrap_or(image)
 }
 
+/// True only in the transparent quarter-rounds DWM clips at the panel edge.
+/// Keeping this in sync with `ui::CORNER_RADIUS` makes the visible corners
+/// click-through when the compositor, rather than a hard GDI region, owns the
+/// clip. The fallback region already removes these points from hit testing.
+fn in_rounded_corner(x: f32, y: f32, w: f32, h: f32, radius: f32) -> bool {
+    let r = radius.max(1.0);
+    if x < 0.0 || y < 0.0 || x >= w || y >= h {
+        return false;
+    }
+    let cx = if x < r {
+        r
+    } else if x > w - r {
+        w - r
+    } else {
+        return false;
+    };
+    let cy = if y < r {
+        r
+    } else if y > h - r {
+        h - r
+    } else {
+        return false;
+    };
+    let dx = x - cx;
+    let dy = y - cy;
+    dx * dx + dy * dy > r * r
+}
+
+fn corner_hit(hwnd: HWND, lp: LPARAM, dpi: f32) -> bool {
+    let mut wr = RECT::default();
+    if unsafe { win::GetWindowRect(hwnd, &mut wr) } == 0 {
+        return false;
+    }
+    let x = (lp & 0xFFFF) as u16 as i16 as f32 - wr.left as f32;
+    let y = ((lp >> 16) & 0xFFFF) as u16 as i16 as f32 - wr.top as f32;
+    let w = (wr.right - wr.left) as f32;
+    let h = (wr.bottom - wr.top) as f32;
+    in_rounded_corner(x, y, w, h, (ui::CORNER_RADIUS * dpi).round().max(1.0))
+}
+
 /// Match the window to an actual Minecraft process, not just a title.
 ///
 /// Browsers, Discord, editors, and the launcher can all carry "Minecraft" in
@@ -1042,10 +1089,18 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
             if game != 0 && unsafe { win::IsWindow(game) } == 0 {
                 game = 0;
             }
-            if root != 0 && is_game(root) {
-                game = root;
-                misses = 0;
-            } else if game == 0 {
+            // Once the game window is verified, the foreground HWND cannot
+            // change process identity. Skip a second process-image query on
+            // every 160 ms tick and only revalidate when focus moves.
+            if root != 0 {
+                if root == game {
+                    misses = 0;
+                } else if is_game(root) {
+                    game = root;
+                    misses = 0;
+                }
+            }
+            if game == 0 {
                 misses += 1;
                 if misses % 8 == 0 {
                     game = find_game();
@@ -1409,7 +1464,9 @@ pub fn run() {
         // Prefer DWM's compositor-rounded corner on Windows 11: it is
         // antialiased and follows the system DPI. Only install the hard
         // GDI region as a fallback when DWM cannot round this popup.
-        if !round_corners(hwnd, radius) {
+        let dwm_rounded = round_corners(hwnd, radius);
+        DWM_ROUNDED.store(dwm_rounded, Ordering::Relaxed);
+        if !dwm_rounded {
             let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
             if rgn != 0 {
                 win::SetWindowRgn(hwnd, rgn, 1);
@@ -1535,7 +1592,7 @@ unsafe fn round_corners(hwnd: HWND, radius: i32) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{game_window_matches, process_leaf};
+    use super::{game_window_matches, in_rounded_corner, process_leaf};
 
     #[test]
     fn game_detection_rejects_browser_and_chat_titles() {
@@ -1598,5 +1655,16 @@ mod tests {
         ));
         assert_eq!(process_leaf(r"C:\Games\javaw.exe"), "javaw.exe");
         assert_eq!(process_leaf("C:/Games/javaw.exe"), "javaw.exe");
+    }
+
+    #[test]
+    fn corner_hit_test_matches_the_rounded_edge() {
+        let (w, h, r) = (624.0, 408.0, 8.0);
+        assert!(in_rounded_corner(0.0, 0.0, w, h, r));
+        assert!(in_rounded_corner(2.0, 2.0, w, h, r));
+        assert!(!in_rounded_corner(8.0, 8.0, w, h, r));
+        assert!(!in_rounded_corner(w - 8.0, 8.0, w, h, r));
+        assert!(!in_rounded_corner(w / 2.0, 2.0, w, h, r));
+        assert!(!in_rounded_corner(-1.0, 4.0, w, h, r));
     }
 }
