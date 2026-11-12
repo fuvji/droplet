@@ -66,11 +66,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.5**
-- Portable executable: **596,992 bytes**
-- SHA-256: `49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850`
+- Version: **2.10.6**
+- Portable executable: **598,528 bytes**
+- SHA-256: `9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **25 / 25**
+- Release tests: **26 / 26**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**
@@ -92,13 +92,19 @@ floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
 
+2.10.6 changes the sprint watcher's idle wait from 8 ms to 100 ms while the
+gate or sprint feature is inactive, then unparks it immediately on focus or
+settings changes. The armed cadence remains 8 ms, so the 100 ms pulse schedule
+is not rounded up. Scheduled idle polls fall from about 125/s to 10/s. The
+executable is 598,528 bytes, 1,536 bytes larger than 2.10.5; this loop does not
+claim a size win. Trigger routing is unchanged; tests are 26 / 26. No
+end-to-end or zero-latency claim is made.
+
 2.10.5 caches the sprint and crosshair enable flags in `Engine`. The sprint
 watcher no longer takes the settings lock every 8 ms when the gate is closed or
 sprint is off, and the crosshair watcher skips it when unfocused or disabled.
-The 8 ms / 100 ms cadence and sprint reset are unchanged. The executable is
-596,992 bytes, 512 bytes larger than 2.10.4; this loop does not claim a size
-win. Trigger routing and tests are unchanged; no end-to-end or zero-latency
-claim is made.
+The executable is 596,992 bytes, 512 bytes larger than 2.10.4; no size win was
+claimed.
 
 2.10.4 removes the web brand plate and duplicate brand CSS, and caches the
 focus-only gate in an atomic updated when settings publish. The 160 ms presence

@@ -1,5 +1,14 @@
 # release
 
+## 2.10.6 — 2026-11-11
+
+- Portable exe: 598,528 B,
+  `9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5`.
+- Tests: 26 / 26.
+- Changes: the sprint watcher parks at 100 ms while inactive and unparks on
+  focus/settings changes; armed cadence stays 8 ms. No latency claim. The exe
+  is 1,536 B larger than 2.10.5; no size win.
+
 ## 2.10.5 — 2026-11-11
 
 - Portable exe: 596,992 B,

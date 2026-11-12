@@ -35,6 +35,15 @@ static SPRINT_NEXT: AtomicI64 = AtomicI64::new(0);
 /// 116 ms. The key itself is still a tap, never a held synthetic key.
 pub const SPRINT_COOLDOWN_MS: i64 = 100;
 pub const SPRINT_TICK_MS: u64 = 8;
+pub const SPRINT_IDLE_MS: u64 = 100;
+
+/// Poll fast only while the gate and sprint feature are armed. This keeps the
+/// 100 ms pulse schedule from rounding up, while an unfocused or disabled
+/// watcher wakes at the cooldown interval instead of 125 times per second.
+#[inline]
+pub fn sprint_wait_ms(armed: bool) -> u64 {
+    if armed { SPRINT_TICK_MS } else { SPRINT_IDLE_MS }
+}
 
 // Toggle mode is a single latched worker per module, not a thread per press.
 // A generation counter invalidates an old worker before a new latch can run,
@@ -907,6 +916,13 @@ mod tests {
         assert!(tap.release_forward);
         assert!(tap.tap_back);
         assert!((132..=148).contains(&tap.hold_ms), "hold={}", tap.hold_ms);
+    }
+
+    #[test]
+    fn sprint_waits_fast_only_while_armed() {
+        assert_eq!(sprint_wait_ms(true), SPRINT_TICK_MS);
+        assert_eq!(sprint_wait_ms(false), SPRINT_IDLE_MS);
+        assert!(sprint_wait_ms(false) > sprint_wait_ms(true));
     }
 
     #[test]

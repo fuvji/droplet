@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.10.6
+
+- Park the sprint watcher for 100 ms while inactive instead of polling every
+  8 ms; focus/settings changes unpark it immediately. Armed cadence and reset
+  behavior are unchanged.
+- Scheduled idle polls drop from roughly 125/s to 10/s. Portable executable:
+  **598,528 bytes**, SHA-256
+  `9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5`.
+  Tests: **26 / 26**. This is 1,536 bytes larger than 2.10.5; no size win.
+- No end-to-end latency or zero-latency claim. Trigger routing and the release
+  profile are unchanged.
+
 ## 2.10.5
 
 - Cache sprint/totem enablement in `Engine`; inactive sprint and crosshair

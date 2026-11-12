@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Droplet releases — 2.10.5 ledger</title>
-  <meta name="description" content="Droplet 2.10.5 release notes: idle sprint and crosshair watcher gates, Windows downloads, SHA-256 checksums, and the full version ledger.">
+  <title>Droplet releases — 2.10.6 ledger</title>
+  <meta name="description" content="Droplet 2.10.6 release notes: a 100 ms idle sprint poll with immediate wake-up, Windows downloads, SHA-256 checksums, and the full version ledger.">
   <link rel="canonical" href="https://fuvji.github.io/droplet/releases.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Droplet releases — 2.10.5 ledger">
-  <meta property="og:description" content="Idle watcher gates, downloads, hashes, and honest limits for Droplet 2.10.5.">
+  <meta property="og:title" content="Droplet releases — 2.10.6 ledger">
+  <meta property="og:description" content="Idle sprint poll floor, downloads, hashes, and honest limits for Droplet 2.10.6.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/releases.html">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.5">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.6">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="favicon.svg?v=2.10.5" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=2.10.5-1">
-  <link rel="stylesheet" href="refine.css?v=2.10.5-1">
+  <link rel="icon" href="favicon.svg?v=2.10.6" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=2.10.6-1">
+  <link rel="stylesheet" href="refine.css?v=2.10.6-1">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -27,7 +27,7 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z" fill="currentColor" fill-opacity=".11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.10.5</span>
+        <span class="brand-version">2.10.6</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html#download">Download</a>
@@ -45,23 +45,23 @@
     <section class="page-hero release-hero wrap" aria-labelledby="release-title">
       <div>
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-11</p>
-        <h1 id="release-title">Droplet<br><em>2.10.5.</em></h1>
-        <p class="lede">A focused watcher pass: the sprint and crosshair loops stop taking the settings lock while inactive. There is no visual change and no latency claim.</p>
+        <h1 id="release-title">Droplet<br><em>2.10.6.</em></h1>
+        <p class="lede">A focused watcher pass: the sprint loop now parks at 100 ms while inactive and wakes immediately on focus or settings changes. There is no visual change and no latency claim.</p>
         <div class="actions">
           <a class="button button-primary" href="downloads/droplet.exe" download>Download exe <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="downloads/SHA256SUMS.txt">Checksums</a>
         </div>
         <ul class="hero-notes" aria-label="Release boundaries">
           <li>Windows x64 only</li>
-          <li>25 / 25 tests</li>
+          <li>26 / 26 tests</li>
           <li>No streamproof mode</li>
         </ul>
       </div>
-      <aside class="console-card" aria-label="2.10.5 release card">
-        <div class="console-head"><span>Release / 2.10.5</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
+      <aside class="console-card" aria-label="2.10.6 release card">
+        <div class="console-head"><span>Release / 2.10.6</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
         <div class="console-main">
           <span class="console-label">Portable executable</span>
-          <div class="console-value">596,992<small>B</small></div>
+          <div class="console-value">598,528<small>B</small></div>
           <p>One direct executable, verified with SHA-256. No MSIX/AppX, installer, or ZIP.</p>
           <div class="signal-bars" aria-hidden="true">
             <i class="sh18"></i><i class="sh34"></i><i class="sh24"></i><i class="sh48"></i>
@@ -70,10 +70,10 @@
             <i class="sh43"></i><i class="sh51"></i><i class="sh32"></i><i class="sh22"></i>
             <i class="sh36"></i><i class="sh16"></i>
           </div>
-          <div class="signal-caption"><span>release tests 25 / 25</span><span>routing 0.45 ns</span></div>
+          <div class="signal-caption"><span>release tests 26 / 26</span><span>routing 0.45 ns</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Version</dt><dd>2.10.5</dd></div>
+          <div><dt>Version</dt><dd>2.10.6</dd></div>
           <div><dt>Artifact</dt><dd>exe only</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
           <div><dt>Network</dt><dd>None</dd></div>
@@ -90,7 +90,7 @@
       <table class="release-table">
         <thead><tr><th>Artifact</th><th>Size / SHA-256</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>596,992 B<br><code>49d55d7a77408ef9c5b9b9a6291351bda1796521626738a90f05b3ab854fc850</code></td><td>Download and run. No installer or package registration.</td></tr>
+          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>598,528 B<br><code>9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5</code></td><td>Download and run. No installer or package registration.</td></tr>
           <tr><td><a href="downloads/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td>exe</td><td>Verify before running.</td></tr>
           <tr><td>Linux / macOS</td><td>Not built</td><td>The core is Win32/GDI+. A real port is a separate project; no fake package is offered.</td></tr>
         </tbody>
@@ -99,18 +99,18 @@
 
     <section class="section wrap" aria-labelledby="notes-title">
       <div class="section-head">
-        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.5 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
+        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.6 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
         <p class="section-lede">A readable ledger. Every item is implemented in the source or measured on the release build; the unverified items are labelled.</p>
       </div>
       <div class="download-grid">
         <article class="release-block">
-          <h3>Idle watcher gates</h3>
+          <h3>Idle sprint poll</h3>
           <ul>
-            <li>The sprint and crosshair watchers cache their enable flags in the engine.</li>
-            <li>When inactive, they skip the settings snapshot and no longer take its lock; the active paths still read the current settings.</li>
-            <li>The sprint 8 ms poll, crosshair 16/100 ms cadence, and sprint reset behavior are unchanged.</li>
+            <li>The sprint watcher parks for 100 ms while the gate or sprint feature is inactive, instead of waking every 8 ms.</li>
+            <li>Settings publishes and focus-gate changes unpark it immediately, so activation is not held for the idle interval.</li>
+            <li>While armed, the 8 ms poll and 100 ms pulse schedule are unchanged; the sprint deadline is reset on the idle path.</li>
             <li>Presence, focus, game detection, and click-through corner behavior are unchanged.</li>
-            <li>The executable is 596,992 bytes and tests are 25 / 25. It is 512 bytes larger than 2.10.4, so no size win is claimed.</li>
+            <li>The executable is 598,528 bytes and tests are 26 / 26. It is 1,536 bytes larger than 2.10.5, so no size win is claimed.</li>
             <li>No end-to-end latency, zero-latency, or render-speed claim is made. The game tick and Windows scheduling remain the boundary.</li>
           </ul>
         </article>
@@ -146,6 +146,7 @@
         <p class="section-lede">The versioned notes in the repository are the source of truth. This page is a readable mirror, not an automatically generated feed.</p>
       </div>
       <div class="release-timeline">
+        <article><strong>2.10.6</strong><div><h3>Idle sprint poll</h3><p>The sprint watcher parks at 100 ms while inactive and wakes immediately on focus or settings changes; the armed 8 ms cadence is unchanged.</p></div></article>
         <article><strong>2.10.5</strong><div><h3>Idle watcher gates</h3><p>The sprint and crosshair watchers skip the settings lock while inactive; cadence and visuals are unchanged.</p></div></article>
         <article><strong>2.10.4</strong><div><h3>Transparent mark, leaner loop</h3><p>The favicon tile and brand plate are gone, and the focus-only presence loop no longer takes the settings lock every 160 ms.</p></div></article>
         <article><strong>2.10.3</strong><div><h3>Click-through corners, lighter watcher</h3><p>Transparent rounded corners pass clicks through, and the watcher reuses a verified foreground game window instead of re-resolving it every 160 ms.</p></div></article>
@@ -170,7 +171,7 @@
       <div class="download-verify">
         <span>Windows PowerShell</span>
         <code>Get-FileHash .\droplet.exe -Algorithm SHA256</code>
-        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.5.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.6.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>

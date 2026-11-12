@@ -81,6 +81,16 @@ one codegen unit, panic-abort, stripped.
   and cold-discovery semantics are unchanged. No input-latency or frame-time
   speedup is claimed.
 
+## 2.10.6 changes
+
+- The sprint watcher parks at `SPRINT_IDLE_MS` (100 ms) while the gate or
+  sprint feature is inactive, then unparks immediately on focus/settings
+  changes. The armed cadence remains 8 ms.
+- Scheduled idle polls drop from roughly 125/s to 10/s. This is a scheduling
+  change, not a measured CPU or end-to-end latency result.
+- The binary is 598,528 B, 1,536 B larger than 2.10.5; no size win is claimed.
+- Tests: 26 / 26.
+
 ## 2.10.5 changes
 
 - `Engine` caches sprint and totem enablement. The sprint watcher and crosshair

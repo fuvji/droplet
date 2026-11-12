@@ -69,6 +69,7 @@ impl Engine {
         self.focus_only.store(s.focus_only, Ordering::Relaxed);
         self.sprint_on.store(s.master && s.sprint, Ordering::Relaxed);
         self.totem_on.store(s.master && s.totem, Ordering::Relaxed);
+        wake_sprint();
         *self.st.write().unwrap() = Arc::new(s);
     }
 }
@@ -79,6 +80,13 @@ static MAIN_HWND: AtomicIsize = AtomicIsize::new(0);
 static GAME: AtomicIsize = AtomicIsize::new(0);
 static DWM_ROUNDED: AtomicBool = AtomicBool::new(false);
 static HOOK_TID: AtomicU32 = AtomicU32::new(0);
+static SPRINT_WAIT: OnceLock<thread::Thread> = OnceLock::new();
+
+fn wake_sprint() {
+    if let Some(t) = SPRINT_WAIT.get() {
+        t.unpark();
+    }
+}
 
 pub fn main_hwnd() -> HWND {
     MAIN_HWND.load(Ordering::Relaxed)
@@ -1132,6 +1140,9 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
             // whole settings snapshot and taking the settings lock every tick.
             let gate = focus || !e.focus_only.load(Ordering::Relaxed);
             let was_gate = e.gate.swap(gate, Ordering::Relaxed);
+            if gate != was_gate {
+                wake_sprint();
+            }
             if !gate && was_gate {
                 // A latched Toggle worker must not outlive the foreground gate.
                 macros::stop_all_toggles();
@@ -1164,12 +1175,13 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
         }
     });
 
-    // Sprint pulse: physical W only, 100 ms cadence. Poll faster than the
-    // deadline so the 100 ms schedule is not rounded up by the sleep interval.
-    // Both the gate and the feature switch are cached, so an idle loop does
-    // not clone the settings snapshot or touch its lock every 8 ms.
+    // Sprint pulse: physical W only, 100 ms cadence. Poll at 8 ms while
+    // armed so the 100 ms schedule is not rounded up; sleep at 100 ms while
+    // idle. Focus/settings transitions unpark this thread immediately, so the
+    // first pulse is not delayed by the idle wait.
     let e = engine.clone();
     thread::spawn(move || {
+        let _ = SPRINT_WAIT.set(thread::current());
         while !e.quitting.load(Ordering::Relaxed) {
             let armed = e.gate.load(Ordering::Relaxed)
                 && e.sprint_on.load(Ordering::Relaxed);
@@ -1179,7 +1191,7 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
             } else {
                 macros::sprint_reset();
             }
-            thread::sleep(Duration::from_millis(macros::SPRINT_TICK_MS));
+            thread::park_timeout(Duration::from_millis(macros::sprint_wait_ms(armed)));
         }
     });
 }
