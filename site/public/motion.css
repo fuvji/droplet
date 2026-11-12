@@ -1,0 +1,448 @@
+/* Droplet interaction layer.
+   Loaded after the editorial and vault layers. Motion is progressive:
+   content stays readable without JavaScript, and every moving part is
+   disabled under prefers-reduced-motion. */
+
+@view-transition {
+  navigation: auto;
+}
+
+:root {
+  --spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --hero-x: 0px;
+  --hero-y: 0px;
+  --reveal-delay: 0ms;
+  --spot-x: 50%;
+  --spot-y: 50%;
+}
+
+/* Reading progress and header state are useful without animation. */
+
+.read-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(207, 227, 242, 0.8), #f4f3ef 55%, rgba(255, 255, 255, 0.2));
+  box-shadow: 0 0 16px rgba(237, 241, 246, 0.35);
+  transform: scaleX(var(--read-progress, 0));
+  transform-origin: 0 50%;
+}
+
+.site-header.is-scrolled {
+  background: rgba(6, 6, 8, 0.88);
+  border-bottom-color: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.28);
+}
+
+.site-nav a.is-active {
+  color: var(--ink);
+}
+
+.site-nav a.is-active::after {
+  transform: scaleX(1);
+  background: linear-gradient(90deg, var(--ink), rgba(255, 255, 255, 0.18));
+}
+
+/* A card gets a child layer rather than competing with the existing
+   ::before/::after decorations used by the product cards. */
+
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    320px circle at var(--spot-x) var(--spot-y),
+    rgba(255, 255, 255, 0.075),
+    transparent 58%
+  );
+  mix-blend-mode: screen;
+  transition: opacity 320ms var(--smooth);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .site-header {
+    transition: background-color 360ms var(--smooth), border-color 360ms var(--smooth),
+      box-shadow 360ms var(--smooth);
+  }
+
+  .brand-mark {
+    transition: transform 620ms var(--spring), filter 620ms var(--spring);
+  }
+
+  .brand:hover .brand-mark {
+    transform: translateY(-1px) scale(1.04);
+    filter: drop-shadow(0 0 14px rgba(240, 243, 247, 0.28));
+  }
+
+  .header-action,
+  .button,
+  .text-link {
+    transition: transform 300ms var(--spring), background 300ms var(--smooth),
+      border-color 300ms var(--smooth), color 300ms var(--smooth),
+      box-shadow 300ms var(--smooth);
+  }
+
+  .button:hover {
+    transform: translateY(-2px);
+  }
+
+  .button:active {
+    transform: translateY(0) scale(0.985);
+  }
+
+  .button-primary:hover {
+    box-shadow: 0 10px 32px rgba(255, 255, 255, 0.12);
+  }
+
+  .text-link:hover {
+    transform: translateX(2px);
+  }
+
+  .hero-copy > *,
+  .page-hero > div > * {
+    animation: hero-in 900ms var(--spring) both;
+  }
+
+  .hero-copy > :nth-child(1),
+  .page-hero > div > :nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .hero-copy > :nth-child(2),
+  .page-hero > div > :nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  .hero-copy > :nth-child(3),
+  .page-hero > div > :nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .hero-copy > :nth-child(4),
+  .page-hero > div > :nth-child(4) {
+    animation-delay: 220ms;
+  }
+
+  .hero-copy > :nth-child(n + 5),
+  .page-hero > div > :nth-child(n + 5) {
+    animation-delay: 280ms;
+  }
+
+  .hero > .console-card,
+  .page-hero > .console-card {
+    animation: card-in 1000ms var(--spring) 180ms both;
+  }
+
+  .hero-vault {
+    transition: transform 900ms var(--spring);
+    transform: translate3d(var(--hero-x), var(--hero-y), 0);
+    will-change: transform;
+  }
+
+  .spotlight-layer {
+    opacity: 0;
+  }
+
+  .spotlight:hover > .spotlight-layer,
+  .spotlight:focus-within > .spotlight-layer {
+    opacity: 1;
+  }
+
+  .js .will-reveal {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, 18px, 0);
+    transition: opacity 760ms var(--smooth), filter 760ms var(--smooth),
+      transform 840ms var(--spring);
+    transition-delay: var(--reveal-delay);
+  }
+
+  .js .will-reveal.is-visible {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  .proof-rail > div,
+  .partner-rail,
+  .section-head,
+  .benchmark-card,
+  .performance-copy,
+  .measure-card,
+  .pipeline-card,
+  .media-frame,
+  .preview-lab,
+  .anatomy li,
+  .interface-facts li,
+  .capture-frame,
+  .capture-copy,
+  .module-card,
+  .audit-layout > *,
+  .download-card,
+  .release-block,
+  .release-timeline article,
+  .faq-list details,
+  .vault-shell,
+  .inventory-card,
+  .policy-grid > div,
+  .inquiry-card {
+    transform-origin: 50% 100%;
+  }
+
+  .preview-tabs label {
+    transition: color 220ms var(--smooth), background 220ms var(--smooth),
+      border-color 220ms var(--smooth), box-shadow 220ms var(--smooth),
+      transform 220ms var(--spring);
+  }
+
+  .preview-tabs label:hover {
+    transform: translateY(-1px);
+  }
+
+  .faq-list summary {
+    cursor: pointer;
+    list-style: none;
+    transition: color 220ms var(--smooth);
+  }
+
+  .faq-list summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-list summary::after {
+    float: right;
+    margin-left: 18px;
+    color: var(--faint);
+    content: "+";
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1;
+    transition: color 220ms var(--smooth), transform 320ms var(--spring);
+  }
+
+  .faq-list details[open] summary::after {
+    color: var(--ink);
+    transform: rotate(45deg);
+  }
+
+  .faq-list details p {
+    animation: detail-in 420ms var(--spring) both;
+  }
+
+  .pipeline li,
+  .audit-list li,
+  .module-card,
+  .download-card,
+  .vault-card,
+  .inventory-card {
+    transition: border-color 300ms var(--smooth), background 300ms var(--smooth),
+      transform 320ms var(--spring), box-shadow 320ms var(--smooth);
+  }
+
+  .pipeline li:hover,
+  .audit-list li:hover {
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .pipeline li:hover span,
+  .audit-list li:hover .audit-name {
+    color: var(--ink-soft);
+  }
+
+  .footer-wordmark {
+    transition: color 500ms var(--smooth), -webkit-text-stroke-color 500ms var(--smooth),
+      transform 700ms var(--spring);
+  }
+
+  .footer-wordmark:hover {
+    color: rgba(255, 255, 255, 0.035);
+    -webkit-text-stroke-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-3px);
+  }
+
+  .signal-bars i {
+    transform-origin: 50% 100%;
+    animation: signal-breathe 5.6s ease-in-out infinite;
+  }
+
+  .signal-bars i:nth-child(3n) {
+    animation-delay: -1.2s;
+  }
+
+  .signal-bars i:nth-child(4n) {
+    animation-delay: -2.6s;
+  }
+
+  .signal-bars i:nth-child(5n) {
+    animation-delay: -3.8s;
+  }
+
+  ::view-transition-old(root) {
+    animation: page-out 180ms ease both;
+  }
+
+  ::view-transition-new(root) {
+    animation: page-in 420ms var(--spring) both;
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes signal-breathe {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scaleY(0.94);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: scale(0.996);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.998);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (hover: none) {
+  .button:active,
+  .header-action:active,
+  .module-card:active,
+  .download-card:active,
+  .inventory-card:active,
+  .vault-card:active {
+    transform: scale(0.985);
+  }
+}
+
+@media (pointer: fine) {
+  html {
+    scrollbar-color: rgba(255, 255, 255, 0.18) #080809;
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #080809;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid #080809;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+@media (max-width: 760px) {
+  .read-progress {
+    height: 1px;
+  }
+
+  .js .will-reveal {
+    filter: none;
+    transform: translate3d(0, 14px, 0);
+  }
+
+  .hero-vault {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .read-progress {
+    transition: none;
+    animation: none;
+    transform: scaleX(var(--read-progress, 0));
+  }
+
+  .site-header,
+  .brand-mark,
+  .button,
+  .text-link,
+  .spotlight-layer,
+  .preview-tabs label,
+  .faq-list summary,
+  .faq-list summary::after,
+  .footer-wordmark,
+  .signal-bars i {
+    transition: none;
+    animation: none;
+  }
+
+  .js .will-reveal {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
