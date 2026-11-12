@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.10.8
+
+- Replace the self-destruct waiter's `std::process::Command` spawn with the
+  existing hidden `ShellExecuteW` path. This removes std's process-spawn
+  machinery while keeping the five-second wait and Recycle Bin deletion.
+- Link with bundled `rust-lld` and ICF; retain `opt-level=3`, fat LTO, one
+  codegen unit, panic-abort, and stripped symbols. Portable executable:
+  **542,720 bytes**, SHA-256
+  `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`.
+  Tests: **26 / 26**. This is 55,808 bytes smaller than 2.10.7 and 54,272
+  bytes below the 596,992-byte target.
+- Isolated 60 s samples measured 2.10.7 at 31.25 ms idle / 125 ms armed CPU,
+  25/s / 140/s process context switches, and 9/s / 126/s on the sprint thread.
+  The gated reads are unchanged; no CPU, latency, or speedup claim is made.
+- No end-to-end latency or zero-latency claim. Trigger routing is unchanged.
+
 ## 2.10.7
 
 - Check the sprint pulse deadline before cloning settings: a held W now does

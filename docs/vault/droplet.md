@@ -15,8 +15,11 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.7 portable exe: 598,528 bytes. Single artifact; no MSIX/AppX or ZIP.
+- 2.10.8 portable exe: 542,720 bytes. Single artifact; no MSIX/AppX or ZIP.
 - Tests: 26 / 26.
+- The self-destruct waiter uses hidden `ShellExecuteW` instead of
+  `std::process::Command`; the link uses bundled `rust-lld` + ICF. This is
+  55,808 B smaller than 2.10.7 and keeps `opt-level=3`.
 - Sprint settings are read only when a pulse is due; crosshair settings only
   on a magenta hit. Poll cadence and bindings are unchanged. Idle sprint and
   crosshair watchers skip the settings snapshot and lock; the sprint loop

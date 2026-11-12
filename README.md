@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.7 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.8 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 598,528 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 542,720 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,19 +28,27 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.7
+## What is in 2.10.8
 
-- **Event-gated armed reads**: the sprint watcher checks the pulse deadline
-  before cloning settings, so a held W now causes at most one settings read
-  per 100 ms instead of one every 8 ms. The crosshair watcher samples the
+- **Smaller binary (2.10.8)**: the one `std::process::Command` user, the
+  self-destruct recycle waiter, now launches through the existing hidden
+  `ShellExecuteW` path instead of linking std's process spawner. LLD plus ICF
+  supplies the final link. The executable is 542,720 bytes, 55,808 smaller
+  than 2.10.7 and 54,272 below the 596,992-byte target. Tests are 26 / 26.
+- **Measured gating (2.10.8)**: a 60 s isolated run of 2.10.7 measured
+  31.25 ms idle versus 125 ms armed CPU, with sprint-thread context switches
+  at 9/s versus 126/s. The 2.10.8 build kept the same low CPU range and the
+  same event-gated reads. These are short samples, not a speedup claim.
+- **Event-gated armed reads (2.10.7)**: the sprint watcher checks the pulse
+  deadline before cloning settings, so a held W causes at most one settings
+  read per 100 ms instead of one every 8 ms. The crosshair watcher samples the
   cursor first and reads settings only on a magenta flash instead of every
-  16 ms. The polling cadence and bindings are unchanged. The executable stays
-  at 598,528 bytes, the same as 2.10.6; no CPU, latency, or size win is claimed.
+  16 ms. The polling cadence and bindings are unchanged.
 - **Idle poll floor (2.10.6)**: the sprint watcher parks for 100 ms while
   inactive instead of waking every 8 ms; focus and settings changes unpark it
   immediately. The armed cadence remains 8 ms. This cut scheduled idle polls
   from about 125/s to 10/s. The 2.10.6 binary was 1,536 bytes larger than
-  2.10.5; 2.10.7 holds that size flat.
+  2.10.5; the 2.10.8 size pass is separate.
 - **Idle watcher gates**: the sprint and crosshair watchers cache their enable
   flags, so inactive loops skip the settings snapshot and its lock. The 8 ms /
   100 ms cadence and sprint reset behavior are unchanged.
@@ -82,7 +90,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.7 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.8 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -128,12 +136,12 @@ name, not a latency claim. Details and reproduction:
 ## Verify
 
 - `cargo test --release`: **26 / 26**.
-- Portable executable: **598,528 bytes**,
-  `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`.
+- Portable executable: **542,720 bytes**,
+  `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.7 capture; live Anchor placement, Java/Bedrock positive
+  from the 2.10.8 capture; live Anchor placement, Java/Bedrock positive
   detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries

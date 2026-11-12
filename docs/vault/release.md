@@ -1,5 +1,17 @@
 # release
 
+## 2.10.8 — 2026-11-12
+
+- Portable exe: 542,720 B,
+  `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`.
+- Tests: 26 / 26.
+- Changes: replace the self-destruct waiter's `std::process::Command` with
+  hidden `ShellExecuteW`; use `rust-lld` + ICF. This is 55,808 B smaller than
+  2.10.7 and 54,272 B below 596,992. Event-gated reads are unchanged.
+- Isolated 60 s sample: 2.10.7 was 31.25 ms idle / 125 ms armed CPU, 25/s /
+  140/s process context switches, and 9/s / 126/s on the sprint thread. No
+  speedup claim.
+
 ## 2.10.7 — 2026-11-12
 
 - Portable exe: 598,528 B,

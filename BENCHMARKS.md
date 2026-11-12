@@ -66,9 +66,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.7**
-- Portable executable: **598,528 bytes**
-- SHA-256: `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`
+- Version: **2.10.8**
+- Portable executable: **542,720 bytes**
+- SHA-256: `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **26 / 26**
 - Runtime dependencies: **0**
@@ -91,6 +91,25 @@ removed the painted outer window hairline. It also removed the Anchor 50 ms
 floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
+
+2.10.8 removes the only `std::process::Command` spawn from the binary. The
+self-destruct recycle waiter now uses the same dynamically loaded
+`ShellExecuteW` path as links, still hidden, and still waits five seconds for
+the process before using the Recycle Bin. The link uses bundled `rust-lld` with
+ICF while keeping `opt-level=3`, fat LTO, one codegen unit, panic-abort, and
+stripped symbols. The executable is **542,720 bytes**, 55,808 smaller than
+2.10.7 and 54,272 below 596,992. Tests are 26 / 26. The event-gated sprint and
+crosshair reads are unchanged.
+
+A 60 s isolated sample after a 5 s warm-up, with the panel hidden and crosshair
+off, measured 2.10.7 at **31.25 ms idle / 125 ms armed** process CPU and
+**25/s idle / 140/s armed** process context switches. The sprint thread itself
+measured **9/s idle / 126/s armed**. An armed repeat measured 156.25 ms and a
+2.10.8 run measured 93.75 ms idle / 109.375 ms armed with 24/s / 138/s process
+context switches and 9/s / 122/s on the sprint thread. CPU time is quantized by
+Windows to 15.625 ms; these are short samples, not a speedup benchmark. The
+gating difference is the stable result; no end-to-end or zero-latency claim is
+made.
 
 2.10.7 moves armed settings reads behind the event. The sprint watcher checks
 `sprint_due_now` before cloning settings, so a held W causes at most one

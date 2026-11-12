@@ -1,4 +1,4 @@
-Droplet 2.10.7 — Windows x64 portable (598,528 bytes)
+Droplet 2.10.8 — Windows x64 portable (542,720 bytes)
 
 Run droplet.exe. Windows 10 19041 or newer, x64.
 The panel starts hidden. Press Ctrl + Right Shift to show or hide it.

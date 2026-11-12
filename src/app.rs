@@ -622,7 +622,6 @@ impl App {
 /// to exit, then sends the exe to the Recycle Bin. It writes no script, log
 /// or temp file and is used only when the direct recycle call is refused.
 fn spawn_recycle_waiter(exe: &std::path::Path) {
-    use std::os::windows::process::CommandExt;
     // A single-quoted PowerShell string takes the path literally; doubling
     // apostrophes is the only escape needed, so no shell path injection.
     let path = exe.to_string_lossy().replace('\'', "''");
@@ -631,20 +630,31 @@ fn spawn_recycle_waiter(exe: &std::path::Path) {
         std::process::id(),
         path
     );
-    let _ = std::process::Command::new("powershell.exe")
-        .args([
-            "-NoLogo",
-            "-NoProfile",
-            "-NonInteractive",
-            "-WindowStyle",
-            "Hidden",
-            "-ExecutionPolicy",
-            "Bypass",
-            "-Command",
-        ])
-        .arg(script)
-        .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
-        .spawn();
+    let params = format!(
+        "-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -Command \"{}\"",
+        script
+    );
+    unsafe { shell_exec_hidden("powershell.exe", &params) };
+}
+
+/// Launch a helper through the shell without a console window. The app already
+/// relies on ShellExecuteW for links, so this avoids linking std's process
+/// spawner for the one self-destruct waiter.
+unsafe fn shell_exec_hidden(file: &str, params: &str) {
+    let dll = win::dyn_load("shell32.dll");
+    if dll == 0 {
+        return;
+    }
+    let p = win::load_proc(dll, "ShellExecuteW");
+    if p == 0 {
+        return;
+    }
+    let f: unsafe extern "system" fn(HWND, *const u16, *const u16, *const u16, *const u16, i32) -> isize =
+        std::mem::transmute(p);
+    let op = win::wide("open");
+    let program = win::wide(file);
+    let args = win::wide(params);
+    f(0, op.as_ptr(), program.as_ptr(), args.as_ptr(), std::ptr::null(), 0);
 }
 
 // --------------------------------------------------------------- wndproc

@@ -1,6 +1,6 @@
 [package]
 name = "droplet"
-version = "2.10.7"
+version = "2.10.8"
 edition = "2021"
 description = "Droplet - local Minecraft keyboard and mouse macro suite"
 license = "LicenseRef-Proprietary"

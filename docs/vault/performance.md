@@ -11,6 +11,19 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.8 changes
+
+- Removed the only `std::process::Command` spawn: the self-destruct waiter now
+  uses the existing hidden `ShellExecuteW` path. This is a size change, not a
+  behavior change.
+- Link with bundled `rust-lld` and ICF while retaining `opt-level=3`, fat LTO,
+  one codegen unit, panic-abort, and stripped symbols. The exe falls from
+  598,528 to **542,720 bytes** (55,808 B smaller; 54,272 B below 596,992).
+- Isolated 60 s sample on this machine: 2.10.7 measured 31.25 ms idle /
+  125 ms armed CPU, 25/s / 140/s process context switches, and 9/s / 126/s on
+  the sprint thread. A 2.10.8 sample measured 93.75 / 109.375 ms, 24/s / 138/s,
+  and 9/s / 122/s. CPU time is quantized at 15.625 ms; no speedup claim.
+
 ## 2.10.7 changes
 
 - The sprint watcher checks `sprint_due_now` before cloning settings. While W
