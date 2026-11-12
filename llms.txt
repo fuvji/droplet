@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.7
+Version: 2.10.8
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,7 +15,13 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.7 portable executable: 598,528 bytes.
+- 2.10.8 portable executable: 542,720 bytes, 55,808 bytes smaller than 2.10.7.
+- The self-destruct waiter uses hidden `ShellExecuteW` instead of
+  `std::process::Command`; the link uses bundled `rust-lld` + ICF. Event-gated
+  sprint and crosshair reads are unchanged.
+- Isolated 60 s samples measured 2.10.7 at 31.25 ms idle / 125 ms armed CPU,
+  9/s / 126/s sprint-thread context switches. These are short samples, not a
+  speedup claim.
 - DWM supplies the antialiased 8 px corner when available; the GDI region is
   used only as a fallback, avoiding a hard second clip. The transparent
   quarter-rounds are click-through.
