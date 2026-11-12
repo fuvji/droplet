@@ -52,9 +52,9 @@
   function paintScroll() {
     const scrollTop = window.scrollY || window.pageYOffset || 0;
     const scrollable = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    updateActiveSection();
     progress.style.setProperty("--read-progress", Math.min(1, scrollTop / scrollable).toFixed(4));
     if (header) header.classList.toggle("is-scrolled", scrollTop > 12);
-    updateActiveSection();
     scrollQueued = false;
   }
 
@@ -119,13 +119,22 @@
 
     const viewportHeight = window.innerHeight || 800;
 
-    revealTargets.forEach((element, index) => {
-      // Above-the-fold content must never wait for an observer.
-      if (element.getBoundingClientRect().top <= viewportHeight * 0.92) return;
-      element.style.setProperty("--reveal-delay", `${(index % 5) * 55}ms`);
-      element.classList.add("will-reveal");
-      revealObserver.observe(element);
-    });
+    // Read all positions first. Interleaving rect reads with class/style
+    // writes forces one layout per element and is the difference between a
+    // smooth setup and a multi-frame stall on a throttled phone.
+    const belowFold = revealTargets
+      .map((element, index) => ({
+        element,
+        index,
+        top: element.getBoundingClientRect().top,
+      }))
+      .filter((entry) => entry.top > viewportHeight * 0.92);
+
+    for (const entry of belowFold) {
+      entry.element.style.setProperty("--reveal-delay", `${(entry.index % 5) * 55}ms`);
+      entry.element.classList.add("will-reveal");
+      revealObserver.observe(entry.element);
+    }
   }
 
   function syncReducedMotion() {

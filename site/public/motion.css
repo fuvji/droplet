@@ -3,10 +3,6 @@
    content stays readable without JavaScript, and every moving part is
    disabled under prefers-reduced-motion. */
 
-@view-transition {
-  navigation: auto;
-}
-
 :root {
   --spring: cubic-bezier(0.16, 1, 0.3, 1);
   --smooth: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -165,16 +161,13 @@
 
   .js .will-reveal {
     opacity: 0;
-    filter: blur(4px);
     transform: translate3d(0, 18px, 0);
-    transition: opacity 760ms var(--smooth), filter 760ms var(--smooth),
-      transform 840ms var(--spring);
+    transition: opacity 720ms var(--smooth), transform 840ms var(--spring);
     transition-delay: var(--reveal-delay);
   }
 
   .js .will-reveal.is-visible {
     opacity: 1;
-    filter: none;
     transform: none;
   }
 
@@ -276,6 +269,9 @@
     transform: translateY(-3px);
   }
 
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .signal-bars i {
     transform-origin: 50% 100%;
     animation: signal-breathe 5.6s ease-in-out infinite;
@@ -292,25 +288,15 @@
   .signal-bars i:nth-child(5n) {
     animation-delay: -3.8s;
   }
-
-  ::view-transition-old(root) {
-    animation: page-out 180ms ease both;
-  }
-
-  ::view-transition-new(root) {
-    animation: page-in 420ms var(--spring) both;
-  }
 }
 
 @keyframes hero-in {
   from {
     opacity: 0;
-    filter: blur(5px);
     transform: translate3d(0, 20px, 0);
   }
   to {
     opacity: 1;
-    filter: none;
     transform: none;
   }
 }
@@ -346,24 +332,6 @@
   50% {
     opacity: 1;
     transform: scaleY(1);
-  }
-}
-
-@keyframes page-out {
-  to {
-    opacity: 0;
-    transform: scale(0.996);
-  }
-}
-
-@keyframes page-in {
-  from {
-    opacity: 0;
-    transform: translateY(7px) scale(0.998);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -410,7 +378,6 @@
   }
 
   .js .will-reveal {
-    filter: none;
     transform: translate3d(0, 14px, 0);
   }
 
@@ -442,7 +409,6 @@
 
   .js .will-reveal {
     opacity: 1;
-    filter: none;
     transform: none;
   }
 }
