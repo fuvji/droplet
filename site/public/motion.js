@@ -68,31 +68,60 @@
   window.addEventListener("resize", queueScroll, { passive: true });
   paintScroll();
 
-  const revealSelector = [
-    ".proof-rail > div",
-    ".partner-rail",
-    ".section-head",
-    ".benchmark-card",
-    ".performance-copy",
-    ".measure-card",
-    ".pipeline-card",
-    ".media-frame",
-    ".preview-lab",
-    ".anatomy li",
-    ".interface-facts li",
-    ".capture-frame",
-    ".capture-copy",
-    ".module-card",
-    ".audit-layout > *",
-    ".download-card",
-    ".release-block",
-    ".release-timeline article",
-    ".faq-list details",
-    ".vault-shell",
-    ".inventory-card",
-    ".policy-grid > div",
-    ".inquiry-card",
-  ].join(",");
+  // On phones, reveal each card group as one surface. Animating 40–50
+  // individual cards costs more scroll frames than the grouping adds in
+  // visual rhythm. Desktop keeps the finer per-card stagger.
+  const narrowViewport = window.matchMedia("(max-width: 760px)").matches;
+  const revealSelector = (narrowViewport
+    ? [
+        ".proof-rail",
+        ".partner-rail",
+        ".section-head",
+        ".benchmark-card",
+        ".performance-copy",
+        ".measure-card",
+        ".pipeline-card",
+        ".media-frame",
+        ".preview-lab",
+        ".anatomy",
+        ".interface-facts",
+        ".capture-grid",
+        ".module-grid",
+        ".audit-layout",
+        ".download-grid",
+        ".release-timeline",
+        ".faq-list",
+        ".vault-shell",
+        ".inventory-grid",
+        ".policy-grid",
+        ".inquiry-card",
+      ]
+    : [
+        ".proof-rail > div",
+        ".partner-rail",
+        ".section-head",
+        ".benchmark-card",
+        ".performance-copy",
+        ".measure-card",
+        ".pipeline-card",
+        ".media-frame",
+        ".preview-lab",
+        ".anatomy li",
+        ".interface-facts li",
+        ".capture-frame",
+        ".capture-copy",
+        ".module-card",
+        ".audit-layout > *",
+        ".download-card",
+        ".release-block",
+        ".release-timeline article",
+        ".faq-list details",
+        ".vault-shell",
+        ".inventory-card",
+        ".policy-grid > div",
+        ".inquiry-card",
+      ]
+  ).join(",");
 
   const revealTargets = Array.from(document.querySelectorAll(revealSelector));
   let revealObserver = null;
