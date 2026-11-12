@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.6 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.7 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -28,13 +28,19 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.6
+## What is in 2.10.7
 
-- **Idle poll floor**: the sprint watcher parks for 100 ms while inactive
-  instead of waking every 8 ms; focus and settings changes unpark it
-  immediately. The armed cadence remains 8 ms. This cuts scheduled idle polls
-  from about 125/s to 10/s, but the binary grows by 1,536 bytes; no size win is
-  claimed.
+- **Event-gated armed reads**: the sprint watcher checks the pulse deadline
+  before cloning settings, so a held W now causes at most one settings read
+  per 100 ms instead of one every 8 ms. The crosshair watcher samples the
+  cursor first and reads settings only on a magenta flash instead of every
+  16 ms. The polling cadence and bindings are unchanged. The executable stays
+  at 598,528 bytes, the same as 2.10.6; no CPU, latency, or size win is claimed.
+- **Idle poll floor (2.10.6)**: the sprint watcher parks for 100 ms while
+  inactive instead of waking every 8 ms; focus and settings changes unpark it
+  immediately. The armed cadence remains 8 ms. This cut scheduled idle polls
+  from about 125/s to 10/s. The 2.10.6 binary was 1,536 bytes larger than
+  2.10.5; 2.10.7 holds that size flat.
 - **Idle watcher gates**: the sprint and crosshair watchers cache their enable
   flags, so inactive loops skip the settings snapshot and its lock. The 8 ms /
   100 ms cadence and sprint reset behavior are unchanged.
@@ -76,7 +82,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.6 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.7 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -123,11 +129,11 @@ name, not a latency claim. Details and reproduction:
 
 - `cargo test --release`: **26 / 26**.
 - Portable executable: **598,528 bytes**,
-  `9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5`.
+  `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.6 capture; live Anchor placement, Java/Bedrock positive
+  from the 2.10.7 capture; live Anchor placement, Java/Bedrock positive
   detection, and hit registration remain unverified in game.
 
 ## Deliberate boundaries

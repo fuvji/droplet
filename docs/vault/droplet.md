@@ -15,10 +15,12 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.6 portable exe: 598,528 bytes. Single artifact; no MSIX/AppX or ZIP.
+- 2.10.7 portable exe: 598,528 bytes. Single artifact; no MSIX/AppX or ZIP.
 - Tests: 26 / 26.
-- Idle sprint/crosshair watchers skip the settings snapshot and lock; the
-  sprint loop parks at 100 ms when inactive and unparks on activation.
+- Sprint settings are read only when a pulse is due; crosshair settings only
+  on a magenta hit. Poll cadence and bindings are unchanged. Idle sprint and
+  crosshair watchers skip the settings snapshot and lock; the sprint loop
+  parks at 100 ms when inactive and unparks on activation.
 - Trigger routing: 0.45 ns indexed vs 202.39 ns scanned (445×, routing only).
 - Anchor defaults: 47/53 ms, Min 47-97, Max 53-103. Hydrogen A6 order;
   Air loop repeats while held.

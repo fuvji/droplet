@@ -847,6 +847,13 @@ fn sprint_due(next: i64, now: i64) -> bool {
     next == 0 || now >= next
 }
 
+/// True when the next sprint pulse is due. The watcher checks this before
+/// cloning the settings snapshot, so most 8 ms polls do no binding work.
+#[inline]
+pub fn sprint_due_now() -> bool {
+    sprint_due(SPRINT_NEXT.load(Ordering::Relaxed), input::now())
+}
+
 #[inline]
 fn sprint_deadline(now: i64, qpf: i64) -> i64 {
     let cooldown = qpf.saturating_mul(SPRINT_COOLDOWN_MS) / 1000;
@@ -880,14 +887,16 @@ pub fn sprint_tick(s: &Settings) {
     }
 }
 
-/// Magenta crosshair detection: swaps to the totem when the pixel under the
-/// cursor matches (damage flash), exactly like the original timer.
-pub fn totem_watch(s: &Settings, probe: &Probe) {
-    if !s.master || !s.totem {
-        return;
-    }
+/// Magenta crosshair detection. Sampling is separated from the settings read
+/// so the watcher only clones settings when the pixel actually matches.
+#[inline]
+pub fn totem_flash(probe: &Probe) -> bool {
     let (r, g, b) = probe.sample_cursor();
-    if r > 214 && g < 41 && b > 214 {
+    r > 214 && g < 41 && b > 214
+}
+
+pub fn totem_tap(s: &Settings) {
+    if s.master && s.totem {
         tap(&s.totem_swap);
     }
 }

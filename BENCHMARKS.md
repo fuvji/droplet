@@ -66,9 +66,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.6**
+- Version: **2.10.7**
 - Portable executable: **598,528 bytes**
-- SHA-256: `9452d73bf5d4126b27d2d350eeec0b2edca78ab65b7e4137b04a0045660bb6d5`
+- SHA-256: `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **26 / 26**
 - Runtime dependencies: **0**
@@ -92,13 +92,21 @@ floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
 
-2.10.6 changes the sprint watcher's idle wait from 8 ms to 100 ms while the
-gate or sprint feature is inactive, then unparks it immediately on focus or
-settings changes. The armed cadence remains 8 ms, so the 100 ms pulse schedule
-is not rounded up. Scheduled idle polls fall from about 125/s to 10/s. The
-executable is 598,528 bytes, 1,536 bytes larger than 2.10.5; this loop does not
-claim a size win. Trigger routing is unchanged; tests are 26 / 26. No
-end-to-end or zero-latency claim is made.
+2.10.7 moves armed settings reads behind the event. The sprint watcher checks
+`sprint_due_now` before cloning settings, so a held W causes at most one
+settings read per 100 ms (10/s) instead of 125/s at the 8 ms poll. The crosshair
+watcher samples the cursor first and only reads settings on a magenta hit
+instead of every 16 ms (62.5/s). Poll cadence and bindings are unchanged. The
+executable is 598,528 bytes, the same as 2.10.6 and 1,536 bytes larger than
+2.10.5. Tests are 26 / 26. No CPU, latency, or size win is claimed.
+
+2.10.6 parks the sprint watcher for 100 ms while the gate or sprint feature is
+inactive, then unparks it immediately on focus or settings changes. The armed
+cadence remains 8 ms, so the 100 ms pulse schedule is not rounded up.
+Scheduled idle polls fall from about 125/s to 10/s. The executable is 598,528
+bytes, 1,536 bytes larger than 2.10.5; 2.10.7 holds that size flat. Trigger
+routing is unchanged; tests are 26 / 26. No end-to-end or zero-latency claim is
+made.
 
 2.10.5 caches the sprint and crosshair enable flags in `Engine`. The sprint
 watcher no longer takes the settings lock every 8 ms when the gate is closed or

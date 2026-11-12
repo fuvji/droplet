@@ -1,5 +1,14 @@
 # release
 
+## 2.10.7 — 2026-11-12
+
+- Portable exe: 598,528 B,
+  `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`.
+- Tests: 26 / 26.
+- Changes: sprint settings are read only when a pulse is due; crosshair
+  settings only on a magenta flash. Poll cadence and bindings are unchanged.
+  Same size as 2.10.6; no latency or size claim.
+
 ## 2.10.6 — 2026-11-11
 
 - Portable exe: 598,528 B,

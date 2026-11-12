@@ -11,6 +11,16 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.7 changes
+
+- The sprint watcher checks `sprint_due_now` before cloning settings. While W
+  is held, settings reads fall from 125/s to at most 10/s; the 8 ms poll and
+  100 ms pulse schedule are unchanged.
+- The crosshair watcher samples the cursor first and reads settings only on a
+  magenta flash instead of every 16 ms. The 16 ms sampling cadence is unchanged.
+- The executable remains 598,528 bytes, the same as 2.10.6. This is a
+  runtime-read reduction; it is not a measured CPU, latency, or size win.
+
 ## 2.9.0 changes
 
 - Unbound key events are rejected by `Engine::has_trigger` before cloning the

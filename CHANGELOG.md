@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.10.7
+
+- Check the sprint pulse deadline before cloning settings: a held W now does
+  at most one settings read per 100 ms instead of one every 8 ms.
+- Sample the crosshair pixel first and read settings only on a magenta flash,
+  instead of every 16 ms. Poll cadence, bindings, and reset behavior are
+  unchanged.
+- Portable executable: **598,528 bytes**, SHA-256
+  `88348e007a5b10fc1921509f7f8f8d9dd159f51adf9fbe93b1e451a5de6dea3f`.
+  Tests: **26 / 26**. Same size as 2.10.6; no CPU, latency, or size win is
+  claimed.
+- No end-to-end latency or zero-latency claim. Trigger routing and the release
+  profile are unchanged.
+
 ## 2.10.6
 
 - Park the sprint watcher for 100 ms while inactive instead of polling every

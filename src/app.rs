@@ -1166,9 +1166,13 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
             let armed = e.totem_on.load(Ordering::Relaxed)
                 && e.focus.load(Ordering::Relaxed);
             if armed {
-                let s = e.settings();
                 if let Some(p) = &probe {
-                    macros::totem_watch(&s, p);
+                    // Sample first; the settings lock is only needed on an
+                    // actual magenta flash, not on every crosshair tick.
+                    if macros::totem_flash(p) {
+                        let s = e.settings();
+                        macros::totem_tap(&s);
+                    }
                 }
             }
             thread::sleep(Duration::from_millis(if armed { 16 } else { 100 }));
@@ -1185,9 +1189,13 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
         while !e.quitting.load(Ordering::Relaxed) {
             let armed = e.gate.load(Ordering::Relaxed)
                 && e.sprint_on.load(Ordering::Relaxed);
-            if armed {
-                let s = e.settings();
-                macros::sprint_tick(&s);
+            if armed && input::physical_down(Ev::K(0x57)) {
+                // Most 8 ms polls are not due. Check the deadline before
+                // cloning the settings snapshot or taking its lock.
+                if macros::sprint_due_now() {
+                    let s = e.settings();
+                    macros::sprint_tick(&s);
+                }
             } else {
                 macros::sprint_reset();
             }
