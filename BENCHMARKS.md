@@ -66,11 +66,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.8**
-- Portable executable: **542,720 bytes**
-- SHA-256: `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`
+- Version: **2.10.9**
+- Portable executable: **545,280 bytes**
+- SHA-256: `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **26 / 26**
+- Release tests: **31 / 31**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**
@@ -91,6 +91,12 @@ removed the painted outer window hairline. It also removed the Anchor 50 ms
 floor and three fixed 50 ms slot sleeps; each slot received one configured
 settle before its right-click. The System-tab paint snapshot in the 2.9.2
 capture read **2.15 ms**; that is one UI sample, not a frame-time benchmark.
+
+2.10.9 is a behavior and GUI correction: Auto Crystal gains a Return slot with
+hold/toggle semantics, and pointer hit testing stays physical through DPI
+changes. Trigger routing, watcher cadence, and the release profile are
+unchanged. The executable is 545,280 bytes and tests are 31 / 31. No CPU,
+latency, size, or render-speed win is claimed.
 
 2.10.8 removes the only `std::process::Command` spawn from the binary. The
 self-destruct recycle waiter now uses the same dynamically loaded

@@ -343,9 +343,8 @@ impl<'a> Ui<'a> {
     fn rail(&mut self) {
         let s = self.scale;
         let items = [("Core", 0usize, 0u8), ("Crystal", 1, 1), ("Assist", 2, 2), ("System", 3, 3)];
-        let mut y = (HEADER_H + 8.0) * s;
         for (name, idx, kind) in items {
-            let r = Rect::new(8.0 * s, y, (RAIL_W - 16.0) * s, 34.0 * s);
+            let r = rail_rect(idx, s);
             let active = self.tab == idx;
             let hot = self.hovered(r);
             let hv = self.anim(wid(name, 2), if hot { 1.0 } else { 0.0 });
@@ -370,7 +369,6 @@ impl<'a> Ui<'a> {
             if self.pressed && hot {
                 self.acts.push(Act::Tab(idx));
             }
-            y += 36.0 * s;
         }
     }
 
@@ -836,13 +834,14 @@ impl<'a> Ui<'a> {
         let (x0, x1) = (self.col(0) * s, self.col(1) * s);
         let mut y = (HEADER_H + PAD) * s;
 
-        let r = Rect::new(x0, y, w, self.card_h(5));
+        let r = Rect::new(x0, y, w, self.card_h(6));
         self.card(r, "Auto Crystal", Some("v5"));
         self.row_key(r, 0, "Trigger", "v5Bn", Some("v5Md"));
         self.row_slot(r, 1, "Obsidian", "v5S1");
         self.row_slot(r, 2, "Crystal", "v5S2");
-        self.row_slider(r, 3, "Min delay", "v5D1", FAST_MIN_LO, FAST_MIN_HI, "ms");
-        self.row_slider(r, 4, "Max delay", "v5D2", FAST_MAX_LO, FAST_MAX_HI, "ms");
+        self.row_slot(r, 3, "Return", "v5S3");
+        self.row_slider(r, 4, "Min delay", "v5D1", FAST_MIN_LO, FAST_MIN_HI, "ms");
+        self.row_slider(r, 5, "Max delay", "v5D2", FAST_MAX_LO, FAST_MAX_HI, "ms");
         y += r.h + gap;
 
         let r = Rect::new(x0, y, w, self.card_h(4));
@@ -1016,6 +1015,17 @@ impl<'a> Ui<'a> {
 }
 
 // ------------------------------------------------------------- header hit
+
+/// Physical rectangle of a left-rail tab. Paint and pointer hit testing share
+/// this helper, so a DPI-scaled click is checked in the same space it is drawn.
+pub fn rail_rect(index: usize, scale: f32) -> Rect {
+    Rect::new(
+        8.0 * scale,
+        (HEADER_H + 8.0 + 36.0 * index as f32) * scale,
+        (RAIL_W - 16.0) * scale,
+        34.0 * scale,
+    )
+}
 
 pub fn header_buttons(w: f32, sc: f32) -> [Rect; 3] {
     let close = Rect::new(w - 10.0 * sc - 20.0 * sc, 12.0 * sc, 20.0 * sc, 20.0 * sc);

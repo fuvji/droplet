@@ -31,13 +31,13 @@ public static class DropletTabs {
     public static extern bool ShowWindow(IntPtr hwnd, int command);
 
     [DllImport("user32.dll")]
-    public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdc, uint flags);
+    public static extern IntPtr SendMessage(IntPtr hwnd, uint msg, IntPtr wParam, ref RECT lParam);
 
     [DllImport("user32.dll")]
     public static extern bool PostMessage(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll")]
-    public static extern uint GetDpiForWindow(IntPtr hwnd);
+    public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 }
 "@
 
@@ -59,22 +59,23 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name, [int]$Radius) {
     }
     $width = $rect.Right - $rect.Left
     $height = $rect.Bottom - $rect.Top
-    if ($width -le 0 -or $height -le 0) {
-        throw 'The Droplet panel has an empty window rectangle.'
+    if ($width -ne 624 -or $height -ne 408) {
+        throw "Expected the native 624x408 capture, got ${width}x${height}."
     }
 
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
     try {
-        $hdc = $graphics.GetHdc()
-        try {
-            [DropletTabs]::PrintWindow($Hwnd, $hdc, 2) | Out-Null
-        } finally {
-            $graphics.ReleaseHdc($hdc)
-        }
-        # PrintWindow returns the rectangular client backing even when the
-        # compositor has clipped the popup to a rounded region. Preserve the
-        # actual silhouette with a transparent rounded mask for the website.
+        $graphics.CopyFromScreen(
+            $rect.Left,
+            $rect.Top,
+            0,
+            0,
+            $bitmap.Size,
+            [System.Drawing.CopyPixelOperation]::SourceCopy
+        )
+        # CopyFromScreen returns the rectangular composited surface. Preserve
+        # the actual silhouette with a transparent rounded mask for the site.
         $masked = New-Object System.Drawing.Bitmap($width, $height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
         $maskGraphics = [System.Drawing.Graphics]::FromImage($masked)
         $maskPath = New-RoundedPath $width $height $Radius
@@ -83,7 +84,16 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name, [int]$Radius) {
             $maskGraphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
             $maskGraphics.SetClip($maskPath)
             $maskGraphics.DrawImage($bitmap, 0, 0, $width, $height)
-            $masked.Save((Join-Path $out $Name), [System.Drawing.Imaging.ImageFormat]::Png)
+            $target = Join-Path $out $Name
+            $masked.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
+            $image = [System.Drawing.Image]::FromFile($target)
+            try {
+                if ($image.Width -ne 624 -or $image.Height -ne 408) {
+                    throw "Saved capture is $($image.Width)x$($image.Height), expected 624x408."
+                }
+            } finally {
+                $image.Dispose()
+            }
         } finally {
             $maskPath.Dispose()
             $maskGraphics.Dispose()
@@ -103,6 +113,11 @@ function Click-Tab([IntPtr]$Hwnd, [int]$X, [int]$Y) {
     Start-Sleep -Milliseconds 350
 }
 
+# The PowerShell host may be DPI-unaware. Make it per-monitor v2 before it
+# reads any window rect or screen pixels; otherwise Windows virtualizes a
+# 120-DPI panel back to 624x408 and clips the capture.
+[DropletTabs]::SetThreadDpiAwarenessContext([IntPtr](-4)) | Out-Null
+
 $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
 try {
     Start-Sleep -Seconds 2
@@ -117,24 +132,34 @@ try {
     [DropletTabs]::ShowWindow($hwnd, 5) | Out-Null
     Start-Sleep -Milliseconds 700
 
-    $dpi = [DropletTabs]::GetDpiForWindow($hwnd)
-    if ($dpi -le 0) { $dpi = 96 }
-    $scale = $dpi / 96.0
+    # Force the panel to 100% for the canonical 624x408 site assets. This
+    # exercises the same WM_DPICHANGED path used by a real monitor move.
+    $current = New-Object DropletTabs+RECT
+    if (-not [DropletTabs]::GetWindowRect($hwnd, [ref]$current)) {
+        throw 'GetWindowRect failed before the DPI reset.'
+    }
+    $suggested = New-Object DropletTabs+RECT
+    $suggested.Left = $current.Left
+    $suggested.Top = $current.Top
+    $suggested.Right = $current.Left + 624
+    $suggested.Bottom = $current.Top + 408
+    $dpiWord = 96 -bor (96 -shl 16)
+    [DropletTabs]::SendMessage($hwnd, 0x02E0, [IntPtr]::new($dpiWord), [ref]$suggested) | Out-Null
+    Start-Sleep -Milliseconds 600
 
-    # Rail items start at y=50 with a 34px height and 36px pitch at 96 DPI.
-    # The click points are client coordinates, matching App::on_pointer's
-    # coordinate space.
+    # Rail items start at y=52 with a 34px height and 36px pitch at 96 DPI.
+    # These are physical client coordinates, matching App::on_pointer.
     $tabs = @(
-        @{ Name = 'droplet-core.png';    Y = 67;  X = 50 },
-        @{ Name = 'droplet-crystal.png'; Y = 103; X = 50 },
-        @{ Name = 'droplet-assist.png';  Y = 139; X = 50 },
-        @{ Name = 'droplet-system.png';  Y = 175; X = 50 }
+        @{ Name = 'droplet-core.png';    Y = 69;  X = 50 },
+        @{ Name = 'droplet-crystal.png'; Y = 105; X = 50 },
+        @{ Name = 'droplet-assist.png';  Y = 141; X = 50 },
+        @{ Name = 'droplet-system.png';  Y = 177; X = 50 }
     )
 
     foreach ($tab in $tabs) {
-        Click-Tab $hwnd ([int]($tab.X * $scale)) ([int]($tab.Y * $scale))
+        Click-Tab $hwnd ([int]$tab.X) ([int]$tab.Y)
         # Must match ui::CORNER_RADIUS so the site mask and the window agree.
-        Save-Panel $hwnd $tab.Name ([int](8 * $scale))
+        Save-Panel $hwnd $tab.Name 8
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

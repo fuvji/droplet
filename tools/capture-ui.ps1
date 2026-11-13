@@ -31,9 +31,16 @@ public static class DropletCapture {
     public static extern bool ShowWindow(IntPtr hwnd, int command);
 
     [DllImport("user32.dll")]
-    public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdc, uint flags);
+    public static extern IntPtr SendMessage(IntPtr hwnd, uint msg, IntPtr wParam, ref RECT lParam);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 }
 "@
+
+# Read and capture in physical pixels; an unaware host would virtualize the
+# window and produce a clipped 624x408 bitmap at 125% DPI.
+[DropletCapture]::SetThreadDpiAwarenessContext([IntPtr](-4)) | Out-Null
 
 $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
 try {
@@ -49,26 +56,51 @@ try {
     [DropletCapture]::ShowWindow($hwnd, 5) | Out-Null
     Start-Sleep -Milliseconds 700
 
+    # Canonical 100% panel size for the README and site.
+    $current = New-Object DropletCapture+RECT
+    if (-not [DropletCapture]::GetWindowRect($hwnd, [ref]$current)) {
+        throw 'GetWindowRect failed before the DPI reset.'
+    }
+    $suggested = New-Object DropletCapture+RECT
+    $suggested.Left = $current.Left
+    $suggested.Top = $current.Top
+    $suggested.Right = $current.Left + 624
+    $suggested.Bottom = $current.Top + 408
+    $dpiWord = 96 -bor (96 -shl 16)
+    [DropletCapture]::SendMessage($hwnd, 0x02E0, [IntPtr]::new($dpiWord), [ref]$suggested) | Out-Null
+    Start-Sleep -Milliseconds 600
+
     $rect = New-Object DropletCapture+RECT
     if (-not [DropletCapture]::GetWindowRect($hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
     }
     $width = $rect.Right - $rect.Left
     $height = $rect.Bottom - $rect.Top
-    if ($width -le 0 -or $height -le 0) {
-        throw 'The Droplet panel has an empty window rectangle.'
+    if ($width -ne 624 -or $height -ne 408) {
+        throw "Expected the native 624x408 capture, got ${width}x${height}."
     }
 
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
     try {
-        $hdc = $graphics.GetHdc()
+        $graphics.CopyFromScreen(
+            $rect.Left,
+            $rect.Top,
+            0,
+            0,
+            $bitmap.Size,
+            [System.Drawing.CopyPixelOperation]::SourceCopy
+        )
+        $target = Join-Path $out 'droplet-core.png'
+        $bitmap.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
+        $image = [System.Drawing.Image]::FromFile($target)
         try {
-            [DropletCapture]::PrintWindow($hwnd, $hdc, 2) | Out-Null
+            if ($image.Width -ne 624 -or $image.Height -ne 408) {
+                throw "Saved capture is $($image.Width)x$($image.Height), expected 624x408."
+            }
         } finally {
-            $graphics.ReleaseHdc($hdc)
+            $image.Dispose()
         }
-        $bitmap.Save((Join-Path $out 'droplet-core.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     } finally {
         $graphics.Dispose()
         $bitmap.Dispose()

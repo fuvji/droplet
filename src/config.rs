@@ -118,7 +118,7 @@ settings_schema! {
     stun:        "vF":  bool = true;
     auto_use:    "vW":  bool = false;
     ghost:       "vG":  bool = true;
-    persist:     "vP":  bool = false;
+    persist:     "vP":  bool = true;
     hover_inv:   "vI":  bool = true;
     low_latency: "vLL": bool = true;
     focus_only:  "vFO": bool = true;
@@ -209,6 +209,7 @@ settings_schema! {
     anchor_totem:   "v6S3": String = "r";
     crystal_obsidian: "v5S1": String = "XButton2";
     crystal_slot:   "v5S2": String = "3";
+    crystal_restore: "v5S3": String = "1";
     totem_swap:     "v8Sp": String = "t";
     totem_hotbar:   "v8T":  String = "r";
     autouse_slot:   "vWS1": String = "4";
@@ -299,6 +300,7 @@ impl Settings {
             "v5B2" => &self.crystal_key2,
             "v5S1" => &self.crystal_obsidian,
             "v5S2" => &self.crystal_slot,
+            "v5S3" => &self.crystal_restore,
             "v6Bn" => &self.anchor_key,
             "v6B2" => &self.anchor_key2,
             "v6S1" => &self.anchor_slot,
@@ -539,9 +541,9 @@ impl Settings {
         let legacy = legacy_path();
         if let Ok(text) = std::fs::read_to_string(&legacy) {
             s.read_ini(&text);
-            // `vP` was inert in the original script (its default was 1 but nothing
-            // read it), so keep the panel hidden until the user opts in.
-            s.persist = false;
+            // `vP` was inert in the original script. Its default was 1, so a
+            // legacy import that carries no explicit value now starts open;
+            // an explicit saved value is still preserved.
             s.normalize();
             s.save();
         }
@@ -568,6 +570,11 @@ impl Settings {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn keep_panel_open_defaults_on() {
+        assert!(Settings::default().persist);
+    }
 
     #[test]
     fn fast_timing_defaults_are_tight() {
@@ -694,7 +701,7 @@ mod tests {
         let keys = [
             "vDBn", "vDB2", "vDS1", "vDS2", "v1Bn", "v1B2", "v1S1", "v2Bn", "v2B2",
             "v2S1", "v3Bn", "v3B2", "v3S1", "v3S2", "v4Bn", "v4B2", "v4S1", "v4S2",
-            "v4S3", "v5Bn", "v5B2", "v5S1", "v5S2", "v6Bn", "v6B2", "v6S1", "v6S2",
+            "v4S3", "v5Bn", "v5B2", "v5S1", "v5S2", "v5S3", "v6Bn", "v6B2", "v6S1", "v6S2",
             "v6S3", "v7Bn", "v7B2", "v7S1", "v7S3", "v8Bn", "v8B2", "v8Sp", "v8T",
             "v8I", "vABn", "vAB2", "vWBn", "vWB2", "vWS1", "vBBn", "vBB2", "vCBn",
         ];
@@ -702,6 +709,15 @@ mod tests {
             assert_eq!(s.binding_at(key), s.get(key).as_str(), "{key}");
         }
         assert_eq!(s.binding_at("unknown"), "");
+    }
+
+    #[test]
+    fn crystal_return_defaults_to_slot_one() {
+        let mut s = Settings::default();
+        assert_eq!(s.crystal_restore, "1");
+        assert_eq!(s.binding_at("v5S3"), "1");
+        s.set("v5S3", "2");
+        assert_eq!(s.crystal_restore, "2");
     }
 
     #[test]

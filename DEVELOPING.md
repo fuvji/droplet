@@ -38,16 +38,18 @@ release artifact and site layout.
 
 ## Verification
 
-The release currently carries 19 tests:
+The release currently carries 31 tests:
 
 ```powershell
 cargo test --release
 ```
 
 They cover config migration, timing bounds, RGB parsing, trigger-mode
-normalization and latch generations, the allocation-free binding lookup, Anchor
-slot validation, W-Tap planning, Sprint's 100 ms deadline, cadence adaptation,
-profile parsing, and trigger-index equivalence plus its routing benchmark.
+normalization and latch generations, Auto Crystal's Return default and
+hold-vs-tap policy, physical rail hit testing at 125%/150%, the allocation-free
+binding lookup, Anchor slot validation, W-Tap planning, Sprint's 100 ms
+deadline, cadence adaptation, profile parsing, and trigger-index equivalence
+plus its routing benchmark.
 
 Before publishing, also check:
 

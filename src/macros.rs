@@ -49,8 +49,16 @@ pub fn sprint_wait_ms(armed: bool) -> u64 {
 // A generation counter invalidates an old worker before a new latch can run,
 // so rapid double-taps can never leave two loops injecting the same module.
 const TOGGLE_SLOTS: usize = 11;
+/// A Crystal press shorter than this is a tap, not a hold. The first place-
+/// and-crystal sequence takes about 50 ms; the extra window keeps an ordinary
+/// click from switching the hotbar back to the Return slot.
+const CRYSTAL_HOLD_MS: i64 = 160;
 static TOGGLE_ON: [AtomicBool; TOGGLE_SLOTS] = [const { AtomicBool::new(false) }; TOGGLE_SLOTS];
 static TOGGLE_GEN: [AtomicU64; TOGGLE_SLOTS] = [const { AtomicU64::new(0) }; TOGGLE_SLOTS];
+/// The generation of the Crystal toggle worker that should restore its Return
+/// slot after the user switches the latch off. Tying it to a generation keeps
+/// a quick off/on cycle from restoring in the middle of the next worker.
+static CRYSTAL_RETURN_GEN: AtomicU64 = AtomicU64::new(0);
 
 pub fn mode_module(mode_key: &str) -> &'static str {
     match mode_key {
@@ -94,6 +102,20 @@ fn toggle_generation_is(module: &str, generation: u64) -> bool {
     toggle_slot(module).map(|i| TOGGLE_GEN[i].load(Ordering::SeqCst) == generation).unwrap_or(false)
 }
 
+fn request_crystal_toggle_return(generation: u64) {
+    CRYSTAL_RETURN_GEN.store(generation, Ordering::SeqCst);
+}
+
+/// Consume the return request only for the worker that owned it. A new toggle
+/// cycle gets a new generation, so it cannot accidentally perform the old
+/// cycle's restore.
+fn take_crystal_toggle_return(generation: u64) -> bool {
+    generation != 0
+        && CRYSTAL_RETURN_GEN
+            .compare_exchange(generation, 0, Ordering::SeqCst, Ordering::SeqCst)
+            .is_ok()
+}
+
 fn repaint() {
     let hwnd = crate::app::main_hwnd();
     if hwnd != 0 {
@@ -106,6 +128,9 @@ fn start_toggle(module: &'static str) -> Option<u64> {
     let generation = TOGGLE_GEN[slot].fetch_add(1, Ordering::SeqCst).wrapping_add(1);
     if TOGGLE_ON[slot].swap(true, Ordering::SeqCst) {
         TOGGLE_ON[slot].store(false, Ordering::SeqCst);
+        if module == "v5" {
+            request_crystal_toggle_return(generation.wrapping_sub(1));
+        }
         repaint();
         None
     } else {
@@ -288,16 +313,26 @@ fn fire(s: &Arc<Settings>, ev: Ev, mode_key: &'static str, module: &'static str,
                 if s.low_latency {
                     input::boost_thread();
                 }
+                let mut ran = false;
                 loop {
                     if !toggle_generation_is(module, generation) || !toggle_active(module) {
                         break;
                     }
                     RUNS.fetch_add(1, Ordering::Relaxed);
                     f(&s, ev, true);
+                    ran = true;
                     if !toggle_generation_is(module, generation) || !toggle_active(module) {
                         break;
                     }
                     input::sleep_ms(55.0);
+                }
+                // A tap that never ran the module must not inject a hotbar
+                // selection. A cycle that did work restores only once, after
+                // the worker has stopped touching the hotbar.
+                if ran && module == "v5" && take_crystal_toggle_return(generation) {
+                    if let Some(_busy) = Busy::enter(&CRYSTAL_BUSY) {
+                        crystal_restore(&s);
+                    }
                 }
             });
         return;
@@ -566,6 +601,23 @@ fn potion(s: &Settings, ev: Ev, latched: bool) {
     }
 }
 
+fn crystal_restore(s: &Settings) {
+    taps(&[&s.crystal_restore, &s.crystal_restore]);
+}
+
+/// Only a press that survives the hold window and actually reaches the repeat
+/// loop restores the Return slot. A quick tap never qualifies.
+fn crystal_hold_ready(repeated: bool, elapsed_ms: i64) -> bool {
+    repeated && elapsed_ms >= CRYSTAL_HOLD_MS
+}
+
+/// Convert a QPC interval to whole milliseconds without overflowing on a long
+/// hold. The same helper feeds the policy test, so the threshold is tested in
+/// the units the macro actually sees.
+fn elapsed_ms(start: i64, end: i64, qpf: i64) -> i64 {
+    end.saturating_sub(start).saturating_mul(1000) / qpf.max(1)
+}
+
 fn crystal(s: &Settings, ev: Ev, latched: bool) {
     if !s.master || !s.crystal {
         return;
@@ -582,6 +634,7 @@ fn crystal(s: &Settings, ev: Ev, latched: bool) {
         Some(b) => b,
         None => return,
     };
+    let started = input::now();
     tap_exact_key(Some(obs));
     rc(s);
     wait_smart(s, "v5", s.crystal_min, s.crystal_max);
@@ -590,8 +643,14 @@ fn crystal(s: &Settings, ev: Ev, latched: bool) {
 
     // A latched worker repeats the whole place-and-crystal pair on its next
     // iteration, so the held-trigger tail is skipped to avoid double cadence.
+    // A short tap releases during the sequence above and never enters this
+    // loop, so it deliberately leaves the current hotbar slot alone. A real
+    // hold enters the repeat loop and restores once it has lasted the hold
+    // window and the trigger is released.
     if !latched {
+        let mut repeated = false;
         while input::raw_down(ev) {
+            repeated = true;
             wait_smart(s, "v5", s.crystal_min, s.crystal_max);
             if !input::raw_down(ev) {
                 break;
@@ -602,6 +661,10 @@ fn crystal(s: &Settings, ev: Ev, latched: bool) {
                 break;
             }
             lc(s);
+        }
+        let held_ms = elapsed_ms(started, input::now(), input::qpf());
+        if crystal_hold_ready(repeated, held_ms) {
+            crystal_restore(s);
         }
     }
 }
@@ -925,6 +988,33 @@ mod tests {
         assert!(tap.release_forward);
         assert!(tap.tap_back);
         assert!((132..=148).contains(&tap.hold_ms), "hold={}", tap.hold_ms);
+    }
+
+    #[test]
+    fn crystal_return_requires_a_hold_not_a_tap() {
+        const QPF: i64 = 10_000_000;
+        // Tap: released before the repeat loop; elapsed time alone never
+        // restores. Short repeat-loop press: still below the threshold. Hold:
+        // reaches the threshold. Long tap: still does not restore.
+        assert!(!crystal_hold_ready(false, elapsed_ms(0, 500_000, QPF)));
+        assert!(!crystal_hold_ready(
+            true,
+            elapsed_ms(0, 1_590_000, QPF)
+        ));
+        assert!(crystal_hold_ready(true, elapsed_ms(0, 1_600_000, QPF)));
+        assert!(!crystal_hold_ready(false, elapsed_ms(0, 5_000_000, QPF)));
+        assert_eq!(elapsed_ms(0, 1_600_000, QPF), CRYSTAL_HOLD_MS);
+    }
+
+    #[test]
+    fn crystal_toggle_off_requests_one_return() {
+        stop_toggle("v5");
+        CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
+        let generation = start_toggle("v5").expect("the first Crystal press should latch");
+        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert!(take_crystal_toggle_return(generation));
+        assert!(!take_crystal_toggle_return(generation));
+        assert!(!take_crystal_toggle_return(generation.wrapping_add(1)));
     }
 
     #[test]

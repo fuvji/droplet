@@ -15,11 +15,17 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.8 portable exe: 542,720 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 26 / 26.
+- 2.10.9 portable exe: 545,280 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 31 / 31.
+- Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
+  160 ms or a toggle-off restores it once; a short tap does not. The restore
+  is a double tap of the Return binding.
+- `WM_DPICHANGED` updates scale, physical window size, rounded clip, hover,
+  and hit testing together. Pointer coordinates stay physical, fixing the
+  125%/150% row and tab offset.
 - The self-destruct waiter uses hidden `ShellExecuteW` instead of
-  `std::process::Command`; the link uses bundled `rust-lld` + ICF. This is
-  55,808 B smaller than 2.10.7 and keeps `opt-level=3`.
+  `std::process::Command`; the link uses bundled `rust-lld` + ICF. The 2.10.8
+  size pass is 55,808 B smaller than 2.10.7 and keeps `opt-level=3`.
 - Sprint settings are read only when a pulse is due; crosshair settings only
   on a magenta hit. Poll cadence and bindings are unchanged. Idle sprint and
   crosshair watchers skip the settings snapshot and lock; the sprint loop
@@ -47,6 +53,13 @@ Min/Max sliders are independent.
 
 ## Current work
 
+- Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
+  160 ms restores it after release and a latched toggle restores it when
+  switched off; a short tap intentionally leaves the selected slot alone.
+- The panel handles `WM_DPICHANGED`: scale, window size, rounded clip, pointer
+  mapping, and hit testing are updated together when it moves between monitors.
+  Pointer coordinates stay physical, matching the scaled paint coordinates, so
+  hover and clicks no longer shift on 125% or 150% displays.
 - Windows is the only port. Linux/macOS need a real platform layer.
 - Live Minecraft hit registration is unverified.
 - The only Windows artifact is the direct `droplet.exe`; no ZIP/MSIX is

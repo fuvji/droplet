@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.8 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.9 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 542,720 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 545,280 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,19 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.8
+## What is in 2.10.9
 
+- **Auto Crystal Return (2.10.9)**: the Crystal card now has a Return slot
+  (`v5S3`, default `1`). A hold of at least 160 ms restores it after release;
+  a latched toggle restores it once when switched off. A short single press
+  deliberately leaves the current hotbar slot alone. The restore is a double
+  tap of the Return binding, matching Potion and Breach.
+- **DPI-correct hit testing (2.10.9)**: the panel handles `WM_DPICHANGED` and
+  keeps pointer coordinates physical, matching the scaled paint rectangles.
+  Hover and clicks no longer shift one row or tab at 125% or 150%. The four
+  site captures were regenerated at 624×408; the capture helpers are DPI-aware.
+- **Panel starts open (2.10.9)**: Keep panel open now defaults on, matching the
+  legacy `vP` default and the download README.
 - **Smaller binary (2.10.8)**: the one `std::process::Command` user, the
   self-destruct recycle waiter, now launches through the existing hidden
   `ShellExecuteW` path instead of linking std's process spawner. LLD plus ICF
@@ -90,7 +101,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.8 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.9 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -104,7 +115,7 @@ chip per frame.
 | Module | Sequence | Mode |
 | --- | --- | --- |
 | Anchor | Hydrogen A6: anchor, click, fixed settle, click, glowstone, totem, detonate; 47–97 / 53–103 ms | one-shot / Air loop |
-| Auto Crystal | Obsidian, then crystal | one-shot / toggle |
+| Auto Crystal | Obsidian, then crystal; Return slot 1 after a hold or toggle-off | one-shot / toggle |
 | Mace | Settled swap and hit | one-shot / toggle |
 | Shield | Axe select and hit in one batch; optional held stun | one-shot / toggle |
 | Dash | Spear select, hit, restore; 50/100/150 ms cooldown | one-shot / toggle |
@@ -135,14 +146,15 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **26 / 26**.
-- Portable executable: **542,720 bytes**,
-  `d7648c2cad510014590fdbe578d14900d385cfab0d80a832b8a46989e1f41507`.
+- `cargo test --release`: **31 / 31**.
+- Portable executable: **545,280 bytes**,
+  `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.8 capture; live Anchor placement, Java/Bedrock positive
-  detection, and hit registration remain unverified in game.
+  from the 2.10.9 capture; live Anchor placement, Crystal Return injection,
+  Java/Bedrock positive detection, and hit registration remain unverified in
+  game.
 
 ## Deliberate boundaries
 

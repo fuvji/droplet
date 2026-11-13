@@ -1,5 +1,16 @@
 # release
 
+## 2.10.9 — 2026-11-13
+
+- Portable exe: 545,280 B,
+  `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`.
+- Tests: 31 / 31.
+- Changes: Auto Crystal Return slot (`v5S3`, default `1`) with a 160 ms hold
+  threshold, generation-gated toggle-off restore, and no restore on a short
+  tap; physical pointer hit testing across `WM_DPICHANGED`; DPI-aware release
+  captures. No CPU, latency, or speedup claim. Live injection remains
+  unverified.
+
 ## 2.10.8 — 2026-11-12
 
 - Portable exe: 542,720 B,

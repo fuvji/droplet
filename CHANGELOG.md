@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.10.9
+
+- Add an Auto Crystal Return slot (`v5S3`, default `1`). A hold of at least
+  160 ms restores it after release; a latched toggle restores it when switched
+  off. A short single press does not switch slots. The restore is a double tap
+  of the Return binding, matching Potion and Breach.
+- Fix panel hit testing on scaled displays by keeping pointer coordinates in
+  the same physical space as the painted rectangles. Handle `WM_DPICHANGED`
+  to update scale, window size, rounded clip, hover state, and hit testing
+  together.
+- Keep the panel open by default (`vP`), matching the legacy default and the
+  first-run text.
+- Make the release capture helpers DPI-aware and force the canonical 624×408
+  size through the app's DPI path.
+- Tests: **31 / 31**, including the hold-vs-tap policy and a scaled rail hit
+  test at 125% and 150%.
+- Portable executable: **545,280 bytes**, SHA-256
+  `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.8
 
 - Replace the self-destruct waiter's `std::process::Command` spawn with the

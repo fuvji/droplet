@@ -475,6 +475,71 @@ impl App {
         )
     }
 
+    fn on_pointer(&mut self, lp: LPARAM) {
+        // Synthetic macro input must never operate Droplet's own controls.
+        // If the panel is open while a macro clicks, the click would otherwise
+        // hover a chip and start a rebind, stealing the next trigger key.
+        if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
+            return;
+        }
+        let x = ((lp & 0xFFFF) as u16 as i16) as i32;
+        let y = (((lp >> 16) & 0xFFFF) as u16 as i16) as i32;
+        let (mx, my, inside) = pointer_state(x, y, self.dpi);
+        self.mx = mx;
+        self.my = my;
+        self.inside = inside;
+    }
+
+    /// Per-monitor DPI changes arrive with a suggested physical rectangle.
+    /// Scale, window size, rounded clip, pointer mapping, and hit testing must
+    /// move together; otherwise the panel draws one monitor's layout into the
+    /// previous monitor's window and every control lands in the wrong place.
+    fn apply_dpi(&mut self, dpi: u32, suggested: *const RECT) {
+        if dpi == 0 {
+            return;
+        }
+        self.dpi = dpi as f32 / 96.0;
+        self.mx = -1.0;
+        self.my = -1.0;
+        self.inside = false;
+        self.drag = None;
+
+        let mut rect = RECT::default();
+        if !suggested.is_null() {
+            rect = unsafe { *suggested };
+        }
+        if rect.width() > 0 && rect.height() > 0 {
+            unsafe {
+                win::SetWindowPos(
+                    self.hwnd,
+                    0,
+                    rect.left,
+                    rect.top,
+                    rect.width(),
+                    rect.height(),
+                    win::SWP_NOZORDER | win::SWP_NOACTIVATE,
+                );
+            }
+        } else {
+            let (w, h) = self.pixel_size();
+            unsafe {
+                win::SetWindowPos(
+                    self.hwnd,
+                    0,
+                    0,
+                    0,
+                    w,
+                    h,
+                    win::SWP_NOMOVE | win::SWP_NOZORDER | win::SWP_NOACTIVATE,
+                );
+            }
+        }
+        let (cw, ch) = self.client();
+        unsafe { apply_window_shape(self.hwnd, cw, ch, self.dpi) };
+        self.kick_anim();
+        self.invalidate();
+    }
+
     fn show_panel(&mut self) {
         if self.shown {
             return;
@@ -568,20 +633,6 @@ impl App {
         } else {
             self.hide_panel();
         }
-    }
-
-    fn on_pointer(&mut self, lp: LPARAM) {
-        // Synthetic macro input must never operate Droplet's own controls.
-        // If the panel is open while a macro clicks, the click would otherwise
-        // hover a chip and start a rebind, stealing the next trigger key.
-        if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
-            return;
-        }
-        let x = ((lp & 0xFFFF) as u16 as i16) as f32;
-        let y = (((lp >> 16) & 0xFFFF) as u16 as i16) as f32;
-        self.mx = x / self.dpi;
-        self.my = y / self.dpi;
-        self.inside = self.mx >= 0.0 && self.my >= 0.0 && self.mx < ui::WIN_W && self.my < ui::WIN_H;
     }
 
     fn on_timer(&mut self, id: usize) {
@@ -685,6 +736,10 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
                 win::HTCLIENT
             }
         }
+        win::WM_DPICHANGED => {
+            app.apply_dpi((wp & 0xFFFF) as u32, lp as *const RECT);
+            0
+        }
         win::WM_MOUSEMOVE => {
             if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
                 return 0;
@@ -722,8 +777,10 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
             }
             app.on_pointer(lp);
             let on_header = app.my >= 0.0
-                && app.my < ui::HEADER_H
-                && !ui::header_buttons(ui::WIN_W, 1.0).iter().any(|r| r.has(app.mx, app.my));
+                && app.my < ui::HEADER_H * app.dpi
+                && !ui::header_buttons(ui::WIN_W, app.dpi)
+                    .iter()
+                    .any(|r| r.has(app.mx, app.my));
             if on_header {
                 let mut p = POINT::default();
                 let mut wr = RECT::default();
@@ -981,6 +1038,19 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
 
 fn process_leaf(image: &str) -> &str {
     image.rsplit(|c| c == '\\' || c == '/').next().unwrap_or(image)
+}
+
+/// Keep the pointer in the same physical space as the painted rects. Dividing
+/// logical coordinates here shifts every hit target by one row/item on a 125%
+/// or 150% display, which is exactly the GUI misplacement this fixes.
+fn pointer_state(x: i32, y: i32, dpi: f32) -> (f32, f32, bool) {
+    let w = (ui::WIN_W * dpi) as i32;
+    let h = (ui::WIN_H * dpi) as i32;
+    (
+        x as f32,
+        y as f32,
+        x >= 0 && y >= 0 && x < w && y < h,
+    )
 }
 
 /// True only in the transparent quarter-rounds DWM clips at the panel edge.
@@ -1507,20 +1577,11 @@ pub fn run() {
         let alpha = if acrylic != "none" { ACRYLIC_ALPHA } else { 255 };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
-        // The same logical radius paints the hairline in ui::frame and sizes
-        // the fallback region below.
-        let radius = (ui::CORNER_RADIUS * dpi).round() as i32;
         // Prefer DWM's compositor-rounded corner on Windows 11: it is
-        // antialiased and follows the system DPI. Only install the hard
-        // GDI region as a fallback when DWM cannot round this popup.
-        let dwm_rounded = round_corners(hwnd, radius);
-        DWM_ROUNDED.store(dwm_rounded, Ordering::Relaxed);
-        if !dwm_rounded {
-            let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
-            if rgn != 0 {
-                win::SetWindowRgn(hwnd, rgn, 1);
-            }
-        }
+        // antialiased and follows the system DPI. Only install the hard GDI
+        // region as a fallback when DWM cannot round this popup. The helper is
+        // reused by WM_DPICHANGED so a monitor change cannot leave a stale clip.
+        apply_window_shape(hwnd, w, h, dpi);
 
         let icon = native_icon();
         if icon != 0 {
@@ -1618,6 +1679,26 @@ unsafe fn system_backdrop(hwnd: HWND) -> bool {
     f(hwnd, 38, &kind as *const i32 as *const std::ffi::c_void, 4) == 0
 }
 
+/// Apply the single logical corner radius to the live window. DWM's rounded
+/// clip is preferred; the GDI region is the only fallback. Reapplying this on
+/// a DPI change also removes a stale region from the previous monitor.
+unsafe fn apply_window_shape(hwnd: HWND, w: i32, h: i32, dpi: f32) {
+    if w <= 0 || h <= 0 {
+        return;
+    }
+    let radius = (ui::CORNER_RADIUS * dpi).round().max(1.0) as i32;
+    if round_corners(hwnd, radius) {
+        DWM_ROUNDED.store(true, Ordering::Relaxed);
+        win::SetWindowRgn(hwnd, 0, 1);
+    } else {
+        DWM_ROUNDED.store(false, Ordering::Relaxed);
+        let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
+        if rgn != 0 {
+            win::SetWindowRgn(hwnd, rgn, 1);
+        }
+    }
+}
+
 unsafe fn round_corners(hwnd: HWND, radius: i32) -> bool {
     let _ = radius;
     let dll = win::dyn_load("dwmapi.dll");
@@ -1641,7 +1722,8 @@ unsafe fn round_corners(hwnd: HWND, radius: i32) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{game_window_matches, in_rounded_corner, process_leaf};
+    use super::{game_window_matches, in_rounded_corner, pointer_state, process_leaf};
+    use crate::ui;
 
     #[test]
     fn game_detection_rejects_browser_and_chat_titles() {
@@ -1704,6 +1786,30 @@ mod tests {
         ));
         assert_eq!(process_leaf(r"C:\Games\javaw.exe"), "javaw.exe");
         assert_eq!(process_leaf("C:/Games/javaw.exe"), "javaw.exe");
+    }
+
+    #[test]
+    fn scaled_pointer_hits_the_scaled_rail() {
+        // At 125%, Crystal occupies physical y=110..152 and Core y=65..107.
+        // A pointer that was divided back to logical space (y=104) would pick
+        // Core, which was the reported one-row-off bug.
+        let scale = 1.25;
+        let (mx, my, inside) = pointer_state(50, 131, scale);
+        assert!(inside);
+        assert_eq!((mx, my), (50.0, 131.0));
+        assert!(ui::rail_rect(1, scale).has(mx, my));
+        assert!(!ui::rail_rect(0, scale).has(mx, my));
+
+        // At 150%, the same physical point must still hit Crystal and remain
+        // inside the taller panel.
+        let scale = 1.5;
+        let (mx, my, inside) = pointer_state(60, 157, scale);
+        assert!(inside);
+        assert!(ui::rail_rect(1, scale).has(mx, my));
+        assert!(!ui::rail_rect(0, scale).has(mx, my));
+
+        // The right/bottom edge is exclusive, matching Rect::has.
+        assert!(!pointer_state(780, 510, 1.25).2);
     }
 
     #[test]

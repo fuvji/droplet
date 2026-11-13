@@ -11,6 +11,16 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.9 changes
+
+- Auto Crystal gets a Return slot with a 160 ms hold threshold and a
+  generation-gated toggle-off restore. This is a behavior change, not a
+  timing or throughput improvement.
+- `WM_DPICHANGED` and physical pointer coordinates fix scaled hit testing at
+  125%/150%. The paint path and the input route are unchanged.
+- Tests: 31 / 31. Portable exe: 545,280 B. No CPU, latency, or render-speed
+  benchmark was run, and no speedup is claimed.
+
 ## 2.10.8 changes
 
 - Removed the only `std::process::Command` spawn: the self-destruct waiter now
