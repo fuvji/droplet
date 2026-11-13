@@ -1,7 +1,7 @@
-Droplet 2.10.8 — Windows x64 portable (542,720 bytes)
+Droplet 2.10.9 — Windows x64 portable (545,280 bytes)
 
 Run droplet.exe. Windows 10 19041 or newer, x64.
-The panel starts hidden. Press Ctrl + Right Shift to show or hide it.
+The panel starts open. Press Ctrl + Right Shift to show or hide it.
 The close button exits the process; there is no tray icon.
 
 Droplet sends ordinary keyboard and mouse input through SendInput. It does
