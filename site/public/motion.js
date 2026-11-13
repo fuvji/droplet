@@ -25,7 +25,12 @@
   const sections = navLinks
     .map((link) => document.querySelector(link.hash))
     .filter(Boolean)
-    .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+    .sort((a, b) => {
+      const relation = a.compareDocumentPosition(b);
+      if (relation & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+      if (relation & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+      return 0;
+    });
 
   function updateActiveSection() {
     if (!sections.length) return;
@@ -66,108 +71,159 @@
 
   window.addEventListener("scroll", queueScroll, { passive: true });
   window.addEventListener("resize", queueScroll, { passive: true });
-  paintScroll();
+  // Do not read section geometry during script execution. The first frame
+  // paints after layout, when the browser can answer these reads without a
+  // forced synchronous layout.
+  queueScroll();
 
   // On phones, reveal each card group as one surface. Animating 40–50
   // individual cards costs more scroll frames than the grouping adds in
   // visual rhythm. Desktop keeps the finer per-card stagger.
-  const narrowViewport = window.matchMedia("(max-width: 760px)").matches;
-  const revealSelector = (narrowViewport
-    ? [
-        ".proof-rail",
-        ".partner-rail",
-        ".section-head",
-        ".benchmark-card",
-        ".performance-copy",
-        ".measure-card",
-        ".pipeline-card",
-        ".media-frame",
-        ".preview-lab",
-        ".anatomy",
-        ".interface-facts",
-        ".capture-grid",
-        ".module-grid",
-        ".audit-layout",
-        ".download-grid",
-        ".release-timeline",
-        ".faq-list",
-        ".vault-shell",
-        ".inventory-grid",
-        ".policy-grid",
-        ".inquiry-card",
-      ]
-    : [
-        ".proof-rail > div",
-        ".partner-rail",
-        ".section-head",
-        ".benchmark-card",
-        ".performance-copy",
-        ".measure-card",
-        ".pipeline-card",
-        ".media-frame",
-        ".preview-lab",
-        ".anatomy li",
-        ".interface-facts li",
-        ".capture-frame",
-        ".capture-copy",
-        ".module-card",
-        ".audit-layout > *",
-        ".download-card",
-        ".release-block",
-        ".release-timeline article",
-        ".faq-list details",
-        ".vault-shell",
-        ".inventory-card",
-        ".policy-grid > div",
-        ".inquiry-card",
-      ]
-  ).join(",");
+  const narrowQuery = window.matchMedia("(max-width: 760px)");
+  const groupedRevealSelector = [
+    ".proof-rail",
+    ".partner-rail",
+    ".section-head",
+    ".benchmark-card",
+    ".performance-copy",
+    ".measure-card",
+    ".pipeline-card",
+    ".media-frame",
+    ".preview-lab",
+    ".anatomy",
+    ".interface-facts",
+    ".capture-grid",
+    ".module-grid",
+    ".audit-layout",
+    ".download-grid",
+    ".release-timeline",
+    ".faq-list",
+    ".vault-shell",
+    ".inventory-grid",
+    ".policy-grid",
+    ".inquiry-card",
+  ].join(",");
+  const individualRevealSelector = [
+    ".proof-rail > div",
+    ".partner-rail",
+    ".section-head",
+    ".benchmark-card",
+    ".performance-copy",
+    ".measure-card",
+    ".pipeline-card",
+    ".media-frame",
+    ".preview-lab",
+    ".anatomy li",
+    ".interface-facts li",
+    ".capture-frame",
+    ".capture-copy",
+    ".module-card",
+    ".audit-layout > *",
+    ".download-card",
+    ".release-block",
+    ".release-timeline article",
+    ".faq-list details",
+    ".vault-shell",
+    ".inventory-card",
+    ".policy-grid > div",
+    ".inquiry-card",
+  ].join(",");
 
-  const revealTargets = Array.from(document.querySelectorAll(revealSelector));
+  let revealTargets = [];
   let revealObserver = null;
+  let activeNarrow = null;
+  let activeOrientation = null;
+  let revealRefreshTimer = 0;
 
-  function revealAll() {
-    for (const element of revealTargets) {
-      element.classList.remove("will-reveal");
-      element.classList.add("is-visible");
+  function currentOrientation() {
+    if (window.screen && window.screen.orientation &&
+        typeof window.screen.orientation.angle === "number") {
+      return window.screen.orientation.angle;
     }
-    if (revealObserver) revealObserver.disconnect();
+    return typeof window.orientation === "number" ? window.orientation : null;
   }
 
-  if (!reduceMotion() && "IntersectionObserver" in window) {
-    revealObserver = new IntersectionObserver(
+  function clearRevealTargets() {
+    for (const element of revealTargets) {
+      element.classList.remove("will-reveal", "is-visible");
+      element.style.removeProperty("--reveal-delay");
+    }
+    revealTargets = [];
+  }
+
+  function setupRevealTargets() {
+    if (revealObserver) {
+      revealObserver.disconnect();
+      revealObserver = null;
+    }
+
+    clearRevealTargets();
+
+    const narrow = narrowQuery.matches;
+    activeNarrow = narrow;
+    activeOrientation = currentOrientation();
+    revealTargets = Array.from(document.querySelectorAll(
+      narrow ? groupedRevealSelector : individualRevealSelector
+    ));
+
+    if (reduceMotion() || !("IntersectionObserver" in window)) return;
+
+    const revealIndex = new Map(revealTargets.map((element, index) => [element, index]));
+
+    // Use the observer's entry geometry instead of calling
+    // getBoundingClientRect() during setup. The observer's initial callback
+    // gives us the same above/below-fold decision without forcing layout in
+    // the middle of script execution.
+    const observer = new IntersectionObserver(
       (entries) => {
+        const viewportHeight = window.innerHeight || 800;
         for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
+          const element = entry.target;
+          const top = entry.boundingClientRect.top;
+          if (entry.isIntersecting || top <= viewportHeight * 0.92) {
+            element.classList.remove("will-reveal");
+            element.classList.add("is-visible");
+            observer.unobserve(element);
+            continue;
+          }
+          if (!element.classList.contains("will-reveal")) {
+            const index = revealIndex.get(element) || 0;
+            element.style.setProperty("--reveal-delay", `${(index % 5) * 55}ms`);
+            element.classList.add("will-reveal");
+          }
         }
       },
       { rootMargin: "0px 0px -8% 0px", threshold: 0.06 }
     );
+    revealObserver = observer;
 
-    const viewportHeight = window.innerHeight || 800;
-
-    // Read all positions first. Interleaving rect reads with class/style
-    // writes forces one layout per element and is the difference between a
-    // smooth setup and a multi-frame stall on a throttled phone.
-    const belowFold = revealTargets
-      .map((element, index) => ({
-        element,
-        index,
-        top: element.getBoundingClientRect().top,
-      }))
-      .filter((entry) => entry.top > viewportHeight * 0.92);
-
-    for (const entry of belowFold) {
-      entry.element.style.setProperty("--reveal-delay", `${(entry.index % 5) * 55}ms`);
-      entry.element.classList.add("will-reveal");
-      revealObserver.observe(entry.element);
+    for (const element of revealTargets) {
+      observer.observe(element);
     }
   }
 
+  function scheduleRevealRefresh(force) {
+    const narrow = narrowQuery.matches;
+    const orientation = currentOrientation();
+    if (!force && narrow === activeNarrow && orientation === activeOrientation) return;
+    if (revealRefreshTimer) return;
+
+    revealRefreshTimer = window.setTimeout(() => {
+      revealRefreshTimer = 0;
+      setupRevealTargets();
+    }, 120);
+  }
+
   function syncReducedMotion() {
-    if (reduceMotion()) revealAll();
+    setupRevealTargets();
+  }
+
+  setupRevealTargets();
+
+  if (narrowQuery.addEventListener) {
+    narrowQuery.addEventListener("change", () => scheduleRevealRefresh(true));
+  } else if (narrowQuery.addListener) {
+    narrowQuery.addListener(() => scheduleRevealRefresh(true));
   }
 
   if (reducedQuery.addEventListener) {
@@ -175,6 +231,9 @@
   } else if (reducedQuery.addListener) {
     reducedQuery.addListener(syncReducedMotion);
   }
+
+  window.addEventListener("orientationchange", () => scheduleRevealRefresh(true), { passive: true });
+  window.addEventListener("resize", () => scheduleRevealRefresh(false), { passive: true });
 
   const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
