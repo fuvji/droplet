@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.9
+Version: 2.10.10
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,7 +15,17 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.9 portable executable: 545,280 bytes.
+- 2.10.10 portable executable: 547,328 bytes.
+- Crystal toggle-off restore now acquires `CRYSTAL_BUSY` before consuming its
+  generation request. A busy Crystal action leaves the request pending and the
+  restore retries; a fresh Crystal cycle cancels a stale delayed restore.
+- Trigger rebinding takes ownership: the previous owner is cleared, and a
+  legacy duplicate config uses the later module. Anchor can use `XButton1`
+  even though Breach ships with that default. Captured `vkXX` keys parse back.
+- `WM_DPICHANGED` clears the slider drag and transient pointer state; a lost
+  capture or missed button-up drops the gesture too.
+- `tools/check-release.ps1` checks version, binary size and SHA-256, test
+  count, 624×408 captures, workflow hash, and local site links.
 - Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
   160 ms restores it after release; a latched toggle restores it once when
   switched off. A short single press leaves the current hotbar slot alone.
@@ -23,8 +33,8 @@ visible to screen capture.
 - `WM_DPICHANGED` updates scale, physical window size, rounded clip, hover,
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
-- Tests: 31 / 31. Four native 624×408 captures were regenerated from the
-  2.10.9 build. No CPU, latency, or speedup claim is made.
+- Tests: 37 / 37. Four native 624×408 captures were regenerated from the
+  2.10.10 build. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
 - DWM supplies the antialiased 8 px corner when available; the GDI region is

@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Droplet releases — 2.10.9 ledger</title>
-  <meta name="description" content="Droplet 2.10.9 release notes: Auto Crystal Return, DPI-correct hit testing, a 545,280-byte portable exe, 31/31 tests, and the full version ledger.">
+  <title>Droplet releases — 2.10.10 ledger</title>
+  <meta name="description" content="Droplet 2.10.10 release notes: busy-safe Crystal restore, DPI drag reset, trigger ownership, vkXX rebinding, a 547,328-byte portable exe, 37/37 tests, and the full version ledger.">
   <link rel="canonical" href="https://fuvji.github.io/droplet/releases.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Droplet releases — 2.10.9 ledger">
-  <meta property="og:description" content="Auto Crystal Return and DPI-correct hit testing in the 2.10.9 portable exe.">
+  <meta property="og:title" content="Droplet releases — 2.10.10 ledger">
+  <meta property="og:description" content="Busy-safe Crystal restore, DPI drag reset, and deterministic trigger ownership in the 2.10.10 portable exe.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/releases.html">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.9">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.10">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="favicon.ico?v=2.10.9-2" type="image/x-icon" sizes="any">
-  <link rel="icon" href="favicon.svg?v=2.10.9-2" type="image/svg+xml" sizes="any">
-  <link rel="icon" href="assets/favicon-32.png?v=2.10.9-2" sizes="32x32" type="image/png">
-  <link rel="icon" href="assets/favicon-16.png?v=2.10.9-2" sizes="16x16" type="image/png">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.10.9-2" sizes="180x180" type="image/png">
-  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2.10.9-2" sizes="180x180" type="image/png">
-  <link rel="mask-icon" href="favicon.svg?v=2.10.9-2" color="#f4f3ef">
-  <link rel="manifest" href="site.webmanifest?v=2.10.9-2" type="application/manifest+json">
+  <link rel="icon" href="favicon.ico?v=2.10.10-2" type="image/x-icon" sizes="any">
+  <link rel="icon" href="favicon.svg?v=2.10.10-2" type="image/svg+xml" sizes="any">
+  <link rel="icon" href="assets/favicon-32.png?v=2.10.10-2" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/favicon-16.png?v=2.10.10-2" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.10.10-2" sizes="180x180" type="image/png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2.10.10-2" sizes="180x180" type="image/png">
+  <link rel="mask-icon" href="favicon.svg?v=2.10.10-2" color="#f4f3ef">
+  <link rel="manifest" href="site.webmanifest?v=2.10.10-2" type="application/manifest+json">
   <meta name="application-name" content="Droplet">
   <meta name="apple-mobile-web-app-title" content="Droplet">
-  <link rel="stylesheet" href="style.css?v=2.10.9-1">
-  <link rel="stylesheet" href="refine.css?v=2.10.9-1">
-  <link rel="stylesheet" href="motion.css?v=2.10.9-4">
-  <script src="motion.js?v=2.10.9-6" defer></script>
+  <link rel="stylesheet" href="style.css?v=2.10.10-1">
+  <link rel="stylesheet" href="refine.css?v=2.10.10-1">
+  <link rel="stylesheet" href="motion.css?v=2.10.10-4">
+  <script src="motion.js?v=2.10.10-6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -38,7 +38,7 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z" fill="currentColor" fill-opacity=".11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.10.9</span>
+        <span class="brand-version">2.10.10</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html#download">Download</a>
@@ -55,24 +55,24 @@
   <main id="main">
     <section class="page-hero release-hero wrap" aria-labelledby="release-title">
       <div>
-        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-13</p>
-        <h1 id="release-title">Droplet<br><em>2.10.9.</em></h1>
-        <p class="lede">Auto Crystal now has a Return slot with hold-or-toggle semantics, and the panel keeps pointer hit testing in physical space across DPI changes. A short tap still never switches the hotbar back.</p>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-14</p>
+        <h1 id="release-title">Droplet<br><em>2.10.10.</em></h1>
+        <p class="lede">Crystal's toggle-off Return restore can no longer be swallowed by a busy Crystal action, and a DPI change clears every slider drag. Reassigning a trigger also takes ownership of its key, so Anchor can use <code>XButton1</code> despite Breach's default.</p>
         <div class="actions">
           <a class="button button-primary" href="downloads/droplet.exe" download>Download exe <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="downloads/SHA256SUMS.txt">Checksums</a>
         </div>
         <ul class="hero-notes" aria-label="Release boundaries">
           <li>Windows x64 only</li>
-          <li>31 / 31 tests</li>
+          <li>37 / 37 tests</li>
           <li>No streamproof mode</li>
         </ul>
       </div>
-      <aside class="console-card" aria-label="2.10.9 release card">
-        <div class="console-head"><span>Release / 2.10.9</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
+      <aside class="console-card" aria-label="2.10.10 release card">
+        <div class="console-head"><span>Release / 2.10.10</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
         <div class="console-main">
           <span class="console-label">Portable executable</span>
-          <div class="console-value">545,280<small>B</small></div>
+          <div class="console-value">547,328<small>B</small></div>
           <p>One direct executable, verified with SHA-256. No MSIX/AppX, installer, or ZIP.</p>
           <div class="signal-bars" aria-hidden="true">
             <i class="sh18"></i><i class="sh34"></i><i class="sh24"></i><i class="sh48"></i>
@@ -81,10 +81,10 @@
             <i class="sh43"></i><i class="sh51"></i><i class="sh32"></i><i class="sh22"></i>
             <i class="sh36"></i><i class="sh16"></i>
           </div>
-          <div class="signal-caption"><span>release tests 31 / 31</span><span>routing 0.45 ns</span></div>
+          <div class="signal-caption"><span>release tests 37 / 37</span><span>routing 0.45 ns</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Version</dt><dd>2.10.9</dd></div>
+          <div><dt>Version</dt><dd>2.10.10</dd></div>
           <div><dt>Artifact</dt><dd>exe only</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
           <div><dt>Network</dt><dd>None</dd></div>
@@ -101,7 +101,7 @@
       <table class="release-table">
         <thead><tr><th>Artifact</th><th>Size / SHA-256</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>545,280 B<br><code>2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f</code></td><td>Download and run. No installer or package registration.</td></tr>
+          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>547,328 B<br><code>a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32</code></td><td>Download and run. No installer or package registration.</td></tr>
           <tr><td><a href="downloads/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td>exe</td><td>Verify before running.</td></tr>
           <tr><td>Linux / macOS</td><td>Not built</td><td>The core is Win32/GDI+. A real port is a separate project; no fake package is offered.</td></tr>
         </tbody>
@@ -110,26 +110,27 @@
 
     <section class="section wrap" aria-labelledby="notes-title">
       <div class="section-head">
-        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.9 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
+        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.10 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
         <p class="section-lede">A readable ledger. Every item is implemented in the source or measured on the release build; the unverified items are labelled.</p>
       </div>
       <div class="download-grid">
         <article class="release-block">
-          <h3>Auto Crystal Return</h3>
+          <h3>Busy-safe Crystal restore</h3>
           <ul>
-            <li>The Auto Crystal card now has a <strong>Return</strong> slot (<code>v5S3</code>), default hotbar <strong>1</strong>, next to Obsidian and Crystal.</li>
-            <li>A hold of at least <strong>160 ms</strong> restores the Return slot after release. A short single press does not switch the hotbar back.</li>
-            <li>A latched toggle restores once when switched off, tied to the worker generation so a quick off/on cycle cannot restore in the middle of the next cycle.</li>
-            <li>The restore is a double tap of the Return binding, matching Potion and Breach.</li>
+            <li>The toggle-off Return restore now acquires <code>CRYSTAL_BUSY</code> <strong>before</strong> consuming its generation request.</li>
+            <li>If another Crystal action is busy, the request stays pending and the worker retries after the gate is released instead of losing the restore.</li>
+            <li>Starting a fresh Crystal cycle clears a stale delayed restore, so it cannot inject into the next Obsidian/Crystal sequence.</li>
+            <li>The 160 ms hold restore and the short-press no-restore rule are unchanged.</li>
           </ul>
         </article>
         <article class="release-block">
-          <h3>DPI-correct hit testing</h3>
+          <h3>DPI and binding edges</h3>
           <ul>
-            <li><code>WM_DPICHANGED</code> now updates scale, physical window size, rounded clip, hover state, and invalidation together.</li>
-            <li>Pointer coordinates stay physical, matching the scaled paint rectangles. Hover and clicks no longer shift one row or tab at 125% or 150%.</li>
-            <li>Four native captures were regenerated at the canonical 624×408 size; the capture helpers are DPI-aware and force the same DPI path the app uses on a monitor move.</li>
-            <li>Tests are <strong>31 / 31</strong>, including the hold-vs-tap policy and a 125/150% scaled rail hit test. Portable exe: <strong>545,280 bytes</strong>, SHA-256 <code>2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f</code>. No CPU, latency, or speedup claim.</li>
+            <li><code>WM_DPICHANGED</code> updates scale, physical window size, rounded clip, hover, hit testing, and transient pointer state together; a slider drag cannot survive into the new scale.</li>
+            <li>Assigning a trigger clears the previous owner. Legacy duplicate configs use the later module, so Anchor can use <code>XButton1</code> despite Breach's default.</li>
+            <li>Lost capture or a missed button-up now drops the pointer gesture, not just a window drag.</li>
+            <li>Captured keys without a friendly name use <code>vkXX</code>, which the parser accepts, so every captured key can be rebound.</li>
+            <li>Tests are <strong>37 / 37</strong>. Portable exe: <strong>547,328 bytes</strong>, SHA-256 <code>a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32</code>. No CPU, latency, or speedup claim.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -164,6 +165,7 @@
         <p class="section-lede">The versioned notes in the repository are the source of truth. This page is a readable mirror, not an automatically generated feed.</p>
       </div>
       <div class="release-timeline">
+        <article><strong>2.10.10</strong><div><h3>Busy-safe Crystal, trigger ownership</h3><p>A busy Crystal action cannot consume a toggle-off Return request; DPI changes clear the slider drag; trigger rebinding takes ownership, and legacy duplicates resolve to the later module. Captured vkXX keys round-trip. Tests: 37 / 37; exe: 547,328 bytes.</p></div></article>
         <article><strong>2.10.9</strong><div><h3>Auto Crystal Return, DPI hit testing</h3><p>Hold the Crystal trigger for 160 ms or switch its toggle off to restore a configurable Return slot; a short tap leaves the hotbar alone. Scaled pointer hit testing now uses physical coordinates at 125% and 150%. Tests: 31 / 31; exe: 545,280 bytes.</p></div></article>
         <article><strong>2.10.8</strong><div><h3>Smaller portable exe</h3><p>Hidden ShellExecuteW replaces the only std::process::Command use, and rust-lld + ICF cuts the binary to 542,720 bytes. Event-gated reads are unchanged.</p></div></article>
         <article><strong>2.10.7</strong><div><h3>Event-gated reads</h3><p>Sprint settings are read only when a pulse is due, and crosshair settings only on a magenta hit; polling and bindings are unchanged.</p></div></article>
@@ -192,7 +194,7 @@
       <div class="download-verify">
         <span>Windows PowerShell</span>
         <code>Get-FileHash .\droplet.exe -Algorithm SHA256</code>
-        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.9.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.10.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>
