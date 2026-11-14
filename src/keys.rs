@@ -215,6 +215,19 @@ pub fn vk_of(name: &str) -> Option<u32> {
                 }
                 return None;
             }
+            // The capture path names keys it does not have a friendly label
+            // for as `vkXX`. Parse that form so every key the hook can capture
+            // can also be stored, displayed, and used again.
+            if let Some(hex) = lower.strip_prefix("vk") {
+                if (2..=4).contains(&hex.len()) {
+                    if let Ok(vk) = u32::from_str_radix(hex, 16) {
+                        if (1..=0xFF).contains(&vk) {
+                            return Some(vk);
+                        }
+                    }
+                }
+                return None;
+            }
             let mut chars = n.chars();
             let first = chars.next()?;
             if chars.next().is_some() {
@@ -240,6 +253,7 @@ pub fn name_of_vk(vk: u32) -> String {
         0x10 => return "Shift".into(),
         0x11 => return "Control".into(),
         0x12 => return "Alt".into(),
+        0x13 => return "Pause".into(),
         0x14 => return "CapsLock".into(),
         0x1B => return "Escape".into(),
         0x20 => return "Space".into(),
@@ -251,10 +265,17 @@ pub fn name_of_vk(vk: u32) -> String {
         0x26 => return "Up".into(),
         0x27 => return "Right".into(),
         0x28 => return "Down".into(),
+        0x2C => return "PrintScreen".into(),
         0x2D => return "Insert".into(),
         0x2E => return "Delete".into(),
         0x90 => return "NumLock".into(),
         0x91 => return "ScrollLock".into(),
+        0xA0 => return "LShift".into(),
+        0xA1 => return "RShift".into(),
+        0xA2 => return "LControl".into(),
+        0xA3 => return "RControl".into(),
+        0xA4 => return "LAlt".into(),
+        0xA5 => return "RAlt".into(),
         0xBD => return "-".into(),
         0xBB => return "=".into(),
         0xDB => return "[".into(),
@@ -293,5 +314,28 @@ pub fn display_ref(binding: &str) -> &str {
         "..."
     } else {
         binding
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn captured_names_round_trip_to_the_same_event() {
+        for (name, vk) in [
+            ("Pause", 0x13),
+            ("PrintScreen", 0x2C),
+            ("LShift", 0xA0),
+            ("RControl", 0xA3),
+            ("vkFF", 0xFF),
+        ] {
+            assert_eq!(ev(name), Some(Ev::K(vk)), "{name}");
+            assert_eq!(ev(&name_of_vk(vk)), Some(Ev::K(vk)), "display {name}");
+        }
+        assert_eq!(ev("XButton1"), Some(Ev::M(Btn::X1)));
+        assert_eq!(ev("xbutton2"), Some(Ev::M(Btn::X2)));
+        assert_eq!(ev("vk00"), None);
+        assert_eq!(ev("vk100"), None);
     }
 }

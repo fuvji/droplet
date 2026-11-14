@@ -11,6 +11,17 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.10 changes
+
+- Correctness and input edges, not throughput: the Crystal toggle-off restore
+  now acquires the busy gate before consuming its request and retries instead
+  of losing the restore; DPI changes clear the slider drag; duplicate trigger
+  assignments move ownership; captured `vkXX` keys round-trip through the
+  parser; and the release checker validates artifact/site metadata.
+- Tests: 37 / 37. Portable exe: 547,328 B. No CPU, latency, or render-speed
+  benchmark was run, and no speedup is claimed. Trigger routing, watcher
+  cadence, and the release profile are unchanged.
+
 ## 2.10.9 changes
 
 - Auto Crystal gets a Return slot with a 160 ms hold threshold and a

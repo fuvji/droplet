@@ -416,7 +416,7 @@ impl App {
         let got = self.engine.captured.lock().unwrap().take();
         if let Some((key, name)) = got {
             if self.capture == Some(key) {
-                self.settings.set_str(key, &name);
+                self.settings.set_binding(key, &name);
                 self.capture = None;
                 *self.engine.capture_key.lock().unwrap() = None;
                 self.changed();
@@ -498,11 +498,15 @@ impl App {
         if dpi == 0 {
             return;
         }
+        // Finish any gesture before the geometry moves. A drag carries
+        // physical coordinates and a char offset from the old scale; keeping
+        // it would make the next mouse move jump the slider to a stale
+        // position after the panel has been rescaled.
+        self.release_pointer();
         self.dpi = dpi as f32 / 96.0;
         self.mx = -1.0;
         self.my = -1.0;
         self.inside = false;
-        self.drag = None;
 
         let mut rect = RECT::default();
         if !suggested.is_null() {
@@ -578,6 +582,17 @@ impl App {
         self.user_hidden = false;
         self.kick_anim();
         self.invalidate();
+    }
+
+    /// Drop every pointer gesture, including a slider drag that lives in the
+    /// UI shared state rather than in the window-move slot. Used by mouse-up,
+    /// lost capture, and the defensive auto-end path in WM_MOUSEMOVE.
+    fn release_pointer(&mut self) {
+        self.down = false;
+        self.pressed = false;
+        self.rpressed = false;
+        self.shared.drag = None;
+        self.end_drag();
     }
 
     fn end_drag(&mut self) {
@@ -760,8 +775,14 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
                     );
                     return 0;
                 }
-                // button released without us seeing the up: finish cleanly
-                app.end_drag();
+            }
+            // A button-up can be lost when capture changes or the pointer
+            // leaves the window. A stale slider drag would otherwise keep
+            // following the mouse with no button held.
+            if (app.drag.is_some() || app.down || app.shared.drag.is_some())
+                && !win::is_down(0x01)
+            {
+                app.release_pointer();
             }
             app.on_pointer(lp);
             app.kick_anim();
@@ -800,18 +821,13 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
             if unsafe { win::GetMessageExtraInfo() as usize } == input::INJ {
                 return 0;
             }
-            if app.drag.is_some() {
-                app.end_drag();
-                return 0;
-            }
             app.on_pointer(lp);
-            app.down = false;
-            app.shared.drag = None;
+            app.release_pointer();
             app.interact();
             0
         }
         win::WM_CAPTURECHANGED => {
-            app.drag = None;
+            app.release_pointer();
             0
         }
         win::WM_RBUTTONDOWN => {

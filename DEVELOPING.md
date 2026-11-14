@@ -38,7 +38,7 @@ release artifact and site layout.
 
 ## Verification
 
-The release currently carries 31 tests:
+The release currently carries **37 / 37** tests:
 
 ```powershell
 cargo test --release
@@ -46,18 +46,30 @@ cargo test --release
 
 They cover config migration, timing bounds, RGB parsing, trigger-mode
 normalization and latch generations, Auto Crystal's Return default and
-hold-vs-tap policy, physical rail hit testing at 125%/150%, the allocation-free
-binding lookup, Anchor slot validation, W-Tap planning, Sprint's 100 ms
-deadline, cadence adaptation, profile parsing, and trigger-index equivalence
-plus its routing benchmark.
+hold-vs-tap policy, busy-safe return ordering, stale-cycle cancellation,
+physical rail hit testing at 125%/150%, the allocation-free binding lookup,
+Rebinding conflict ownership, `XButton1`/Anchor routing, captured-key
+round-trips, Anchor slot validation, W-Tap planning, Sprint's 100 ms deadline,
+cadence adaptation, profile parsing, and trigger-index equivalence plus its
+routing benchmark.
 
-Before publishing, also check:
+Before publishing, run the release consistency checker:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/check-release.ps1
+```
+
+It verifies the version in `Cargo.toml`/`Cargo.lock`, checksum and size for both
+copied executables, SHA256SUMS, the workflow hash, the test count claimed in
+docs, all four 624×408 captures, and local site links. It also runs
+`cargo test --release`. A release check should not use `-SkipTests`.
+
+Also check:
 
 - `git diff --check`
-- every local `href`/`src` in `site/public` resolves
-- all four captures are 624×408
 - the product page, `releases.html`, and `sponsors.html` have no console errors
-- the direct `droplet.exe` and `SHA256SUMS.txt` links resolve
+- the direct `droplet.exe` and `SHA256SUMS.txt` links resolve on the published
+  Pages URL, not only locally
 
 ## Repository
 

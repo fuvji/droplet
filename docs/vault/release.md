@@ -1,5 +1,17 @@
 # release
 
+## 2.10.10 — 2026-11-14
+
+- Portable exe: 547,328 B,
+  `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`.
+- Tests: 37 / 37.
+- Changes: busy-safe Crystal toggle-off restore with retry and stale-cycle
+  cancellation; slider/pointer drag reset on DPI changes and lost capture;
+  trigger ownership on rebinding plus last-wins routing for legacy duplicate
+  configs (`XButton1` on Anchor); `vkXX` capture round-trip; release consistency
+  checker. No CPU, latency, or speedup claim. Live injection remains
+  unverified.
+
 ## 2.10.9 — 2026-11-13
 
 - Portable exe: 545,280 B,

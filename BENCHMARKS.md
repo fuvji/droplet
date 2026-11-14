@@ -3,6 +3,21 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.10 release
+
+2.10.10 is a correctness release. Crystal toggle-off restore is now gated by
+the same busy flag as the Crystal action, and retries until the gate is free;
+DPI changes clear the slider drag; binding conflicts move ownership to the
+newly assigned trigger; captured `vkXX` keys round-trip through the parser; and
+`tools/check-release.ps1` checks the release metadata and local site links.
+
+- Version: **2.10.10**
+- Portable executable: **547,328 bytes**
+- SHA-256: `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`
+- Release tests: **37 / 37**
+- No CPU, latency, render-speed, or size win is claimed. Trigger routing,
+  watcher cadence, and the release profile are unchanged.
+
 ## 2.6.0 trigger routing
 
 | Path | Time per lookup | What it does |
@@ -66,11 +81,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.9**
-- Portable executable: **545,280 bytes**
-- SHA-256: `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`
+- Version: **2.10.10**
+- Portable executable: **547,328 bytes**
+- SHA-256: `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **31 / 31**
+- Release tests: **37 / 37**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**
@@ -97,6 +112,12 @@ hold/toggle semantics, and pointer hit testing stays physical through DPI
 changes. Trigger routing, watcher cadence, and the release profile are
 unchanged. The executable is 545,280 bytes and tests are 31 / 31. No CPU,
 latency, size, or render-speed win is claimed.
+
+2.10.10 fixes the concurrency and input edges around those features: a busy
+Crystal action can no longer consume a toggle-off restore, DPI changes clear
+the slider drag, duplicate trigger assignments move ownership deterministically,
+and captured `vkXX` keys can be rebound. The binary is 547,328 bytes and tests
+are 37 / 37; the increase is code and test coverage, not a performance claim.
 
 2.10.8 removes the only `std::process::Command` spawn from the binary. The
 self-destruct recycle waiter now uses the same dynamically loaded

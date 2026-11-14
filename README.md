@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.9 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.10 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 545,280 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 547,328 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,24 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.9
+## What is in 2.10.10
 
+- **Busy-safe Crystal restore (2.10.10)**: a toggle-off restore now waits for
+  the Crystal re-entrancy gate instead of consuming the request while another
+  Crystal action is busy. The pending request survives a busy cycle and a
+  fresh Crystal cycle cancels a stale delayed restore.
+- **DPI changes end slider drags (2.10.10)**: changing monitors or scale now
+  clears the UI drag state along with the window drag, so the next mouse move
+  cannot jump a slider using old coordinates.
+- **Bindings take ownership (2.10.10)**: assigning a trigger to a key another
+  trigger already owns clears the old owner, and legacy duplicate configs use
+  the later module. Anchor can now use `XButton1` even though Breach ships with
+  that default.
+- **Every captured key is rebindable (2.10.10)**: keys without a friendly label
+  are stored as `vkXX` and parsed back, instead of being captured but unusable.
+- **Release consistency check (2.10.10)**: `tools/check-release.ps1` verifies
+  the version, artifact size and SHA-256, test count, 624×408 captures, workflow
+  hash, and local site links in one command.
 - **Auto Crystal Return (2.10.9)**: the Crystal card now has a Return slot
   (`v5S3`, default `1`). A hold of at least 160 ms restores it after release;
   a latched toggle restores it once when switched off. A short single press
@@ -101,7 +117,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.9 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.10 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -146,13 +162,14 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **31 / 31**.
-- Portable executable: **545,280 bytes**,
-  `2cfb0020918fc735ef73a4ffbae62ceb599d02dd44c6122b8794fcce3686861f`.
+- `cargo test --release`: **37 / 37**.
+- Portable executable: **547,328 bytes**,
+  `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
-- Four native 624×408 captures in `site/public/assets/`.
+- Four native 624×408 captures in `site/public/assets/`, regenerated from the
+  2.10.10 build.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.9 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.10 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game.
 

@@ -15,14 +15,22 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.9 portable exe: 545,280 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 31 / 31.
+- 2.10.10 portable exe: 547,328 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 37 / 37.
 - Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
   160 ms or a toggle-off restores it once; a short tap does not. The restore
-  is a double tap of the Return binding.
+  is a double tap of the Return binding. The toggle-off path acquires
+  `CRYSTAL_BUSY` before consuming the generation, so a busy action cannot
+  swallow the request, and a new cycle cancels a stale delayed restore.
 - `WM_DPICHANGED` updates scale, physical window size, rounded clip, hover,
-  and hit testing together. Pointer coordinates stay physical, fixing the
-  125%/150% row and tab offset.
+  hit testing, and clears slider/pointer drag state together. Pointer
+  coordinates stay physical, fixing the 125%/150% row and tab offset.
+- Trigger assignments take ownership: a newly assigned trigger clears the
+  previous owner, and legacy duplicates resolve to the later module. This is
+  why Anchor can use `XButton1` although Breach ships with it as a default.
+  Captured keys without a friendly name use `vkXX`, which the parser accepts.
+- `tools/check-release.ps1` checks version, artifact size and SHA-256, test
+  count, 624×408 captures, workflow hash, and local site links.
 - The self-destruct waiter uses hidden `ShellExecuteW` instead of
   `std::process::Command`; the link uses bundled `rust-lld` + ICF. The 2.10.8
   size pass is 55,808 B smaller than 2.10.7 and keeps `opt-level=3`.

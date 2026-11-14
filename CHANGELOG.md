@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.10.10
+
+- Hold the Crystal busy gate before consuming a toggle-off Return request. A
+  busy Crystal action now leaves the request pending and the restore retries
+  after the action releases; a fresh Crystal cycle cancels a stale delayed
+  restore instead of injecting into the new cycle.
+- Clear the UI slider drag on every DPI change, and drop a pointer gesture when
+  capture is lost or a button-up is missed. A stale drag can no longer follow
+  the mouse using the previous scale's coordinates.
+- Assigning a trigger takes ownership of its input: the previous owner is
+  cleared, and legacy duplicate configs resolve to the later module. Anchor can
+  use `XButton1` despite Breach's default.
+- Parse captured `vkXX` names, so keys without a friendly label remain
+  rebindable, and add friendly labels for Pause, PrintScreen, and modifier keys.
+- Add `tools/check-release.ps1` for version, binary size and SHA-256, test
+  count, 624×408 captures, release workflow hash, and local site links.
+- Tests: **37 / 37**. Portable executable: **547,328 bytes**, SHA-256
+  `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.9
 
 - Add an Auto Crystal Return slot (`v5S3`, default `1`). A hold of at least

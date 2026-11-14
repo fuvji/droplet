@@ -3,6 +3,8 @@
 
 use std::path::PathBuf;
 
+use crate::keys;
+
 pub trait Ini: Sized + Clone {
     fn ini_parse(s: &str) -> Option<Self>;
     fn ini_write(&self) -> String;
@@ -215,6 +217,18 @@ settings_schema! {
     autouse_slot:   "vWS1": String = "4";
 }
 
+/// Every editable trigger binding. Slots and action keys are deliberately
+/// excluded: a hotbar slot may legitimately equal a trigger name.
+const TRIGGER_BINDING_KEYS: [&str; 26] = [
+    "vDBn", "vDB2", "v1Bn", "v1B2", "v2Bn", "v2B2", "v3Bn", "v3B2", "v4Bn", "v4B2",
+    "v5Bn", "v5B2", "v6Bn", "v6B2", "vABn", "vAB2", "vBBn", "vBB2", "vCBn", "v7Bn",
+    "v7B2", "v8Bn", "v8B2", "vWBn", "vWB2", "v8I",
+];
+
+fn is_trigger_binding(key: &str) -> bool {
+    TRIGGER_BINDING_KEYS.contains(&key)
+}
+
 impl Settings {
     /// Hot UI path: read the boolean directly instead of formatting the value
     /// into a temporary String on every frame and every repaint.
@@ -334,6 +348,26 @@ impl Settings {
     }
     pub fn set_str(&mut self, key: &str, v: &str) {
         self.set(key, v);
+    }
+
+    /// A trigger belongs to one input event at a time. When the user assigns
+    /// an event that another trigger already owns, clear the old owner so the
+    /// newly captured chip is the one the hook can actually route. Clearing
+    /// the old field is deliberate: first-wins routing made a later binding
+    /// (for example Anchor on XButton1) look accepted but silently dead.
+    pub fn set_binding(&mut self, key: &str, value: &str) {
+        if !is_trigger_binding(key) {
+            self.set_str(key, value);
+            return;
+        }
+        if let Some(target) = keys::ev(value) {
+            for other in TRIGGER_BINDING_KEYS {
+                if other != key && keys::ev(self.binding_at(other)) == Some(target) {
+                    self.set_str(other, "...");
+                }
+            }
+        }
+        self.set_str(key, value);
     }
 
     /// Accent colour as (r, g, b); invalid values fall back to the default tint.
@@ -709,6 +743,21 @@ mod tests {
             assert_eq!(s.binding_at(key), s.get(key).as_str(), "{key}");
         }
         assert_eq!(s.binding_at("unknown"), "");
+    }
+
+    #[test]
+    fn rebinding_a_trigger_clears_the_previous_owner() {
+        let mut s = Settings::default();
+        assert_eq!(s.breach_key, "XButton1");
+
+        s.set_binding("v6Bn", "XButton1");
+        assert_eq!(s.anchor_key, "XButton1");
+        assert_eq!(s.breach_key, "...", "old owner must not shadow Anchor");
+
+        // A later assignment wins too: the first binding is not frozen.
+        s.set_binding("v3Bn", "xbutton1");
+        assert_eq!(s.breach_key, "xbutton1");
+        assert_eq!(s.anchor_key, "...");
     }
 
     #[test]

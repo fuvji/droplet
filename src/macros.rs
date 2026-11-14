@@ -116,6 +116,34 @@ fn take_crystal_toggle_return(generation: u64) -> bool {
             .is_ok()
 }
 
+/// Consume and restore only while holding the same re-entrancy gate every
+/// Crystal action uses. Taking the request before this gate lets a busy action
+/// swallow it: the old code consumed the generation, failed to enter Busy, and
+/// never put the Return slot back. Returning false here leaves the request in
+/// place so the caller can retry once the action releases the gate.
+fn try_restore_crystal_toggle_return<F: FnOnce()>(generation: u64, restore: F) -> bool {
+    let Some(_busy) = Busy::enter(&CRYSTAL_BUSY) else {
+        return false;
+    };
+    if take_crystal_toggle_return(generation) {
+        restore();
+        true
+    } else {
+        false
+    }
+}
+
+/// Wait for the Crystal gate instead of dropping the request on the floor. A
+/// newer off/on cycle clears the request, which ends this short-lived worker.
+fn restore_crystal_toggle_return(generation: u64, s: &Settings) {
+    while CRYSTAL_RETURN_GEN.load(Ordering::SeqCst) == generation {
+        if try_restore_crystal_toggle_return(generation, || crystal_restore(s)) {
+            return;
+        }
+        input::sleep_ms(2.0);
+    }
+}
+
 fn repaint() {
     let hwnd = crate::app::main_hwnd();
     if hwnd != 0 {
@@ -134,6 +162,13 @@ fn start_toggle(module: &'static str) -> Option<u64> {
         repaint();
         None
     } else {
+        // Starting a fresh Crystal cycle invalidates any delayed restore from
+        // the previous cycle. Without this, a restore worker that was waiting
+        // for Busy could put the Return slot back in the middle of the new
+        // Obsidian/Crystal sequence.
+        if module == "v5" {
+            CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
+        }
         repaint();
         Some(generation)
     }
@@ -329,10 +364,8 @@ fn fire(s: &Arc<Settings>, ev: Ev, mode_key: &'static str, module: &'static str,
                 // A tap that never ran the module must not inject a hotbar
                 // selection. A cycle that did work restores only once, after
                 // the worker has stopped touching the hotbar.
-                if ran && module == "v5" && take_crystal_toggle_return(generation) {
-                    if let Some(_busy) = Busy::enter(&CRYSTAL_BUSY) {
-                        crystal_restore(&s);
-                    }
+                if ran && module == "v5" {
+                    restore_crystal_toggle_return(generation, &s);
                 }
             });
         return;
@@ -406,18 +439,16 @@ impl TriggerMap {
 
     fn bind(&mut self, binding: &str, action: Action) {
         let Some(ev) = keys::ev(binding) else { return; };
+        // Last configured binding wins. The UI also clears the previous owner
+        // in `set_binding`, but an older INI can still contain a duplicate
+        // (Breach's XButton1 default plus an Anchor bind). Last-wins makes that
+        // recoverable without asking the user to edit or delete their config.
         match ev {
             Ev::K(vk) if (vk as usize) < self.keys.len() => {
-                let slot = &mut self.keys[vk as usize];
-                if slot.is_none() {
-                    *slot = Some(action);
-                }
+                self.keys[vk as usize] = Some(action);
             }
             Ev::M(btn) if (btn as usize) < self.mouse.len() => {
-                let slot = &mut self.mouse[btn as usize];
-                if slot.is_none() {
-                    *slot = Some(action);
-                }
+                self.mouse[btn as usize] = Some(action);
             }
             _ => {}
         }
@@ -462,44 +493,45 @@ pub fn trigger(ev: Ev, s: &Arc<Settings>, map: &TriggerMap) {
 
 #[cfg(test)]
 fn scan_action(s: &Settings, ev: Ev) -> Option<Action> {
-    if hit(&s.dash_key, ev) || hit(&s.dash_key2, ev) {
-        return Some(Action::Dash);
-    }
-    if hit(&s.shield_key, ev) || hit(&s.shield_key2, ev) {
-        return Some(Action::Shield);
-    }
-    if hit(&s.mace_key, ev) || hit(&s.mace_key2, ev) {
-        return Some(Action::Mace);
-    }
-    if hit(&s.breach_key, ev) || hit(&s.breach_key2, ev) {
-        return Some(Action::Breach);
-    }
-    if hit(&s.potion_key, ev) || hit(&s.potion_key2, ev) {
-        return Some(Action::Potion);
-    }
-    if hit(&s.crystal_key, ev) || hit(&s.crystal_key2, ev) {
-        return Some(Action::Crystal);
-    }
-    if hit(&s.anchor_key, ev) || hit(&s.anchor_key2, ev) {
-        return Some(Action::Anchor);
-    }
-    if hit(&s.fastuse_key, ev) || hit(&s.fastuse_key2, ev) {
-        return Some(Action::FastUse);
-    }
-    if hit(&s.pearl_key, ev) || hit(&s.pearl_key2, ev) {
-        return Some(Action::Pearl);
-    }
-    if hit(&s.totem_key, ev) || hit(&s.totem_key2, ev) {
-        return Some(Action::Totem);
-    }
-    if hit(&s.autouse_key, ev) || hit(&s.autouse_key2, ev) {
-        return Some(Action::AutoUse);
+    // Reverse of the binding order to mirror TriggerMap's last-wins rule.
+    if hit(&s.hover_inv_key, ev) {
+        return Some(Action::HoverInv);
     }
     if hit(&s.wtap_key, ev) {
         return Some(Action::WTap);
     }
-    if hit(&s.hover_inv_key, ev) {
-        return Some(Action::HoverInv);
+    if hit(&s.autouse_key, ev) || hit(&s.autouse_key2, ev) {
+        return Some(Action::AutoUse);
+    }
+    if hit(&s.totem_key, ev) || hit(&s.totem_key2, ev) {
+        return Some(Action::Totem);
+    }
+    if hit(&s.pearl_key, ev) || hit(&s.pearl_key2, ev) {
+        return Some(Action::Pearl);
+    }
+    if hit(&s.fastuse_key, ev) || hit(&s.fastuse_key2, ev) {
+        return Some(Action::FastUse);
+    }
+    if hit(&s.anchor_key, ev) || hit(&s.anchor_key2, ev) {
+        return Some(Action::Anchor);
+    }
+    if hit(&s.crystal_key, ev) || hit(&s.crystal_key2, ev) {
+        return Some(Action::Crystal);
+    }
+    if hit(&s.potion_key, ev) || hit(&s.potion_key2, ev) {
+        return Some(Action::Potion);
+    }
+    if hit(&s.breach_key, ev) || hit(&s.breach_key2, ev) {
+        return Some(Action::Breach);
+    }
+    if hit(&s.mace_key, ev) || hit(&s.mace_key2, ev) {
+        return Some(Action::Mace);
+    }
+    if hit(&s.shield_key, ev) || hit(&s.shield_key2, ev) {
+        return Some(Action::Shield);
+    }
+    if hit(&s.dash_key, ev) || hit(&s.dash_key2, ev) {
+        return Some(Action::Dash);
     }
     None
 }
@@ -967,6 +999,11 @@ pub fn totem_tap(s: &Settings) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    // The Crystal return request is process-global. These tests exercise its
+    // ordering directly, so serialize the tests that mutate it.
+    static CRYSTAL_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn wtap_modes_and_hold_delay_follow_the_slider() {
@@ -1008,6 +1045,7 @@ mod tests {
 
     #[test]
     fn crystal_toggle_off_requests_one_return() {
+        let _guard = CRYSTAL_TEST_LOCK.lock().unwrap();
         stop_toggle("v5");
         CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
         let generation = start_toggle("v5").expect("the first Crystal press should latch");
@@ -1015,6 +1053,68 @@ mod tests {
         assert!(take_crystal_toggle_return(generation));
         assert!(!take_crystal_toggle_return(generation));
         assert!(!take_crystal_toggle_return(generation.wrapping_add(1)));
+    }
+
+    #[test]
+    fn busy_crystal_cannot_consume_the_return_request() {
+        let _guard = CRYSTAL_TEST_LOCK.lock().unwrap();
+        stop_toggle("v5");
+        CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
+        let generation = start_toggle("v5").expect("the first Crystal press should latch");
+        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), generation);
+
+        let busy = Busy::enter(&CRYSTAL_BUSY).expect("test should own the Crystal gate");
+        let mut restored = false;
+        assert!(!try_restore_crystal_toggle_return(generation, || {
+            restored = true;
+        }));
+        assert!(!restored, "a busy action must not run the restore");
+        assert_eq!(
+            CRYSTAL_RETURN_GEN.load(Ordering::SeqCst),
+            generation,
+            "the pending request must remain after a failed Busy enter"
+        );
+
+        drop(busy);
+        assert!(try_restore_crystal_toggle_return(generation, || {
+            restored = true;
+        }));
+        assert!(restored);
+        assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), 0);
+    }
+
+    #[test]
+    fn starting_a_new_crystal_cycle_cancels_a_stale_restore() {
+        let _guard = CRYSTAL_TEST_LOCK.lock().unwrap();
+        stop_toggle("v5");
+        CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
+        let generation = start_toggle("v5").expect("the first Crystal press should latch");
+        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), generation);
+
+        assert!(start_toggle("v5").is_some(), "the next press starts a new cycle");
+        assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), 0);
+        stop_toggle("v5");
+    }
+
+    #[test]
+    fn assigning_xbutton1_to_anchor_routes_it_to_anchor() {
+        let mut s = Settings::default();
+        s.set_binding("v6Bn", "XButton1");
+        let map = TriggerMap::build(&s);
+        assert_eq!(map.get(Ev::M(Btn::X1)), Some(Action::Anchor));
+    }
+
+    #[test]
+    fn legacy_duplicate_binding_uses_the_later_module() {
+        // Simulate the old UI accepting Anchor=XButton1 without clearing the
+        // default Breach bind. The hook must still route the key to Anchor.
+        let mut s = Settings::default();
+        s.anchor_key = "XButton1".into();
+        let map = TriggerMap::build(&s);
+        assert_eq!(map.get(Ev::M(Btn::X1)), Some(Action::Anchor));
+        assert_eq!(scan_action(&s, Ev::M(Btn::X1)), Some(Action::Anchor));
     }
 
     #[test]
