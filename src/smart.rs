@@ -113,7 +113,11 @@ pub fn load_profile() {
 
 fn learned(i: usize) -> Option<i32> {
     let value = learned_slots()[i].load(Ordering::Relaxed);
-    if value > 0 { Some(value) } else { None }
+    if value > 0 {
+        Some(value)
+    } else {
+        None
+    }
 }
 
 /// A bounded EWMA with a warm-up phase. The first few samples adapt quickly;

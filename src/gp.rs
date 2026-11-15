@@ -56,7 +56,9 @@ pub static MISSING: std::sync::Mutex<Option<&'static str>> = std::sync::Mutex::n
 
 pub fn missing() -> String {
     match MISSING.lock() {
-        Ok(g) => g.map(|s| s.to_string()).unwrap_or_else(|| "startup".to_string()),
+        Ok(g) => g
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| "startup".to_string()),
         Err(_) => "mutex".to_string(),
     }
 }
@@ -309,7 +311,16 @@ impl Canvas {
 
     pub fn circle(&mut self, cx: f32, cy: f32, radius: f32, color: u32) {
         self.fill_color(color);
-        unsafe { (api().GdipFillEllipse)(self.g, self.brush, cx - radius, cy - radius, radius * 2.0, radius * 2.0) };
+        unsafe {
+            (api().GdipFillEllipse)(
+                self.g,
+                self.brush,
+                cx - radius,
+                cy - radius,
+                radius * 2.0,
+                radius * 2.0,
+            )
+        };
     }
 
     pub fn line(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, color: u32, width: f32) {
@@ -327,22 +338,37 @@ impl Canvas {
         let p = self.reset_path();
         unsafe {
             (api.GdipAddPathBezier)(
-                p, cx, top,
-                cx - w * 0.06, top + h * 0.26,
-                cx - hw, top + h * 0.44,
-                cx - hw, top + h * 0.64,
+                p,
+                cx,
+                top,
+                cx - w * 0.06,
+                top + h * 0.26,
+                cx - hw,
+                top + h * 0.44,
+                cx - hw,
+                top + h * 0.64,
             );
             (api.GdipAddPathBezier)(
-                p, cx - hw, top + h * 0.64,
-                cx - hw, top + h * 1.08,
-                cx + hw, top + h * 1.08,
-                cx + hw, top + h * 0.64,
+                p,
+                cx - hw,
+                top + h * 0.64,
+                cx - hw,
+                top + h * 1.08,
+                cx + hw,
+                top + h * 1.08,
+                cx + hw,
+                top + h * 0.64,
             );
             (api.GdipAddPathBezier)(
-                p, cx + hw, top + h * 0.64,
-                cx + hw, top + h * 0.44,
-                cx + w * 0.06, top + h * 0.26,
-                cx, top,
+                p,
+                cx + hw,
+                top + h * 0.64,
+                cx + hw,
+                top + h * 0.44,
+                cx + w * 0.06,
+                top + h * 0.26,
+                cx,
+                top,
             );
             (api.GdipClosePathFigure)(p);
             self.fill_color(color);
@@ -352,7 +378,16 @@ impl Canvas {
 
     /// Tinted water droplet with a crisp outline: the quiet panel mark.
     /// Shares the silhouette of [`Canvas::drop`].
-    pub fn drop_mark(&mut self, cx: f32, top: f32, w: f32, h: f32, fill: u32, line: u32, width: f32) {
+    pub fn drop_mark(
+        &mut self,
+        cx: f32,
+        top: f32,
+        w: f32,
+        h: f32,
+        fill: u32,
+        line: u32,
+        width: f32,
+    ) {
         if w <= 0.0 || h <= 0.0 {
             return;
         }
@@ -361,22 +396,37 @@ impl Canvas {
         let p = self.reset_path();
         unsafe {
             (api.GdipAddPathBezier)(
-                p, cx, top,
-                cx - w * 0.06, top + h * 0.26,
-                cx - hw, top + h * 0.44,
-                cx - hw, top + h * 0.64,
+                p,
+                cx,
+                top,
+                cx - w * 0.06,
+                top + h * 0.26,
+                cx - hw,
+                top + h * 0.44,
+                cx - hw,
+                top + h * 0.64,
             );
             (api.GdipAddPathBezier)(
-                p, cx - hw, top + h * 0.64,
-                cx - hw, top + h * 1.08,
-                cx + hw, top + h * 1.08,
-                cx + hw, top + h * 0.64,
+                p,
+                cx - hw,
+                top + h * 0.64,
+                cx - hw,
+                top + h * 1.08,
+                cx + hw,
+                top + h * 1.08,
+                cx + hw,
+                top + h * 0.64,
             );
             (api.GdipAddPathBezier)(
-                p, cx + hw, top + h * 0.64,
-                cx + hw, top + h * 0.44,
-                cx + w * 0.06, top + h * 0.26,
-                cx, top,
+                p,
+                cx + hw,
+                top + h * 0.64,
+                cx + hw,
+                top + h * 0.44,
+                cx + w * 0.06,
+                top + h * 0.26,
+                cx,
+                top,
             );
             (api.GdipClosePathFigure)(p);
             self.fill_color(fill);
@@ -386,7 +436,17 @@ impl Canvas {
         }
     }
 
-    pub fn text(&mut self, s: &str, x: f32, y: f32, w: f32, h: f32, font: Gp, color: u32, align: i32) {
+    pub fn text(
+        &mut self,
+        s: &str,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        font: Gp,
+        color: u32,
+        align: i32,
+    ) {
         if s.is_empty() {
             return;
         }
@@ -496,10 +556,15 @@ impl Fonts {
         let wide: Vec<u16> = name.encode_utf16().chain(std::iter::once(0)).collect();
         unsafe {
             let mut fam: Gp = std::ptr::null_mut();
-            if (api.GdipCreateFontFamilyFromName)(wide.as_ptr(), std::ptr::null_mut(), &mut fam) != 0 {
+            if (api.GdipCreateFontFamilyFromName)(wide.as_ptr(), std::ptr::null_mut(), &mut fam)
+                != 0
+            {
                 return None;
             }
-            Some(Fonts { family: fam, cache: Vec::new() })
+            Some(Fonts {
+                family: fam,
+                cache: Vec::new(),
+            })
         }
     }
 
@@ -516,7 +581,14 @@ impl Fonts {
         let api = api();
         unsafe {
             let mut f: Gp = std::ptr::null_mut();
-            if (api.GdipCreateFont)(self.family, px, if bold { FONT_BOLD } else { FONT_REGULAR }, UNIT_PIXEL, &mut f) != 0 {
+            if (api.GdipCreateFont)(
+                self.family,
+                px,
+                if bold { FONT_BOLD } else { FONT_REGULAR },
+                UNIT_PIXEL,
+                &mut f,
+            ) != 0
+            {
                 return std::ptr::null_mut();
             }
             self.cache.push((key, f));
@@ -575,7 +647,14 @@ impl BackBuffer {
                 return None;
             }
             let old = win::SelectObject(dc, bmp);
-            Some(BackBuffer { dc, bmp, old, bits: bits as *mut u32, w, h })
+            Some(BackBuffer {
+                dc,
+                bmp,
+                old,
+                bits: bits as *mut u32,
+                w,
+                h,
+            })
         }
     }
 

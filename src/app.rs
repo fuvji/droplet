@@ -67,7 +67,8 @@ impl Engine {
         // settings publish, never on the input-hook hot path.
         *self.triggers.write().unwrap() = Arc::new(macros::TriggerMap::build(&s));
         self.focus_only.store(s.focus_only, Ordering::Relaxed);
-        self.sprint_on.store(s.master && s.sprint, Ordering::Relaxed);
+        self.sprint_on
+            .store(s.master && s.sprint, Ordering::Relaxed);
         self.totem_on.store(s.master && s.totem, Ordering::Relaxed);
         wake_sprint();
         *self.st.write().unwrap() = Arc::new(s);
@@ -261,7 +262,11 @@ impl App {
                 shared: &mut self.shared,
                 acts: Vec::new(),
                 timer_100ns: TIMER_100NS.load(Ordering::Relaxed),
-                priority: if REALTIME_ACTIVE.load(Ordering::Relaxed) { "Realtime" } else { "High" },
+                priority: if REALTIME_ACTIVE.load(Ordering::Relaxed) {
+                    "Realtime"
+                } else {
+                    "High"
+                },
             };
             ui.frame();
             acts = std::mem::take(&mut ui.acts);
@@ -338,7 +343,11 @@ impl App {
                 }
                 Act::Mode(k) => {
                     macros::stop_toggle(macros::mode_module(k));
-                    let next = if self.settings.mode_is_toggle(k) { "hold" } else { "toggle" };
+                    let next = if self.settings.mode_is_toggle(k) {
+                        "hold"
+                    } else {
+                        "toggle"
+                    };
                     self.settings.set_str(k, next);
                     self.changed();
                 }
@@ -442,7 +451,11 @@ impl App {
         self.destructed = true;
 
         let packaged = std::env::current_exe()
-            .map(|p| p.to_string_lossy().to_ascii_lowercase().contains("\\windowsapps\\"))
+            .map(|p| {
+                p.to_string_lossy()
+                    .to_ascii_lowercase()
+                    .contains("\\windowsapps\\")
+            })
             .unwrap_or(false);
         if packaged {
             // MSIX install files live in a read-only WindowsApps directory and
@@ -469,10 +482,7 @@ impl App {
     // ------------------------------------------------------------ geometry
 
     fn pixel_size(&self) -> (i32, i32) {
-        (
-            (ui::WIN_W * self.dpi) as i32,
-            (ui::WIN_H * self.dpi) as i32,
-        )
+        ((ui::WIN_W * self.dpi) as i32, (ui::WIN_H * self.dpi) as i32)
     }
 
     fn on_pointer(&mut self, lp: LPARAM) {
@@ -550,7 +560,14 @@ impl App {
         }
         let (w, h) = self.pixel_size();
         let mut wa = RECT::default();
-        unsafe { win::SystemParametersInfoW(win::SPI_GETWORKAREA, 0, &mut wa as *mut RECT as *mut c_void, 0) };
+        unsafe {
+            win::SystemParametersInfoW(
+                win::SPI_GETWORKAREA,
+                0,
+                &mut wa as *mut RECT as *mut c_void,
+                0,
+            )
+        };
         let (mut x, mut y) = if self.settings.win_x >= 0 && self.settings.win_y >= 0 {
             (self.settings.win_x, self.settings.win_y)
         } else {
@@ -715,12 +732,25 @@ unsafe fn shell_exec_hidden(file: &str, params: &str) {
     if p == 0 {
         return;
     }
-    let f: unsafe extern "system" fn(HWND, *const u16, *const u16, *const u16, *const u16, i32) -> isize =
-        std::mem::transmute(p);
+    let f: unsafe extern "system" fn(
+        HWND,
+        *const u16,
+        *const u16,
+        *const u16,
+        *const u16,
+        i32,
+    ) -> isize = std::mem::transmute(p);
     let op = win::wide("open");
     let program = win::wide(file);
     let args = win::wide(params);
-    f(0, op.as_ptr(), program.as_ptr(), args.as_ptr(), std::ptr::null(), 0);
+    f(
+        0,
+        op.as_ptr(),
+        program.as_ptr(),
+        args.as_ptr(),
+        std::ptr::null(),
+        0,
+    );
 }
 
 // --------------------------------------------------------------- wndproc
@@ -779,8 +809,7 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
             // A button-up can be lost when capture changes or the pointer
             // leaves the window. A stale slider drag would otherwise keep
             // following the mouse with no button held.
-            if (app.drag.is_some() || app.down || app.shared.drag.is_some())
-                && !win::is_down(0x01)
+            if (app.drag.is_some() || app.down || app.shared.drag.is_some()) && !win::is_down(0x01)
             {
                 app.release_pointer();
             }
@@ -958,29 +987,31 @@ unsafe extern "system" fn kb_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
     // backslash: tap toggles the master switch, one second hold self-destructs
     if vk == 0xDC {
         if !SD_ACTIVE.swap(true, Ordering::SeqCst) {
-            let _ = std::thread::Builder::new().stack_size(64 * 1024).spawn(move || {
-                let start = input::now();
-                let freq = input::qpf() as f64;
-                let mut progress: u32;
-                loop {
-                    let elapsed = (input::now() - start) as f64 / freq;
-                    progress = ((elapsed / 1.0) * 1000.0).clamp(0.0, 1000.0) as u32;
-                    SD_PROGRESS.store(progress, Ordering::Relaxed);
-                    win::PostMessageW(hwnd, win::WM_APP_TICK, 0, 0);
-                    if elapsed >= 1.0 || !input::raw_down(Ev::K(0xDC)) {
-                        break;
+            let _ = std::thread::Builder::new()
+                .stack_size(64 * 1024)
+                .spawn(move || {
+                    let start = input::now();
+                    let freq = input::qpf() as f64;
+                    let mut progress: u32;
+                    loop {
+                        let elapsed = (input::now() - start) as f64 / freq;
+                        progress = ((elapsed / 1.0) * 1000.0).clamp(0.0, 1000.0) as u32;
+                        SD_PROGRESS.store(progress, Ordering::Relaxed);
+                        win::PostMessageW(hwnd, win::WM_APP_TICK, 0, 0);
+                        if elapsed >= 1.0 || !input::raw_down(Ev::K(0xDC)) {
+                            break;
+                        }
+                        input::sleep_ms(40.0);
                     }
-                    input::sleep_ms(40.0);
-                }
-                SD_PROGRESS.store(0, Ordering::Relaxed);
-                SD_ACTIVE.store(false, Ordering::SeqCst);
-                win::PostMessageW(hwnd, win::WM_APP_TICK, 0, 0);
-                if progress >= 1000 {
-                    win::PostMessageW(hwnd, win::WM_APP_DESTRUCT, 0, 0);
-                } else if progress < 400 {
-                    win::PostMessageW(hwnd, win::WM_APP_MASTER, 0, 0);
-                }
-            });
+                    SD_PROGRESS.store(0, Ordering::Relaxed);
+                    SD_ACTIVE.store(false, Ordering::SeqCst);
+                    win::PostMessageW(hwnd, win::WM_APP_TICK, 0, 0);
+                    if progress >= 1000 {
+                        win::PostMessageW(hwnd, win::WM_APP_DESTRUCT, 0, 0);
+                    } else if progress < 400 {
+                        win::PostMessageW(hwnd, win::WM_APP_MASTER, 0, 0);
+                    }
+                });
         }
         return win::CallNextHookEx(0, code, wp, lp);
     }
@@ -1015,11 +1046,19 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
         win::WM_MBUTTONDOWN => (Btn::Middle, true),
         win::WM_MBUTTONUP => (Btn::Middle, false),
         0x020B => (
-            if (info.mouseData >> 16) == 1 { Btn::X1 } else { Btn::X2 },
+            if (info.mouseData >> 16) == 1 {
+                Btn::X1
+            } else {
+                Btn::X2
+            },
             true,
         ),
         0x020C => (
-            if (info.mouseData >> 16) == 1 { Btn::X1 } else { Btn::X2 },
+            if (info.mouseData >> 16) == 1 {
+                Btn::X1
+            } else {
+                Btn::X2
+            },
             false,
         ),
         _ => return win::CallNextHookEx(0, code, wp, lp),
@@ -1053,7 +1092,10 @@ unsafe extern "system" fn ms_hook(code: i32, wp: WPARAM, lp: LPARAM) -> LRESULT 
 // -------------------------------------------------------------- discovery
 
 fn process_leaf(image: &str) -> &str {
-    image.rsplit(|c| c == '\\' || c == '/').next().unwrap_or(image)
+    image
+        .rsplit(|c| c == '\\' || c == '/')
+        .next()
+        .unwrap_or(image)
 }
 
 /// Keep the pointer in the same physical space as the painted rects. Dividing
@@ -1062,11 +1104,7 @@ fn process_leaf(image: &str) -> &str {
 fn pointer_state(x: i32, y: i32, dpi: f32) -> (f32, f32, bool) {
     let w = (ui::WIN_W * dpi) as i32;
     let h = (ui::WIN_H * dpi) as i32;
-    (
-        x as f32,
-        y as f32,
-        x >= 0 && y >= 0 && x < w && y < h,
-    )
+    (x as f32, y as f32, x >= 0 && y >= 0 && x < w && y < h)
 }
 
 /// True only in the transparent quarter-rounds DWM clips at the panel edge.
@@ -1131,11 +1169,9 @@ fn game_window_matches(image: &str, class: &str, title: &str) -> bool {
         return false;
     }
 
-    let game_class =
-        class.starts_with("glfw") || class == "lwjgl" || class.contains("minecraft");
-    let game_title = title.contains("minecraft")
-        || title.contains("lunar client")
-        || title.contains("badlion");
+    let game_class = class.starts_with("glfw") || class == "lwjgl" || class.contains("minecraft");
+    let game_title =
+        title.contains("minecraft") || title.contains("lunar client") || title.contains("badlion");
     game_class || game_title
 }
 
@@ -1259,8 +1295,7 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
     thread::spawn(move || {
         let probe = Probe::new();
         while !e.quitting.load(Ordering::Relaxed) {
-            let armed = e.totem_on.load(Ordering::Relaxed)
-                && e.focus.load(Ordering::Relaxed);
+            let armed = e.totem_on.load(Ordering::Relaxed) && e.focus.load(Ordering::Relaxed);
             if armed {
                 if let Some(p) = &probe {
                     // Sample first; the settings lock is only needed on an
@@ -1283,8 +1318,7 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
     thread::spawn(move || {
         let _ = SPRINT_WAIT.set(thread::current());
         while !e.quitting.load(Ordering::Relaxed) {
-            let armed = e.gate.load(Ordering::Relaxed)
-                && e.sprint_on.load(Ordering::Relaxed);
+            let armed = e.gate.load(Ordering::Relaxed) && e.sprint_on.load(Ordering::Relaxed);
             if armed && input::physical_down(Ev::K(0x57)) {
                 // Most 8 ms polls are not due. Check the deadline before
                 // cloning the settings snapshot or taking its lock.
@@ -1380,12 +1414,27 @@ fn apply_priority(on: bool) {
 fn apply_timer(on: bool) {
     unsafe {
         let ntdll = win::dyn_load("ntdll.dll");
-        let query = if ntdll != 0 { win::load_proc(ntdll, "NtQueryTimerResolution") } else { 0 };
-        let set = if ntdll != 0 { win::load_proc(ntdll, "NtSetTimerResolution") } else { 0 };
+        let query = if ntdll != 0 {
+            win::load_proc(ntdll, "NtQueryTimerResolution")
+        } else {
+            0
+        };
+        let set = if ntdll != 0 {
+            win::load_proc(ntdll, "NtSetTimerResolution")
+        } else {
+            0
+        };
         let query: Option<unsafe extern "system" fn(*mut u32, *mut u32, *mut u32) -> i32> =
-            if query != 0 { Some(std::mem::transmute(query)) } else { None };
-        let set: Option<unsafe extern "system" fn(u32, u8, *mut u32) -> i32> =
-            if set != 0 { Some(std::mem::transmute(set)) } else { None };
+            if query != 0 {
+                Some(std::mem::transmute(query))
+            } else {
+                None
+            };
+        let set: Option<unsafe extern "system" fn(u32, u8, *mut u32) -> i32> = if set != 0 {
+            Some(std::mem::transmute(set))
+        } else {
+            None
+        };
 
         if on {
             time_begin_period(1);
@@ -1418,7 +1467,10 @@ fn apply_timer(on: bool) {
             if let Some(q) = query {
                 let _ = q(&mut min, &mut max, &mut current);
             }
-            TIMER_100NS.store(if current > 0 { current } else { 156_250 }, Ordering::Relaxed);
+            TIMER_100NS.store(
+                if current > 0 { current } else { 156_250 },
+                Ordering::Relaxed,
+            );
         }
     }
 }
@@ -1433,7 +1485,11 @@ fn apply_low_latency(on: bool) {
             if h != 0 {
                 win::SetThreadPriority(
                     h,
-                    if on { win::THREAD_PRIORITY_TIME_CRITICAL } else { win::THREAD_PRIORITY_NORMAL },
+                    if on {
+                        win::THREAD_PRIORITY_TIME_CRITICAL
+                    } else {
+                        win::THREAD_PRIORITY_NORMAL
+                    },
                 );
                 win::CloseHandle(h);
             }
@@ -1450,16 +1506,36 @@ unsafe fn open_url(url: &str) {
     if p == 0 {
         return;
     }
-    let f: unsafe extern "system" fn(HWND, *const u16, *const u16, *const u16, *const u16, i32) -> isize =
-        std::mem::transmute(p);
+    let f: unsafe extern "system" fn(
+        HWND,
+        *const u16,
+        *const u16,
+        *const u16,
+        *const u16,
+        i32,
+    ) -> isize = std::mem::transmute(p);
     let op = win::wide("open");
     let u = win::wide(url);
-    let opened = f(0, op.as_ptr(), u.as_ptr(), std::ptr::null(), std::ptr::null(), 1);
+    let opened = f(
+        0,
+        op.as_ptr(),
+        u.as_ptr(),
+        std::ptr::null(),
+        std::ptr::null(),
+        1,
+    );
     if opened <= 32 {
         // A shell association can be missing or broken. Hand the URL to
         // Explorer explicitly so the click still reaches the default browser.
         let explorer = win::wide("explorer.exe");
-        f(0, op.as_ptr(), explorer.as_ptr(), u.as_ptr(), std::ptr::null(), 1);
+        f(
+            0,
+            op.as_ptr(),
+            explorer.as_ptr(),
+            u.as_ptr(),
+            std::ptr::null(),
+            1,
+        );
     }
 }
 
@@ -1557,10 +1633,8 @@ pub fn run() {
         }
 
         let title = win::wide("Droplet");
-        let ex_style = win::WS_EX_TOPMOST
-            | win::WS_EX_TOOLWINDOW
-            | win::WS_EX_NOACTIVATE
-            | win::WS_EX_LAYERED;
+        let ex_style =
+            win::WS_EX_TOPMOST | win::WS_EX_TOOLWINDOW | win::WS_EX_NOACTIVATE | win::WS_EX_LAYERED;
         let hwnd = win::CreateWindowExW(
             ex_style,
             class.as_ptr(),
@@ -1581,16 +1655,32 @@ pub fn run() {
 
         let dpi = {
             let d = win::GetDpiForWindow(hwnd);
-            if d == 0 { 1.0 } else { d as f32 / 96.0 }
+            if d == 0 {
+                1.0
+            } else {
+                d as f32 / 96.0
+            }
         };
         let (w, h) = ((ui::WIN_W * dpi) as i32, (ui::WIN_H * dpi) as i32);
-        win::SetWindowPos(hwnd, 0, 0, 0, w, h, win::SWP_NOMOVE | win::SWP_NOZORDER | win::SWP_NOACTIVATE);
+        win::SetWindowPos(
+            hwnd,
+            0,
+            0,
+            0,
+            w,
+            h,
+            win::SWP_NOMOVE | win::SWP_NOZORDER | win::SWP_NOACTIVATE,
+        );
 
         // Desktop acrylic is composited by DWM, so it stays off the app's
         // paint thread. The window alpha is what lets the blur read through
         // the dark panel; without it the opaque back buffer would hide it.
         let acrylic = apply_acrylic(hwnd);
-        let alpha = if acrylic != "none" { ACRYLIC_ALPHA } else { 255 };
+        let alpha = if acrylic != "none" {
+            ACRYLIC_ALPHA
+        } else {
+            255
+        };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
         // Prefer DWM's compositor-rounded corner on Windows 11: it is

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.10.11
+
+- Format the complete source tree with rustfmt and make `cargo fmt --check`
+  clean without changing runtime behavior.
+- Normalize duplicate legacy trigger bindings on config load. The later module
+  keeps the input, matching the last-wins runtime router, so the painted chips
+  and hook behavior agree and Anchor's `XButton1` assignment is unambiguous.
+- Generate all four site captures from an isolated, deterministic profile so
+  published screenshots do not inherit a developer's local settings or a stale
+  duplicate binding. Anchor is shown on `XButton1`; Breach's old owner is cleared.
+- Tests: **38 / 38**. Portable executable: **547,840 bytes**, SHA-256
+  `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.10
 
 - Hold the Crystal busy gate before consuming a toggle-off Return request. A

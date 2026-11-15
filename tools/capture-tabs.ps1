@@ -12,6 +12,26 @@ if (-not (Test-Path -LiteralPath $exe)) {
 $out = Join-Path $root $OutDir
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 
+# Capture from a fresh, isolated profile. Using the caller's real config makes
+# the published images depend on whatever bindings and toggles happen to be on
+# this machine (and can preserve a legacy duplicate binding). The seeded
+# profile makes every capture deterministic and demonstrates Anchor ownership
+# of XButton1; normalize_bindings clears the old Breach owner on load.
+$captureRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("droplet-capture-" + [Guid]::NewGuid().ToString("N"))
+$captureData = Join-Path $captureRoot "Droplet"
+New-Item -ItemType Directory -Force -Path $captureData | Out-Null
+Set-Content -LiteralPath (Join-Path $captureData "config.ini") -Encoding ASCII -Value @"
+[T]
+v0=1
+vP=1
+v6Bn=XButton1
+"@
+$savedEnv = @{
+    LOCALAPPDATA = $env:LOCALAPPDATA
+    TEMP = $env:TEMP
+    TMP = $env:TMP
+}
+
 Add-Type -AssemblyName System.Drawing
 Add-Type @"
 using System;
@@ -118,8 +138,12 @@ function Click-Tab([IntPtr]$Hwnd, [int]$X, [int]$Y) {
 # 120-DPI panel back to 624x408 and clips the capture.
 [DropletTabs]::SetThreadDpiAwarenessContext([IntPtr](-4)) | Out-Null
 
-$process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
+$process = $null
 try {
+    $env:LOCALAPPDATA = $captureRoot
+    $env:TEMP = $captureRoot
+    $env:TMP = $captureRoot
+    $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
     Start-Sleep -Seconds 2
     $hwnd = [DropletTabs]::FindWindow('DropletOverlay', 'Droplet')
     if ($hwnd -eq [IntPtr]::Zero) {
@@ -163,7 +187,15 @@ try {
         Write-Output "Captured $($tab.Name)"
     }
 } finally {
-    if (-not $process.HasExited) {
-        Stop-Process -Id $process.Id
+    if ($null -ne $process -and -not $process.HasExited) {
+        Stop-Process -Id $process.Id -PassThru | Wait-Process -Timeout 5 -ErrorAction SilentlyContinue
     }
+    foreach ($name in $savedEnv.Keys) {
+        if ($null -eq $savedEnv[$name]) {
+            Remove-Item "Env:$name" -ErrorAction SilentlyContinue
+        } else {
+            Set-Item "Env:$name" $savedEnv[$name]
+        }
+    }
+    Remove-Item -LiteralPath $captureRoot -Recurse -Force -ErrorAction SilentlyContinue
 }

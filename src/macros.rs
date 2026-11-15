@@ -42,7 +42,11 @@ pub const SPRINT_IDLE_MS: u64 = 100;
 /// watcher wakes at the cooldown interval instead of 125 times per second.
 #[inline]
 pub fn sprint_wait_ms(armed: bool) -> u64 {
-    if armed { SPRINT_TICK_MS } else { SPRINT_IDLE_MS }
+    if armed {
+        SPRINT_TICK_MS
+    } else {
+        SPRINT_IDLE_MS
+    }
 }
 
 // Toggle mode is a single latched worker per module, not a thread per press.
@@ -95,11 +99,15 @@ fn toggle_slot(module: &str) -> Option<usize> {
 }
 
 pub fn toggle_active(module: &str) -> bool {
-    toggle_slot(module).map(|i| TOGGLE_ON[i].load(Ordering::Relaxed)).unwrap_or(false)
+    toggle_slot(module)
+        .map(|i| TOGGLE_ON[i].load(Ordering::Relaxed))
+        .unwrap_or(false)
 }
 
 fn toggle_generation_is(module: &str, generation: u64) -> bool {
-    toggle_slot(module).map(|i| TOGGLE_GEN[i].load(Ordering::SeqCst) == generation).unwrap_or(false)
+    toggle_slot(module)
+        .map(|i| TOGGLE_GEN[i].load(Ordering::SeqCst) == generation)
+        .unwrap_or(false)
 }
 
 fn request_crystal_toggle_return(generation: u64) {
@@ -153,7 +161,9 @@ fn repaint() {
 
 fn start_toggle(module: &'static str) -> Option<u64> {
     let slot = toggle_slot(module)?;
-    let generation = TOGGLE_GEN[slot].fetch_add(1, Ordering::SeqCst).wrapping_add(1);
+    let generation = TOGGLE_GEN[slot]
+        .fetch_add(1, Ordering::SeqCst)
+        .wrapping_add(1);
     if TOGGLE_ON[slot].swap(true, Ordering::SeqCst) {
         TOGGLE_ON[slot].store(false, Ordering::SeqCst);
         if module == "v5" {
@@ -334,13 +344,21 @@ fn hit(binding: &str, ev: Ev) -> bool {
 /// The latch flag is passed to the action so hold-gated modules (Fast Use,
 /// Potion, Pearl, Shield, Crystal) repeat instead of idling on a key that is
 /// already up by the time the worker starts.
-fn fire(s: &Arc<Settings>, ev: Ev, mode_key: &'static str, module: &'static str, f: fn(&Settings, Ev, bool)) {
+fn fire(
+    s: &Arc<Settings>,
+    ev: Ev,
+    mode_key: &'static str,
+    module: &'static str,
+    f: fn(&Settings, Ev, bool),
+) {
     smart::on_trigger(module);
     if s.mode_is_toggle(mode_key) {
         if !s.master || !s.bool_at(module) {
             return;
         }
-        let Some(generation) = start_toggle(module) else { return; };
+        let Some(generation) = start_toggle(module) else {
+            return;
+        };
         let s = s.clone();
         let _ = std::thread::Builder::new()
             .stack_size(96 * 1024)
@@ -438,7 +456,9 @@ impl TriggerMap {
     }
 
     fn bind(&mut self, binding: &str, action: Action) {
-        let Some(ev) = keys::ev(binding) else { return; };
+        let Some(ev) = keys::ev(binding) else {
+            return;
+        };
         // Last configured binding wins. The UI also clears the previous owner
         // in `set_binding`, but an older INI can still contain a duplicate
         // (Breach's XButton1 default plus an Anchor bind). Last-wins makes that
@@ -466,7 +486,9 @@ impl TriggerMap {
 
 /// Route a raw input event to whichever module owns that binding.
 pub fn trigger(ev: Ev, s: &Arc<Settings>, map: &TriggerMap) {
-    let Some(action) = map.get(ev) else { return; };
+    let Some(action) = map.get(ev) else {
+        return;
+    };
     match action {
         Action::Dash => fire(s, ev, "vDMd", "vD", dash),
         Action::Shield => fire(s, ev, "v1Md", "v1", shield),
@@ -1034,10 +1056,7 @@ mod tests {
         // restores. Short repeat-loop press: still below the threshold. Hold:
         // reaches the threshold. Long tap: still does not restore.
         assert!(!crystal_hold_ready(false, elapsed_ms(0, 500_000, QPF)));
-        assert!(!crystal_hold_ready(
-            true,
-            elapsed_ms(0, 1_590_000, QPF)
-        ));
+        assert!(!crystal_hold_ready(true, elapsed_ms(0, 1_590_000, QPF)));
         assert!(crystal_hold_ready(true, elapsed_ms(0, 1_600_000, QPF)));
         assert!(!crystal_hold_ready(false, elapsed_ms(0, 5_000_000, QPF)));
         assert_eq!(elapsed_ms(0, 1_600_000, QPF), CRYSTAL_HOLD_MS);
@@ -1049,7 +1068,10 @@ mod tests {
         stop_toggle("v5");
         CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
         let generation = start_toggle("v5").expect("the first Crystal press should latch");
-        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert!(
+            start_toggle("v5").is_none(),
+            "the second press should unlatch"
+        );
         assert!(take_crystal_toggle_return(generation));
         assert!(!take_crystal_toggle_return(generation));
         assert!(!take_crystal_toggle_return(generation.wrapping_add(1)));
@@ -1061,7 +1083,10 @@ mod tests {
         stop_toggle("v5");
         CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
         let generation = start_toggle("v5").expect("the first Crystal press should latch");
-        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert!(
+            start_toggle("v5").is_none(),
+            "the second press should unlatch"
+        );
         assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), generation);
 
         let busy = Busy::enter(&CRYSTAL_BUSY).expect("test should own the Crystal gate");
@@ -1090,10 +1115,16 @@ mod tests {
         stop_toggle("v5");
         CRYSTAL_RETURN_GEN.store(0, Ordering::SeqCst);
         let generation = start_toggle("v5").expect("the first Crystal press should latch");
-        assert!(start_toggle("v5").is_none(), "the second press should unlatch");
+        assert!(
+            start_toggle("v5").is_none(),
+            "the second press should unlatch"
+        );
         assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), generation);
 
-        assert!(start_toggle("v5").is_some(), "the next press starts a new cycle");
+        assert!(
+            start_toggle("v5").is_some(),
+            "the next press starts a new cycle"
+        );
         assert_eq!(CRYSTAL_RETURN_GEN.load(Ordering::SeqCst), 0);
         stop_toggle("v5");
     }
@@ -1179,8 +1210,7 @@ mod tests {
     #[test]
     fn toggle_slots_cover_every_mode_key_once() {
         let mode_keys = [
-            "vDMd", "v1Md", "v2Md", "v3Md", "v4Md", "v5Md", "v6Md", "v7Md", "v8Md",
-            "vABMd", "vWMd",
+            "vDMd", "v1Md", "v2Md", "v3Md", "v4Md", "v5Md", "v6Md", "v7Md", "v8Md", "vABMd", "vWMd",
         ];
         let mut slots = Vec::new();
         for key in mode_keys {

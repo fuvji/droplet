@@ -15,8 +15,12 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.10 portable exe: 547,328 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 37 / 37.
+- 2.10.11 portable exe: 547,840 bytes. Single artifact; no MSIX/AppX or ZIP.
+- Tests: 38 / 38.
+- The full source tree is rustfmt-clean. Duplicate legacy trigger bindings are
+  normalized on load so the later module owns the input, matching runtime
+  last-wins routing. The four site captures use an isolated deterministic
+  profile; Anchor is shown on `XButton1` and the old Breach owner is cleared.
 - Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
   160 ms or a toggle-off restores it once; a short tap does not. The restore
   is a double tap of the Return binding. The toggle-off path acquires
@@ -26,9 +30,10 @@ Canonical site: <https://fuvji.github.io/droplet/>
   hit testing, and clears slider/pointer drag state together. Pointer
   coordinates stay physical, fixing the 125%/150% row and tab offset.
 - Trigger assignments take ownership: a newly assigned trigger clears the
-  previous owner, and legacy duplicates resolve to the later module. This is
-  why Anchor can use `XButton1` although Breach ships with it as a default.
-  Captured keys without a friendly name use `vkXX`, which the parser accepts.
+  previous owner, load-time normalization removes legacy duplicates in the
+  same order, and the later module wins. This is why Anchor can use
+  `XButton1` although Breach ships with it as a default. Captured keys without
+  a friendly name use `vkXX`, which the parser accepts.
 - `tools/check-release.ps1` checks version, artifact size and SHA-256, test
   count, 624×408 captures, workflow hash, and local site links.
 - The self-destruct waiter uses hidden `ShellExecuteW` instead of

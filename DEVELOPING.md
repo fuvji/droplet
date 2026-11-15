@@ -38,7 +38,7 @@ release artifact and site layout.
 
 ## Verification
 
-The release currently carries **37 / 37** tests:
+The release currently carries **38 / 38** tests:
 
 ```powershell
 cargo test --release
@@ -48,8 +48,8 @@ They cover config migration, timing bounds, RGB parsing, trigger-mode
 normalization and latch generations, Auto Crystal's Return default and
 hold-vs-tap policy, busy-safe return ordering, stale-cycle cancellation,
 physical rail hit testing at 125%/150%, the allocation-free binding lookup,
-Rebinding conflict ownership, `XButton1`/Anchor routing, captured-key
-round-trips, Anchor slot validation, W-Tap planning, Sprint's 100 ms deadline,
+rebinding conflict ownership, load-time duplicate cleanup, `XButton1`/Anchor
+routing, captured-key round-trips, Anchor slot validation, W-Tap planning, Sprint's 100 ms deadline,
 cadence adaptation, profile parsing, and trigger-index equivalence plus its
 routing benchmark.
 
@@ -64,12 +64,38 @@ copied executables, SHA256SUMS, the workflow hash, the test count claimed in
 docs, all four 624×408 captures, and local site links. It also runs
 `cargo test --release`. A release check should not use `-SkipTests`.
 
+Captures use a temporary `LOCALAPPDATA` and seeded config; the caller's real
+settings are never read or changed. This keeps the published four-image set
+reproducible and lets the Crystal capture demonstrate Anchor owning `XButton1`
+without carrying a duplicate Breach binding.
+
 Also check:
 
 - `git diff --check`
+- `cargo fmt --check` is clean
 - the product page, `releases.html`, and `sponsors.html` have no console errors
 - the direct `droplet.exe` and `SHA256SUMS.txt` links resolve on the published
   Pages URL, not only locally
+
+## Final handoff
+
+For a complete release pass, run these in order from the repository root:
+
+```powershell
+cargo fmt --check
+cargo test --release
+cargo build --release
+Copy-Item target/x86_64-pc-windows-gnu/release/droplet.exe apps/droplet/droplet.exe
+Copy-Item target/x86_64-pc-windows-gnu/release/droplet.exe site/public/downloads/droplet.exe
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/capture-tabs.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/check-release.ps1
+```
+
+The capture helper uses a temporary profile, so it does not read or rewrite the
+developer's personal `%LOCALAPPDATA%\Droplet` settings. Update the release note,
+site metadata, checksums, workflow hash, and the copied executables whenever the
+version or artifact changes. Preview locally with `tools/serve-site.ps1`; publish
+only the contents of `site/public/` to `gh-pages`.
 
 ## Repository
 

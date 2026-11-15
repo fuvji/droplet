@@ -1,5 +1,15 @@
 # release
 
+## 2.10.11 — 2026-11-15
+
+- Portable exe: 547,840 B,
+  `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`.
+- Tests: 38 / 38.
+- Changes: rustfmt-clean source tree; load-time duplicate trigger binding
+  normalization matching last-wins routing; deterministic isolated capture
+  profile with Anchor on `XButton1`; final image/preview refresh. No CPU,
+  latency, or speedup claim. Live injection remains unverified.
+
 ## 2.10.10 — 2026-11-14
 
 - Portable exe: 547,328 B,

@@ -11,6 +11,14 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.11 changes
+
+- Final handoff only: formatting, load-time cleanup of duplicate legacy trigger
+  bindings, and deterministic capture generation. No runtime, routing, or timing
+  path changed.
+- Tests: 38 / 38. Portable exe: 547,840 B. No CPU, latency, or render-speed
+  benchmark was run, and no speedup is claimed.
+
 ## 2.10.10 changes
 
 - Correctness and input edges, not throughput: the Crystal toggle-off restore

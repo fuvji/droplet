@@ -192,7 +192,17 @@ impl<'a> Ui<'a> {
         self.c.text(s, x, y, w, h, f, color, 0);
     }
 
-    fn label_center(&mut self, x: f32, y: f32, w: f32, h: f32, s: &str, px: f32, bold: bool, color: u32) {
+    fn label_center(
+        &mut self,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
+        s: &str,
+        px: f32,
+        bold: bool,
+        color: u32,
+    ) {
         let sc = self.scale;
         let f = self.f.font(px * sc, bold);
         self.c.text(s, x, y, w, h, f, color, 1);
@@ -234,7 +244,8 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         self.c.rect(0.0, 0.0, WIN_W * s, WIN_H * s, self.th.bg);
         self.c.rect(0.0, 0.0, RAIL_W * s, WIN_H * s, self.th.rail);
-        self.c.rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 8));
+        self.c
+            .rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 8));
         self.header();
         self.rail();
         match self.tab {
@@ -272,9 +283,11 @@ impl<'a> Ui<'a> {
         let hv = self.anim(wid("master", 1), if hot { 1.0 } else { 0.0 });
         let bg = with_alpha(self.th.text, (6.0 + 6.0 * hv) as u8);
         let radius = master.h * 0.5;
-        self.c.round_rect(master.x, master.y, master.w, master.h, radius, bg);
+        self.c
+            .round_rect(master.x, master.y, master.w, master.h, radius, bg);
         let dot = if armed { self.th.accent } else { self.th.faint };
-        self.c.circle(master.x + 13.0 * s, master.y + master.h * 0.5, 2.5 * s, dot);
+        self.c
+            .circle(master.x + 13.0 * s, master.y + master.h * 0.5, 2.5 * s, dot);
         let fg = if armed { self.th.text } else { self.th.dim };
         self.label(
             master.x + 21.0 * s,
@@ -308,13 +321,27 @@ impl<'a> Ui<'a> {
         let id = if glyph == 0 { "min" } else { "close" };
         let hv = self.anim(wid(id, 18), if hot { 1.0 } else { 0.0 });
         if hv > 0.01 {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.text, (12.0 * hv) as u8));
+            self.c.round_rect(
+                r.x,
+                r.y,
+                r.w,
+                r.h,
+                r.h * 0.5,
+                with_alpha(self.th.text, (12.0 * hv) as u8),
+            );
         }
         let color = mix(self.th.faint, self.th.text, hv);
         let cx = r.x + r.w * 0.5;
         let cy = r.y + r.h * 0.5;
         if glyph == 0 {
-            self.c.line(cx - 4.0 * s, cy + 0.5 * s, cx + 4.0 * s, cy + 0.5 * s, color, 1.3 * s);
+            self.c.line(
+                cx - 4.0 * s,
+                cy + 0.5 * s,
+                cx + 4.0 * s,
+                cy + 0.5 * s,
+                color,
+                1.3 * s,
+            );
         } else {
             let d = 3.5 * s;
             self.c.line(cx - d, cy - d, cx + d, cy + d, color, 1.3 * s);
@@ -342,19 +369,37 @@ impl<'a> Ui<'a> {
 
     fn rail(&mut self) {
         let s = self.scale;
-        let items = [("Core", 0usize, 0u8), ("Crystal", 1, 1), ("Assist", 2, 2), ("System", 3, 3)];
+        let items = [
+            ("Core", 0usize, 0u8),
+            ("Crystal", 1, 1),
+            ("Assist", 2, 2),
+            ("System", 3, 3),
+        ];
         for (name, idx, kind) in items {
             let r = rail_rect(idx, s);
             let active = self.tab == idx;
             let hot = self.hovered(r);
             let hv = self.anim(wid(name, 2), if hot { 1.0 } else { 0.0 });
             if active {
-                self.c.round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 7));
-                self.c.round_rect(r.x, r.y + 10.0 * s, 2.0 * s, r.h - 20.0 * s, 1.0 * s, self.th.accent);
+                self.c
+                    .round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 7));
+                self.c.round_rect(
+                    r.x,
+                    r.y + 10.0 * s,
+                    2.0 * s,
+                    r.h - 20.0 * s,
+                    1.0 * s,
+                    self.th.accent,
+                );
             } else if hot {
-                self.c.round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 5));
+                self.c
+                    .round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 5));
             }
-            let tint = if active { self.th.accent } else { mix(self.th.dim, self.th.text, hv * 0.35) };
+            let tint = if active {
+                self.th.accent
+            } else {
+                mix(self.th.dim, self.th.text, hv * 0.35)
+            };
             self.icon(kind, r.x + 10.0 * s, r.y + 10.0 * s, 14.0 * s, tint);
             self.label(
                 r.x + 30.0 * s,
@@ -378,30 +423,101 @@ impl<'a> Ui<'a> {
         match kind {
             0 => {
                 // shield
-                self.c.line(cx, y + 0.5, x + sz - 0.5, y + sz * 0.30, color, w);
-                self.c.line(x + sz - 0.5, y + sz * 0.30, x + sz * 0.84, y + sz * 0.74, color, w);
-                self.c.line(x + sz * 0.84, y + sz * 0.74, cx, y + sz - 0.5, color, w);
-                self.c.line(cx, y + sz - 0.5, x + sz * 0.16, y + sz * 0.74, color, w);
-                self.c.line(x + sz * 0.16, y + sz * 0.74, x + 0.5, y + sz * 0.30, color, w);
+                self.c
+                    .line(cx, y + 0.5, x + sz - 0.5, y + sz * 0.30, color, w);
+                self.c.line(
+                    x + sz - 0.5,
+                    y + sz * 0.30,
+                    x + sz * 0.84,
+                    y + sz * 0.74,
+                    color,
+                    w,
+                );
+                self.c
+                    .line(x + sz * 0.84, y + sz * 0.74, cx, y + sz - 0.5, color, w);
+                self.c
+                    .line(cx, y + sz - 0.5, x + sz * 0.16, y + sz * 0.74, color, w);
+                self.c.line(
+                    x + sz * 0.16,
+                    y + sz * 0.74,
+                    x + 0.5,
+                    y + sz * 0.30,
+                    color,
+                    w,
+                );
                 self.c.line(x + 0.5, y + sz * 0.30, cx, y + 0.5, color, w);
             }
             1 => {
                 // crystal
-                self.c.line(cx, y + 0.5, x + sz * 0.86, y + sz * 0.42, color, w);
-                self.c.line(x + sz * 0.86, y + sz * 0.42, cx, y + sz - 0.5, color, w);
-                self.c.line(cx, y + sz - 0.5, x + sz * 0.14, y + sz * 0.42, color, w);
-                self.c.line(x + sz * 0.14, y + sz * 0.42, cx, y + 0.5, color, w);
-                self.c.line(cx, y + 0.5, cx, y + sz - 0.5, with_alpha(color, 120), 1.0);
+                self.c
+                    .line(cx, y + 0.5, x + sz * 0.86, y + sz * 0.42, color, w);
+                self.c
+                    .line(x + sz * 0.86, y + sz * 0.42, cx, y + sz - 0.5, color, w);
+                self.c
+                    .line(cx, y + sz - 0.5, x + sz * 0.14, y + sz * 0.42, color, w);
+                self.c
+                    .line(x + sz * 0.14, y + sz * 0.42, cx, y + 0.5, color, w);
+                self.c
+                    .line(cx, y + 0.5, cx, y + sz - 0.5, with_alpha(color, 120), 1.0);
             }
             2 => {
                 // pointer
-                self.c.line(x + sz * 0.28, y + 0.5, x + sz * 0.28, y + sz * 0.80, color, w);
-                self.c.line(x + sz * 0.28, y + sz * 0.80, x + sz * 0.44, y + sz * 0.64, color, w);
-                self.c.line(x + sz * 0.44, y + sz * 0.64, x + sz * 0.55, y + sz * 0.92, color, w);
-                self.c.line(x + sz * 0.55, y + sz * 0.92, x + sz * 0.68, y + sz * 0.86, color, w);
-                self.c.line(x + sz * 0.68, y + sz * 0.86, x + sz * 0.57, y + sz * 0.60, color, w);
-                self.c.line(x + sz * 0.57, y + sz * 0.60, x + sz * 0.78, y + sz * 0.57, color, w);
-                self.c.line(x + sz * 0.78, y + sz * 0.57, x + sz * 0.28, y + 0.5, color, w);
+                self.c.line(
+                    x + sz * 0.28,
+                    y + 0.5,
+                    x + sz * 0.28,
+                    y + sz * 0.80,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.28,
+                    y + sz * 0.80,
+                    x + sz * 0.44,
+                    y + sz * 0.64,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.44,
+                    y + sz * 0.64,
+                    x + sz * 0.55,
+                    y + sz * 0.92,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.55,
+                    y + sz * 0.92,
+                    x + sz * 0.68,
+                    y + sz * 0.86,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.68,
+                    y + sz * 0.86,
+                    x + sz * 0.57,
+                    y + sz * 0.60,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.57,
+                    y + sz * 0.60,
+                    x + sz * 0.78,
+                    y + sz * 0.57,
+                    color,
+                    w,
+                );
+                self.c.line(
+                    x + sz * 0.78,
+                    y + sz * 0.57,
+                    x + sz * 0.28,
+                    y + 0.5,
+                    color,
+                    w,
+                );
             }
             _ => {
                 // sliders
@@ -450,10 +566,18 @@ impl<'a> Ui<'a> {
         let hot = self.hovered(r);
         let t = self.anim(wid(key, 11), if on { 1.0 } else { 0.0 });
         let hv = self.anim(wid(key, 12), if hot { 1.0 } else { 0.0 });
-        let track = mix(self.th.track, self.th.text, (0.045 + 0.035 * hv) * (1.0 - t));
+        let track = mix(
+            self.th.track,
+            self.th.text,
+            (0.045 + 0.035 * hv) * (1.0 - t),
+        );
         let track = mix(track, self.th.accent, t);
         self.c.round_rect(r.x, r.y, w, h, h * 0.5, track);
-        let knob = if on { 0xFF07_0708 } else { mix(self.th.dim, self.th.text, 0.35 + 0.65 * hv) };
+        let knob = if on {
+            0xFF07_0708
+        } else {
+            mix(self.th.dim, self.th.text, 0.35 + 0.65 * hv)
+        };
         let kx = r.x + 3.0 * s + (w - 16.0 * s) * t;
         self.c.circle(kx + 5.0 * s, r.y + h * 0.5, 5.0 * s, knob);
         if self.pressed && hot {
@@ -475,8 +599,16 @@ impl<'a> Ui<'a> {
             with_alpha(self.th.text, (5.0 + 6.0 * hv) as u8)
         };
         self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, bg);
-        let text = if listening { "press…" } else { crate::keys::display_ref(binding) };
-        let color = if listening { self.th.accent } else { self.th.text };
+        let text = if listening {
+            "press…"
+        } else {
+            crate::keys::display_ref(binding)
+        };
+        let color = if listening {
+            self.th.accent
+        } else {
+            self.th.text
+        };
         // Long binding names must not bleed into the mode chip beside them.
         self.c.clip(r.x, r.y, r.w, r.h);
         self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 9.0, false, color);
@@ -491,7 +623,14 @@ impl<'a> Ui<'a> {
 
     // ---- rows
 
-    fn row_key(&mut self, card: Rect, i: usize, label: &str, key: &'static str, mode: Option<&'static str>) {
+    fn row_key(
+        &mut self,
+        card: Rect,
+        i: usize,
+        label: &str,
+        key: &'static str,
+        mode: Option<&'static str>,
+    ) {
         let s = self.scale;
         let y = self.row_y(card, i);
         let mode_w = if mode.is_some() { 42.0 * s } else { 0.0 };
@@ -500,10 +639,22 @@ impl<'a> Ui<'a> {
         let kx = card.x + card.w - 10.0 * s - mode_w - gap - key_w;
         // Keep the label inside the space left of the key chips, never under them.
         let label_w = (kx - (card.x + 12.0 * s) - 6.0 * s).max(0.0);
-        self.label(card.x + 12.0 * s, y, label_w, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            label_w,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         self.chip(Rect::new(kx, y + 2.5 * s, key_w, 17.0 * s), key);
         if let Some(mk) = mode {
-            self.mode_chip(Rect::new(kx + key_w + gap, y + 2.5 * s, mode_w, 17.0 * s), mk);
+            self.mode_chip(
+                Rect::new(kx + key_w + gap, y + 2.5 * s, mode_w, 17.0 * s),
+                mk,
+            );
         }
     }
 
@@ -515,17 +666,47 @@ impl<'a> Ui<'a> {
         let hv = self.anim(wid(key, 14), if hot { 1.0 } else { 0.0 });
         let pulse = 0.5 + 0.5 * (self.time * 5.0).sin();
         if live {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.accent, (18.0 + 14.0 * pulse) as u8));
+            self.c.round_rect(
+                r.x,
+                r.y,
+                r.w,
+                r.h,
+                r.h * 0.5,
+                with_alpha(self.th.accent, (18.0 + 14.0 * pulse) as u8),
+            );
         } else if toggle {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.accent, 9));
+            self.c
+                .round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.accent, 9));
         } else if hv > 0.01 {
-            self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, with_alpha(self.th.text, (4.0 * hv) as u8));
+            self.c.round_rect(
+                r.x,
+                r.y,
+                r.w,
+                r.h,
+                r.h * 0.5,
+                with_alpha(self.th.text, (4.0 * hv) as u8),
+            );
         }
-        let color = if toggle { self.th.accent } else { mix(self.th.dim, self.th.text, hv) };
-        let text = if live { "On" } else if toggle { "Toggle" } else { "Hold" };
+        let color = if toggle {
+            self.th.accent
+        } else {
+            mix(self.th.dim, self.th.text, hv)
+        };
+        let text = if live {
+            "On"
+        } else if toggle {
+            "Toggle"
+        } else {
+            "Hold"
+        };
         self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 7.5, false, color);
         if live {
-            self.c.circle(r.x + r.w - 4.0 * s, r.y + r.h * 0.5, 1.6 * s, with_alpha(self.th.accent, 220));
+            self.c.circle(
+                r.x + r.w - 4.0 * s,
+                r.y + r.h * 0.5,
+                1.6 * s,
+                with_alpha(self.th.accent, 220),
+            );
         }
         if self.pressed && hot {
             self.acts.push(Act::Mode(key));
@@ -535,9 +716,21 @@ impl<'a> Ui<'a> {
     fn row_slot(&mut self, card: Rect, i: usize, label: &str, key: &'static str) {
         let s = self.scale;
         let y = self.row_y(card, i);
-        self.label(card.x + 12.0 * s, y, card.w - 100.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            card.w - 100.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         let w = 66.0 * s;
-        self.chip(Rect::new(card.x + card.w - 10.0 * s - w, y + 2.5 * s, w, 17.0 * s), key);
+        self.chip(
+            Rect::new(card.x + card.w - 10.0 * s - w, y + 2.5 * s, w, 17.0 * s),
+            key,
+        );
     }
 
     fn row_switch(&mut self, card: Rect, i: usize, label: &str, key: &'static str) {
@@ -550,17 +743,41 @@ impl<'a> Ui<'a> {
         self.switch(sw.x, sw.y, key, on);
     }
 
-    fn row_slider(&mut self, card: Rect, i: usize, label: &str, key: &'static str, min: i32, max: i32, suffix: &str) {
+    fn row_slider(
+        &mut self,
+        card: Rect,
+        i: usize,
+        label: &str,
+        key: &'static str,
+        min: i32,
+        max: i32,
+        suffix: &str,
+    ) {
         let s = self.scale;
         let y = self.row_y(card, i);
         let v = self.s.int_at(key).clamp(min, max);
-        self.label(card.x + 12.0 * s, y, 72.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            72.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         let tx = card.x + 84.0 * s;
         let tw = card.w - 84.0 * s - 42.0 * s;
         let cy = y + ROW_H * 0.5 * s;
-        let t = if max > min { (v - min) as f32 / (max - min) as f32 } else { 0.0 };
-        self.c.round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
-        self.c.round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
+        let t = if max > min {
+            (v - min) as f32 / (max - min) as f32
+        } else {
+            0.0
+        };
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
         self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
         self.label_right(
             card.x + card.w - 10.0 * s - 36.0 * s,
@@ -573,7 +790,14 @@ impl<'a> Ui<'a> {
         );
         let hit = Rect::new(tx - 8.0 * s, y, tw + 16.0 * s, ROW_H * s);
         if self.pressed && self.hovered(hit) {
-            self.shared.drag = Some(Drag { key, ch: 9, x: tx, w: tw, min, max });
+            self.shared.drag = Some(Drag {
+                key,
+                ch: 9,
+                x: tx,
+                w: tw,
+                min,
+                max,
+            });
         }
         if let Some(d) = self.shared.drag {
             if d.key == key && self.down {
@@ -598,13 +822,24 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         let y = self.row_y(card, i);
         let v = self.s.int_at(key).clamp(1, 3);
-        self.label(card.x + 12.0 * s, y, 72.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            72.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         let tx = card.x + 84.0 * s;
         let tw = card.w - 84.0 * s - 42.0 * s;
         let cy = y + ROW_H * 0.5 * s;
         let t = (v - 1) as f32 * 0.5;
-        self.c.round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
-        self.c.round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
         for n in 0..3 {
             let x = tx + tw * (n as f32 * 0.5);
             let selected = n + 1 == v;
@@ -612,7 +847,11 @@ impl<'a> Ui<'a> {
                 x,
                 cy,
                 if selected { 4.0 * s } else { 2.4 * s },
-                if selected { self.th.text } else { self.th.faint },
+                if selected {
+                    self.th.text
+                } else {
+                    self.th.faint
+                },
             );
         }
         self.label_right(
@@ -626,7 +865,14 @@ impl<'a> Ui<'a> {
         );
         let hit = Rect::new(tx - 8.0 * s, y, tw + 16.0 * s, ROW_H * s);
         if self.pressed && self.hovered(hit) {
-            self.shared.drag = Some(Drag { key, ch: 10, x: tx, w: tw, min: 1, max: 3 });
+            self.shared.drag = Some(Drag {
+                key,
+                ch: 10,
+                x: tx,
+                w: tw,
+                min: 1,
+                max: 3,
+            });
         }
         if let Some(d) = self.shared.drag {
             if d.key == key && self.down {
@@ -639,20 +885,50 @@ impl<'a> Ui<'a> {
         }
     }
 
-    fn row_seg(&mut self, card: Rect, i: usize, label: &str, key: &'static str, options: [&'static str; 2]) {
+    fn row_seg(
+        &mut self,
+        card: Rect,
+        i: usize,
+        label: &str,
+        key: &'static str,
+        options: [&'static str; 2],
+    ) {
         let s = self.scale;
         let y = self.row_y(card, i);
         let cur = self.s.str_at(key);
-        self.label(card.x + 12.0 * s, y, 72.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            72.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         let total = 100.0 * s;
         let x = card.x + card.w - 10.0 * s - total;
-        self.c.round_rect(x, y + 2.5 * s, total, 17.0 * s, 8.5 * s, with_alpha(self.th.text, 4));
+        self.c.round_rect(
+            x,
+            y + 2.5 * s,
+            total,
+            17.0 * s,
+            8.5 * s,
+            with_alpha(self.th.text, 4),
+        );
         let half = total * 0.5;
         for (n, opt) in options.iter().enumerate() {
             let r = Rect::new(x + half * n as f32, y + 2.5 * s, half, 17.0 * s);
             let on = cur == *opt;
             if on {
-                self.c.round_rect(r.x + 1.5 * s, r.y + 1.5 * s, r.w - 3.0 * s, r.h - 3.0 * s, (r.h - 3.0 * s) * 0.5, with_alpha(self.th.accent, 13));
+                self.c.round_rect(
+                    r.x + 1.5 * s,
+                    r.y + 1.5 * s,
+                    r.w - 3.0 * s,
+                    r.h - 3.0 * s,
+                    (r.h - 3.0 * s) * 0.5,
+                    with_alpha(self.th.accent, 13),
+                );
             }
             let color = if on { self.th.accent } else { self.th.faint };
             let hot = self.hovered(r);
@@ -681,7 +957,16 @@ impl<'a> Ui<'a> {
         let total = sw * presets.len() as f32 + gap * (presets.len() as f32 - 1.0);
         let left = card.x + card.w - 10.0 * s - total;
         let label_w = (left - (card.x + 12.0 * s) - 6.0 * s).max(0.0);
-        self.label(card.x + 12.0 * s, y, label_w, ROW_H * s, "Presets", 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            label_w,
+            ROW_H * s,
+            "Presets",
+            9.5,
+            false,
+            self.th.dim,
+        );
         let mut x = left;
         for (color, r, g, b) in presets {
             let rr = Rect::new(x, y + 4.0 * s, sw, sw);
@@ -689,9 +974,25 @@ impl<'a> Ui<'a> {
             let selected = cr as i32 == r && cg as i32 == g && cb as i32 == b;
             self.c.round_rect(rr.x, rr.y, rr.w, rr.h, rr.w * 0.5, color);
             if selected {
-                self.c.round_stroke(rr.x - 1.5 * s, rr.y - 1.5 * s, rr.w + 3.0 * s, rr.h + 3.0 * s, (rr.w + 3.0 * s) * 0.5, with_alpha(self.th.text, 200), 1.1);
+                self.c.round_stroke(
+                    rr.x - 1.5 * s,
+                    rr.y - 1.5 * s,
+                    rr.w + 3.0 * s,
+                    rr.h + 3.0 * s,
+                    (rr.w + 3.0 * s) * 0.5,
+                    with_alpha(self.th.text, 200),
+                    1.1,
+                );
             } else if hot {
-                self.c.round_stroke(rr.x - 1.0 * s, rr.y - 1.0 * s, rr.w + 2.0 * s, rr.h + 2.0 * s, (rr.w + 2.0 * s) * 0.5, with_alpha(self.th.text, 150), 1.0);
+                self.c.round_stroke(
+                    rr.x - 1.0 * s,
+                    rr.y - 1.0 * s,
+                    rr.w + 2.0 * s,
+                    rr.h + 2.0 * s,
+                    (rr.w + 2.0 * s) * 0.5,
+                    with_alpha(self.th.text, 150),
+                    1.0,
+                );
             }
             if self.pressed && hot {
                 self.acts.push(Act::Preset(r, g, b));
@@ -709,18 +1010,44 @@ impl<'a> Ui<'a> {
             1 => 0xFF6A_D99A,
             _ => 0xFF6A_9B_E0,
         };
-        self.label(card.x + 12.0 * s, y, 72.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            72.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
         let tx = card.x + 84.0 * s;
         let tw = card.w - 84.0 * s - 42.0 * s;
         let cy = y + ROW_H * 0.5 * s;
         let t = v as f32 / 255.0;
-        self.c.round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
-        self.c.round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, color);
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+        self.c
+            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, color);
         self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
-        self.label_right(card.x + card.w - 10.0 * s - 36.0 * s, y, 36.0 * s, ROW_H * s, &v.to_string(), 8.5, self.th.dim);
+        self.label_right(
+            card.x + card.w - 10.0 * s - 36.0 * s,
+            y,
+            36.0 * s,
+            ROW_H * s,
+            &v.to_string(),
+            8.5,
+            self.th.dim,
+        );
         let hit = Rect::new(tx - 8.0 * s, y, tw + 16.0 * s, ROW_H * s);
         if self.pressed && self.hovered(hit) {
-            self.shared.drag = Some(Drag { key: "thmC", ch, x: tx, w: tw, min: 0, max: 255 });
+            self.shared.drag = Some(Drag {
+                key: "thmC",
+                ch,
+                x: tx,
+                w: tw,
+                min: 0,
+                max: 255,
+            });
         }
         if let Some(d) = self.shared.drag {
             if d.key == "thmC" && d.ch == ch && self.down {
@@ -746,7 +1073,13 @@ impl<'a> Ui<'a> {
             with_alpha(self.th.text, if hot { 11 } else { 6 })
         };
         self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, bg);
-        let fg = if primary { self.th.accent } else if hot { self.th.text } else { self.th.dim };
+        let fg = if primary {
+            self.th.accent
+        } else if hot {
+            self.th.text
+        } else {
+            self.th.dim
+        };
         self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 9.0, false, fg);
         if self.pressed && hot {
             self.acts.push(act);
@@ -757,8 +1090,25 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         let y = self.row_y(card, i);
         // 12 left + 80 value + 12 right + 6 breathing room.
-        self.label(card.x + 12.0 * s, y, card.w - 110.0 * s, ROW_H * s, label, 9.5, false, self.th.dim);
-        self.label_right(card.x + card.w - 12.0 * s - 80.0 * s, y, 80.0 * s, ROW_H * s, value, 9.5, self.th.text);
+        self.label(
+            card.x + 12.0 * s,
+            y,
+            card.w - 110.0 * s,
+            ROW_H * s,
+            label,
+            9.5,
+            false,
+            self.th.dim,
+        );
+        self.label_right(
+            card.x + card.w - 12.0 * s - 80.0 * s,
+            y,
+            80.0 * s,
+            ROW_H * s,
+            value,
+            9.5,
+            self.th.text,
+        );
     }
 
     fn row_danger(&mut self, card: Rect, i: usize, text: &str) {
@@ -768,7 +1118,16 @@ impl<'a> Ui<'a> {
         let hot = self.hovered(r);
         let bg = with_alpha(self.th.danger, if hot { 26 } else { 15 });
         self.c.round_rect(r.x, r.y, r.w, r.h, r.h * 0.5, bg);
-        self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, text, 9.0, false, self.th.danger);
+        self.label_center(
+            r.x,
+            r.y - 0.5 * s,
+            r.w,
+            r.h,
+            text,
+            9.0,
+            false,
+            self.th.danger,
+        );
         if self.pressed && hot {
             self.acts.push(Act::Destruct);
         }
@@ -859,8 +1218,24 @@ impl<'a> Ui<'a> {
         self.row_slot(r, 2, "Glowstone", "v6S2");
         self.row_slot(r, 3, "Totem", "v6S3");
         self.row_switch(r, 4, "Air loop", "vE");
-        self.row_slider(r, 5, "Min delay", "v6D1", ANCHOR_MIN_LO, ANCHOR_MIN_HI, "ms");
-        self.row_slider(r, 6, "Max delay", "v6D2", ANCHOR_MAX_LO, ANCHOR_MAX_HI, "ms");
+        self.row_slider(
+            r,
+            5,
+            "Min delay",
+            "v6D1",
+            ANCHOR_MIN_LO,
+            ANCHOR_MIN_HI,
+            "ms",
+        );
+        self.row_slider(
+            r,
+            6,
+            "Max delay",
+            "v6D2",
+            ANCHOR_MAX_LO,
+            ANCHOR_MAX_HI,
+            "ms",
+        );
         y += r.h + gap;
 
         let r = Rect::new(x1, y, w, self.card_h(4));
@@ -954,16 +1329,32 @@ impl<'a> Ui<'a> {
             "15.6 ms".to_string()
         };
         self.row_value(r, 2, "Timer", &timer);
-        self.row_value(r, 3, "AI brain", if self.s.bool_at("vAI") { "Smart" } else { "Manual" });
+        self.row_value(
+            r,
+            3,
+            "AI brain",
+            if self.s.bool_at("vAI") {
+                "Smart"
+            } else {
+                "Manual"
+            },
+        );
     }
 
     fn footer(&mut self) {
         let s = self.scale;
         let y = (WIN_H - FOOTER_H) * s;
-        self.c.rect(RAIL_W * s, y, (WIN_W - RAIL_W) * s, 1.0, with_alpha(self.th.text, 8));
+        self.c.rect(
+            RAIL_W * s,
+            y,
+            (WIN_W - RAIL_W) * s,
+            1.0,
+            with_alpha(self.th.text, 8),
+        );
         let armed = self.s.bool_at("v0");
         let dot = if armed { self.th.accent } else { self.th.faint };
-        self.c.circle(RAIL_W * s + 15.0 * s, y + FOOTER_H * 0.5 * s, 2.0 * s, dot);
+        self.c
+            .circle(RAIL_W * s + 15.0 * s, y + FOOTER_H * 0.5 * s, 2.0 * s, dot);
         let n = self.on_count();
         let status = format!("{} · {} on", if armed { "Armed" } else { "Safe" }, n);
         self.label(
@@ -978,8 +1369,23 @@ impl<'a> Ui<'a> {
         );
         if self.sd > 0.0 {
             let label = format!("hold 1s · {:.0}%", self.sd * 100.0);
-            self.label_center(RAIL_W * s, y + 4.0 * s, (WIN_W - RAIL_W) * s, 16.0 * s, &label, 8.5, false, self.th.danger);
-            self.c.rect(0.0, WIN_H * s - 2.0 * s, WIN_W * s * self.sd, 2.0 * s, self.th.danger);
+            self.label_center(
+                RAIL_W * s,
+                y + 4.0 * s,
+                (WIN_W - RAIL_W) * s,
+                16.0 * s,
+                &label,
+                8.5,
+                false,
+                self.th.danger,
+            );
+            self.c.rect(
+                0.0,
+                WIN_H * s - 2.0 * s,
+                WIN_W * s * self.sd,
+                2.0 * s,
+                self.th.danger,
+            );
             return;
         }
         let (game_dot, game_text, game_color) = if self.focused {
@@ -995,7 +1401,12 @@ impl<'a> Ui<'a> {
         let game_w = self.c.measure(game_text, game_font);
         let game_x = WIN_W * s - 12.0 * s - game_w;
         let dot_x = game_x - 8.0 * s;
-        self.c.circle(dot_x, y + FOOTER_H * 0.5 * s, 2.0 * s, with_alpha(game_dot, 220));
+        self.c.circle(
+            dot_x,
+            y + FOOTER_H * 0.5 * s,
+            2.0 * s,
+            with_alpha(game_dot, 220),
+        );
         self.c.text(
             game_text,
             game_x,
@@ -1009,7 +1420,9 @@ impl<'a> Ui<'a> {
     }
 
     fn on_count(&self) -> u32 {
-        let keys = ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "vA", "vB", "vC", "vD", "vW"];
+        let keys = [
+            "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "vA", "vB", "vC", "vD", "vW",
+        ];
         keys.iter().filter(|k| self.s.bool_at(k)).count() as u32
     }
 }
@@ -1029,7 +1442,17 @@ pub fn rail_rect(index: usize, scale: f32) -> Rect {
 
 pub fn header_buttons(w: f32, sc: f32) -> [Rect; 3] {
     let close = Rect::new(w - 10.0 * sc - 20.0 * sc, 12.0 * sc, 20.0 * sc, 20.0 * sc);
-    let hide = Rect::new(close.x - 4.0 * sc - 20.0 * sc, 12.0 * sc, 20.0 * sc, 20.0 * sc);
-    let master = Rect::new(hide.x - 8.0 * sc - 72.0 * sc, 11.0 * sc, 72.0 * sc, 22.0 * sc);
+    let hide = Rect::new(
+        close.x - 4.0 * sc - 20.0 * sc,
+        12.0 * sc,
+        20.0 * sc,
+        20.0 * sc,
+    );
+    let master = Rect::new(
+        hide.x - 8.0 * sc - 72.0 * sc,
+        11.0 * sc,
+        72.0 * sc,
+        22.0 * sc,
+    );
     [master, hide, close]
 }

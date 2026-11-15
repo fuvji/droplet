@@ -22,7 +22,11 @@ impl Ini for bool {
         }
     }
     fn ini_write(&self) -> String {
-        if *self { "1".into() } else { "0".into() }
+        if *self {
+            "1".into()
+        } else {
+            "0".into()
+        }
     }
 }
 
@@ -220,9 +224,9 @@ settings_schema! {
 /// Every editable trigger binding. Slots and action keys are deliberately
 /// excluded: a hotbar slot may legitimately equal a trigger name.
 const TRIGGER_BINDING_KEYS: [&str; 26] = [
-    "vDBn", "vDB2", "v1Bn", "v1B2", "v2Bn", "v2B2", "v3Bn", "v3B2", "v4Bn", "v4B2",
-    "v5Bn", "v5B2", "v6Bn", "v6B2", "vABn", "vAB2", "vBBn", "vBB2", "vCBn", "v7Bn",
-    "v7B2", "v8Bn", "v8B2", "vWBn", "vWB2", "v8I",
+    "vDBn", "vDB2", "v1Bn", "v1B2", "v2Bn", "v2B2", "v3Bn", "v3B2", "v4Bn", "v4B2", "v5Bn", "v5B2",
+    "v6Bn", "v6B2", "vABn", "vAB2", "vBBn", "vBB2", "vCBn", "v7Bn", "v7B2", "v8Bn", "v8B2", "vWBn",
+    "vWB2", "v8I",
 ];
 
 fn is_trigger_binding(key: &str) -> bool {
@@ -504,6 +508,24 @@ impl Settings {
             self.timing_rev = 4;
         }
         self.normalize_timing();
+        self.normalize_bindings();
+    }
+
+    /// Legacy configs can contain the same input on two trigger chips because
+    /// the old first-wins router accepted the duplicate. Runtime routing now
+    /// uses last-wins order, so clear the earlier owners on load as well. This
+    /// keeps the painted chips and the hook behavior in agreement.
+    fn normalize_bindings(&mut self) {
+        for i in 0..TRIGGER_BINDING_KEYS.len() {
+            let key = TRIGGER_BINDING_KEYS[i];
+            if let Some(target) = keys::ev(self.binding_at(key)) {
+                for earlier in &TRIGGER_BINDING_KEYS[..i] {
+                    if keys::ev(self.binding_at(earlier)) == Some(target) {
+                        self.set_str(earlier, "...");
+                    }
+                }
+            }
+        }
     }
 
     /// Enforce each slider's own domain without re-running legacy migrations.
@@ -523,7 +545,6 @@ impl Settings {
         self.wtap_min = self.wtap_min.clamp(50, 300);
         self.wtap_max = self.wtap_max.clamp(50, 300);
     }
-
 }
 
 pub fn data_dir_path() -> PathBuf {
@@ -733,11 +754,11 @@ mod tests {
     fn fast_binding_lookup_covers_every_painted_chip() {
         let s = Settings::default();
         let keys = [
-            "vDBn", "vDB2", "vDS1", "vDS2", "v1Bn", "v1B2", "v1S1", "v2Bn", "v2B2",
-            "v2S1", "v3Bn", "v3B2", "v3S1", "v3S2", "v4Bn", "v4B2", "v4S1", "v4S2",
-            "v4S3", "v5Bn", "v5B2", "v5S1", "v5S2", "v5S3", "v6Bn", "v6B2", "v6S1", "v6S2",
-            "v6S3", "v7Bn", "v7B2", "v7S1", "v7S3", "v8Bn", "v8B2", "v8Sp", "v8T",
-            "v8I", "vABn", "vAB2", "vWBn", "vWB2", "vWS1", "vBBn", "vBB2", "vCBn",
+            "vDBn", "vDB2", "vDS1", "vDS2", "v1Bn", "v1B2", "v1S1", "v2Bn", "v2B2", "v2S1", "v3Bn",
+            "v3B2", "v3S1", "v3S2", "v4Bn", "v4B2", "v4S1", "v4S2", "v4S3", "v5Bn", "v5B2", "v5S1",
+            "v5S2", "v5S3", "v6Bn", "v6B2", "v6S1", "v6S2", "v6S3", "v7Bn", "v7B2", "v7S1", "v7S3",
+            "v8Bn", "v8B2", "v8Sp", "v8T", "v8I", "vABn", "vAB2", "vWBn", "vWB2", "vWS1", "vBBn",
+            "vBB2", "vCBn",
         ];
         for key in keys {
             assert_eq!(s.binding_at(key), s.get(key).as_str(), "{key}");
@@ -758,6 +779,16 @@ mod tests {
         s.set_binding("v3Bn", "xbutton1");
         assert_eq!(s.breach_key, "xbutton1");
         assert_eq!(s.anchor_key, "...");
+    }
+
+    #[test]
+    fn loading_a_duplicate_binding_keeps_the_last_owner() {
+        let mut s = Settings::default();
+        s.breach_key = "XButton1".into();
+        s.anchor_key = "XButton1".into();
+        s.normalize();
+        assert_eq!(s.anchor_key, "XButton1");
+        assert_eq!(s.breach_key, "...");
     }
 
     #[test]

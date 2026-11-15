@@ -1,3 +1,3 @@
-Droplet 2.10.10 - SHA-256
+Droplet 2.10.11 - SHA-256
 
-a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32  droplet.exe
+aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71  droplet.exe

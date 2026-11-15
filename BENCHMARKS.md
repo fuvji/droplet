@@ -3,6 +3,20 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.11 release
+
+2.10.11 is the final handoff build. The source tree is rustfmt-clean, duplicate
+legacy trigger chips are normalized on load to match last-wins routing, and the
+four captures are generated from an isolated deterministic profile. No runtime
+or timing path changed, and no speedup is claimed.
+
+- Version: **2.10.11**
+- Portable executable: **547,840 bytes**
+- SHA-256: `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`
+- Release tests: **38 / 38**
+- No CPU, latency, render-speed, or size win is claimed. Trigger routing,
+  watcher cadence, and the release profile are unchanged.
+
 ## 2.10.10 release
 
 2.10.10 is a correctness release. Crystal toggle-off restore is now gated by
@@ -81,11 +95,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.10**
-- Portable executable: **547,328 bytes**
-- SHA-256: `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`
+- Version: **2.10.11**
+- Portable executable: **547,840 bytes**
+- SHA-256: `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **37 / 37**
+- Release tests: **38 / 38**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**

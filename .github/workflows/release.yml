@@ -21,7 +21,7 @@ jobs:
       - name: Stage verified exe
         shell: pwsh
         run: |
-          $expected = "a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32"
+          $expected = "aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71"
           $artifact = "site/public/downloads/droplet.exe"
           $actual = (Get-FileHash $artifact -Algorithm SHA256).Hash.ToLower()
           if ($actual -ne $expected) { throw "Published exe hash does not match the release notes." }

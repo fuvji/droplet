@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.10 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.11 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 547,328 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 547,840 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,12 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.10
+## What is in 2.10.11
 
+- **Final handoff polish (2.10.11)**: the source tree is rustfmt-clean, legacy
+  duplicate trigger chips are normalized on load to match last-wins routing,
+  and captures now come from an isolated, deterministic profile. The final
+  artifact is 547,840 bytes with 38 release tests.
 - **Busy-safe Crystal restore (2.10.10)**: a toggle-off restore now waits for
   the Crystal re-entrancy gate instead of consuming the request while another
   Crystal action is busy. The pending request survives a busy cycle and a
@@ -117,7 +121,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.10 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.11 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; DWM supplies the rounded edge, and there is no outer stroke
@@ -162,14 +166,14 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **37 / 37**.
-- Portable executable: **547,328 bytes**,
-  `a99a282c09f5b2ec0d417c6b6fac6cd6439ef19a48736826450dfbc0c5d40d32`.
+- `cargo test --release`: **38 / 38**.
+- Portable executable: **547,840 bytes**,
+  `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.10 build.
+  2.10.11 build with an isolated deterministic profile.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.10 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.11 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game.
 

@@ -110,7 +110,11 @@ pub fn ev(name: &str) -> Option<Ev> {
         if c.len() >= 64 {
             c.remove(0);
         }
-        c.push(EvCache { hash, name: name.to_string(), ev: parsed });
+        c.push(EvCache {
+            hash,
+            name: name.to_string(),
+            ev: parsed,
+        });
     });
     parsed
 }

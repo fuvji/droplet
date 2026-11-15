@@ -349,7 +349,6 @@ pub const MAPVK_VK_TO_VSC_EX: u32 = 4;
 
 pub const GWLP_USERDATA: i32 = -21;
 
-
 pub const SPI_GETWORKAREA: u32 = 0x0030;
 
 pub const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
@@ -395,7 +394,15 @@ extern "system" {
     pub fn DefWindowProcW(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) -> LRESULT;
     pub fn DestroyWindow(hwnd: HWND) -> BOOL;
     pub fn ShowWindow(hwnd: HWND, cmd: i32) -> BOOL;
-    pub fn SetWindowPos(hwnd: HWND, after: HWND, x: i32, y: i32, cx: i32, cy: i32, flags: u32) -> BOOL;
+    pub fn SetWindowPos(
+        hwnd: HWND,
+        after: HWND,
+        x: i32,
+        y: i32,
+        cx: i32,
+        cy: i32,
+        flags: u32,
+    ) -> BOOL;
     pub fn GetWindowRect(hwnd: HWND, r: *mut RECT) -> BOOL;
     pub fn GetClientRect(hwnd: HWND, r: *mut RECT) -> BOOL;
     pub fn SetWindowRgn(hwnd: HWND, rgn: HRGN, redraw: BOOL) -> i32;
@@ -445,13 +452,29 @@ extern "system" {
     pub fn SetWindowTextW(hwnd: HWND, s: *const u16) -> BOOL;
     pub fn GetSystemMetrics(idx: i32) -> i32;
     pub fn SetFocus(hwnd: HWND) -> HWND;
-    pub fn CreateIcon(hinst: HINSTANCE, w: i32, h: i32, planes: u8, bits: u8, and_mask: *const u8, xor_mask: *const u8) -> HICON;
+    pub fn CreateIcon(
+        hinst: HINSTANCE,
+        w: i32,
+        h: i32,
+        planes: u8,
+        bits: u8,
+        and_mask: *const u8,
+        xor_mask: *const u8,
+    ) -> HICON;
     pub fn SetClassLongPtrW(hwnd: HWND, idx: i32, val: isize) -> isize;
     pub fn SetForegroundWindow(hwnd: HWND) -> BOOL;
     pub fn CreatePopupMenu() -> HMENU;
     pub fn AppendMenuW(menu: HMENU, flags: u32, id: usize, text: *const u16) -> BOOL;
     pub fn DestroyMenu(menu: HMENU) -> BOOL;
-    pub fn TrackPopupMenu(menu: HMENU, flags: u32, x: i32, y: i32, reserved: i32, hwnd: HWND, rect: *const RECT) -> BOOL;
+    pub fn TrackPopupMenu(
+        menu: HMENU,
+        flags: u32,
+        x: i32,
+        y: i32,
+        reserved: i32,
+        hwnd: HWND,
+        rect: *const RECT,
+    ) -> BOOL;
     pub fn RegisterWindowMessageW(name: *const u16) -> u32;
     pub fn DestroyIcon(icon: HICON) -> BOOL;
 }
@@ -473,7 +496,8 @@ extern "system" {
     pub fn GetCurrentProcess() -> HANDLE;
     pub fn GetCurrentThread() -> HANDLE;
     pub fn OpenProcess(access: u32, inherit: BOOL, pid: u32) -> HANDLE;
-    pub fn QueryFullProcessImageNameW(h: HANDLE, flags: u32, buf: *mut u16, size: *mut u32) -> BOOL;
+    pub fn QueryFullProcessImageNameW(h: HANDLE, flags: u32, buf: *mut u16, size: *mut u32)
+        -> BOOL;
     pub fn CloseHandle(h: HANDLE) -> BOOL;
     pub fn OpenThread(access: u32, inherit: BOOL, tid: u32) -> HANDLE;
     pub fn GetCurrentThreadId() -> u32;
@@ -491,11 +515,28 @@ extern "system" {
 extern "system" {
     pub fn CreateCompatibleDC(hdc: HDC) -> HDC;
     pub fn CreateCompatibleBitmap(hdc: HDC, w: i32, h: i32) -> HBITMAP;
-    pub fn CreateDIBSection(hdc: HDC, pbmi: *const BITMAPINFO, usage: u32, bits: *mut *mut c_void, section: HANDLE, offset: u32) -> HBITMAP;
+    pub fn CreateDIBSection(
+        hdc: HDC,
+        pbmi: *const BITMAPINFO,
+        usage: u32,
+        bits: *mut *mut c_void,
+        section: HANDLE,
+        offset: u32,
+    ) -> HBITMAP;
     pub fn SelectObject(hdc: HDC, obj: HGDIOBJ) -> HGDIOBJ;
     pub fn DeleteObject(obj: HGDIOBJ) -> BOOL;
     pub fn DeleteDC(hdc: HDC) -> BOOL;
-    pub fn BitBlt(dst: HDC, x: i32, y: i32, w: i32, h: i32, src: HDC, sx: i32, sy: i32, rop: u32) -> BOOL;
+    pub fn BitBlt(
+        dst: HDC,
+        x: i32,
+        y: i32,
+        w: i32,
+        h: i32,
+        src: HDC,
+        sx: i32,
+        sy: i32,
+        rop: u32,
+    ) -> BOOL;
     pub fn CreateRoundRectRgn(x1: i32, y1: i32, x2: i32, y2: i32, w: i32, h: i32) -> HRGN;
     pub fn CreateSolidBrush(color: u32) -> HBRUSH;
     pub fn FillRect(hdc: HDC, r: *const RECT, brush: HBRUSH) -> i32;

@@ -135,11 +135,46 @@ fn mk_key(k: Key, up: bool) -> INPUT {
 #[inline]
 fn mk_mouse(b: Btn, up: bool) -> INPUT {
     let (flags, data) = match b {
-        Btn::Left => (if up { win::MOUSEEVENTF_LEFTUP } else { win::MOUSEEVENTF_LEFTDOWN }, 0),
-        Btn::Right => (if up { win::MOUSEEVENTF_RIGHTUP } else { win::MOUSEEVENTF_RIGHTDOWN }, 0),
-        Btn::Middle => (if up { win::MOUSEEVENTF_MIDDLEUP } else { win::MOUSEEVENTF_MIDDLEDOWN }, 0),
-        Btn::X1 => (if up { win::MOUSEEVENTF_XUP } else { win::MOUSEEVENTF_XDOWN }, 1),
-        Btn::X2 => (if up { win::MOUSEEVENTF_XUP } else { win::MOUSEEVENTF_XDOWN }, 2),
+        Btn::Left => (
+            if up {
+                win::MOUSEEVENTF_LEFTUP
+            } else {
+                win::MOUSEEVENTF_LEFTDOWN
+            },
+            0,
+        ),
+        Btn::Right => (
+            if up {
+                win::MOUSEEVENTF_RIGHTUP
+            } else {
+                win::MOUSEEVENTF_RIGHTDOWN
+            },
+            0,
+        ),
+        Btn::Middle => (
+            if up {
+                win::MOUSEEVENTF_MIDDLEUP
+            } else {
+                win::MOUSEEVENTF_MIDDLEDOWN
+            },
+            0,
+        ),
+        Btn::X1 => (
+            if up {
+                win::MOUSEEVENTF_XUP
+            } else {
+                win::MOUSEEVENTF_XDOWN
+            },
+            1,
+        ),
+        Btn::X2 => (
+            if up {
+                win::MOUSEEVENTF_XUP
+            } else {
+                win::MOUSEEVENTF_XDOWN
+            },
+            2,
+        ),
     };
     INPUT {
         r#type: win::INPUT_MOUSE,
@@ -161,7 +196,11 @@ fn send(buf: &[INPUT]) {
         return;
     }
     unsafe {
-        win::SendInput(buf.len() as u32, buf.as_ptr(), std::mem::size_of::<INPUT>() as i32);
+        win::SendInput(
+            buf.len() as u32,
+            buf.as_ptr(),
+            std::mem::size_of::<INPUT>() as i32,
+        );
     }
 }
 
@@ -417,7 +456,11 @@ impl Probe {
             win::BitBlt(self.mem, 0, 0, 1, 1, screen, x, y, win::SRCCOPY);
             win::ReleaseDC(0, screen);
             let v = *self.bits;
-            ((v & 0xFF) as u8, ((v >> 8) & 0xFF) as u8, ((v >> 16) & 0xFF) as u8)
+            (
+                (v & 0xFF) as u8,
+                ((v >> 8) & 0xFF) as u8,
+                ((v >> 16) & 0xFF) as u8,
+            )
         }
     }
 
