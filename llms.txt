@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.12
+Version: 2.10.13
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,13 +15,18 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.12 portable executable: 550,400 bytes.
-- 2.10.12 fixes the Windows 10 corner silhouette and the non-sticky low-latency
-  timer. The 8 px GDI window region is installed first with `SetWindowRgn` on
-  every supported Windows version; Windows 10 could report success for DWM's
-  newer corner attribute while still drawing a square popup, so DWM is now only
-  a fallback. The region is replaced on DPI changes, and a failed install
-  deletes its orphaned GDI handle.
+- 2.10.13 portable executable: 550,400 bytes.
+- 2.10.13 removes DWM's light square non-client frame from the region path. The
+  8 px GDI region already clipped the client, but DWM still drew outside it;
+  Droplet now clears the border color and asks DWM not to round so there is only
+  one silhouette. The border-color attribute is a Windows 11 extra; the region
+  remains the clip on Windows 10. Non-client rendering stays enabled so the
+  acrylic backdrop is preserved. The screenshots use `GetWindowRgn` for alpha
+  instead of a hardcoded mask.
+- 2.10.12 fixed the Windows 10 corner clip and the non-sticky low-latency
+  timer. The GDI region is installed first with `SetWindowRgn` on every
+  supported Windows version; DWM is only a fallback. The region is replaced on
+  DPI changes, and a failed install deletes its orphaned GDI handle.
 - `NtQueryTimerResolution` returns the coarsest value in `min` and the finest
   hardware value in `max`. The timer target now uses `max` and requests
   5,000 x 100 ns (0.5 ms) when supported; a one-second guard reasserts it while
@@ -56,7 +61,7 @@ visible to screen capture.
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
 - Tests: 39 / 39. Four native 624×408 captures were regenerated from the
-  2.10.12 build. No CPU, latency, or speedup claim is made.
+  2.10.13 build using the live window region as their alpha mask. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
 - The GDI 8 px window region is the primary clip on Windows 10 and 11; DWM is
