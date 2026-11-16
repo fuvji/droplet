@@ -33,8 +33,9 @@ $savedEnv = @{
 }
 
 Add-Type -AssemblyName System.Drawing
-Add-Type @"
+Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @"
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 
 public static class DropletTabs {
@@ -57,22 +58,47 @@ public static class DropletTabs {
     public static extern bool PostMessage(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll")]
+    public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdc, uint flags);
+
+    [DllImport("user32.dll")]
     public static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
+
+    [DllImport("gdi32.dll")]
+    public static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
+
+    [DllImport("user32.dll")]
+    public static extern int GetWindowRgn(IntPtr hwnd, IntPtr region);
+
+    [DllImport("gdi32.dll")]
+    public static extern bool PtInRegion(IntPtr region, int x, int y);
+
+    [DllImport("gdi32.dll")]
+    public static extern bool DeleteObject(IntPtr obj);
+
+    // Apply the live window's own region, not a hardcoded radius. This makes
+    // the published PNG prove the real silhouette and cannot hide a square
+    // frame with a decorative mask.
+    public static void ApplyWindowRegionAlpha(Bitmap bitmap, IntPtr hwnd) {
+        IntPtr region = CreateRectRgn(0, 0, 0, 0);
+        try {
+            if (GetWindowRgn(hwnd, region) == 0) {
+                return;
+            }
+            for (int y = 0; y < bitmap.Height; y++) {
+                for (int x = 0; x < bitmap.Width; x++) {
+                    if (!PtInRegion(region, x, y)) {
+                        bitmap.SetPixel(x, y, Color.Transparent);
+                    }
+                }
+            }
+        } finally {
+            DeleteObject(region);
+        }
+    }
 }
 "@
 
-function New-RoundedPath([int]$Width, [int]$Height, [int]$Radius) {
-    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
-    $d = [Math]::Max(1, $Radius * 2)
-    $path.AddArc(0, 0, $d, $d, 180, 90)
-    $path.AddArc($Width - $d, 0, $d, $d, 270, 90)
-    $path.AddArc($Width - $d, $Height - $d, $d, $d, 0, 90)
-    $path.AddArc(0, $Height - $d, $d, $d, 90, 90)
-    $path.CloseFigure()
-    return $path
-}
-
-function Save-Panel([IntPtr]$Hwnd, [string]$Name, [int]$Radius) {
+function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
     $rect = New-Object DropletTabs+RECT
     if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
@@ -86,38 +112,30 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name, [int]$Radius) {
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
     $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
     try {
-        $graphics.CopyFromScreen(
-            $rect.Left,
-            $rect.Top,
-            0,
-            0,
-            $bitmap.Size,
-            [System.Drawing.CopyPixelOperation]::SourceCopy
-        )
-        # CopyFromScreen returns the rectangular composited surface. Preserve
-        # the actual silhouette with a transparent rounded mask for the site.
-        $masked = New-Object System.Drawing.Bitmap($width, $height, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-        $maskGraphics = [System.Drawing.Graphics]::FromImage($masked)
-        $maskPath = New-RoundedPath $width $height $Radius
+        $hdc = $graphics.GetHdc()
         try {
-            $maskGraphics.Clear([System.Drawing.Color]::Transparent)
-            $maskGraphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-            $maskGraphics.SetClip($maskPath)
-            $maskGraphics.DrawImage($bitmap, 0, 0, $width, $height)
-            $target = Join-Path $out $Name
-            $masked.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
-            $image = [System.Drawing.Image]::FromFile($target)
-            try {
-                if ($image.Width -ne 624 -or $image.Height -ne 408) {
-                    throw "Saved capture is $($image.Width)x$($image.Height), expected 624x408."
-                }
-            } finally {
-                $image.Dispose()
+            # PrintWindow captures the window rather than the desktop behind its
+            # acrylic. CopyFromScreen would include unrelated windows that show
+            # through the translucent panel.
+            if (-not [DropletTabs]::PrintWindow($Hwnd, $hdc, 2)) {
+                throw 'PrintWindow failed.'
             }
         } finally {
-            $maskPath.Dispose()
-            $maskGraphics.Dispose()
-            $masked.Dispose()
+            $graphics.ReleaseHdc($hdc)
+        }
+        # Use the live region. The old hardcoded GraphicsPath could make a
+        # square DWM frame look rounded in the screenshot even when the app
+        # itself did not clip that frame.
+        [DropletTabs]::ApplyWindowRegionAlpha($bitmap, $Hwnd)
+        $target = Join-Path $out $Name
+        $bitmap.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
+        $image = [System.Drawing.Image]::FromFile($target)
+        try {
+            if ($image.Width -ne 624 -or $image.Height -ne 408) {
+                throw "Saved capture is $($image.Width)x$($image.Height), expected 624x408."
+            }
+        } finally {
+            $image.Dispose()
         }
     } finally {
         $graphics.Dispose()
@@ -182,8 +200,9 @@ try {
 
     foreach ($tab in $tabs) {
         Click-Tab $hwnd ([int]$tab.X) ([int]$tab.Y)
-        # Must match ui::CORNER_RADIUS so the site mask and the window agree.
-        Save-Panel $hwnd $tab.Name 8
+        # The alpha mask comes from GetWindowRgn, so the PNG follows the
+        # actual window silhouette at the current DPI.
+        Save-Panel $hwnd $tab.Name
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

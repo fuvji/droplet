@@ -1,5 +1,19 @@
 # release
 
+## 2.10.13 — 2026-11-16
+
+- Portable exe: 550,400 B,
+  `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`.
+- Tests: 39 / 39.
+- Changes: remove DWM's light square non-client frame from the authoritative
+  region path. The border color is cleared and DWM is told not to round while
+  the region is installed; DWM rounds only on the fallback. Non-client
+  rendering stays enabled so the acrylic backdrop is preserved. Capture alpha
+  now comes from the live window region rather than a hardcoded mask. Timer,
+  anti-sleep, DPI, and provenance behavior from 2.10.12 is unchanged. A
+  magenta-backdrop capture showed the square frame is gone; no live game or
+  separate Windows 10 device was available.
+
 ## 2.10.12 — 2026-11-16
 
 - Portable exe: 550,400 B,

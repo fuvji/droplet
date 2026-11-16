@@ -3,6 +3,22 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.13 release
+
+2.10.13 is a visual hotfix. The GDI 8 px region already clipped the client, but
+DWM still drew its light square non-client frame outside it. Non-client
+rendering is now disabled and the border color cleared on the region path, so
+DWM no longer draws a competing square edge. The capture helper now derives its
+alpha from `GetWindowRgn` instead of a hardcoded rounded path, so the published
+images show the live silhouette. Timer, anti-sleep, DPI, and provenance behavior
+from 2.10.12 is unchanged.
+
+- Version: **2.10.13**
+- Portable executable: **550,400 bytes**
+- SHA-256: `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`
+- Release tests: **39 / 39**
+- No CPU, latency, render-speed, or size win is claimed.
+
 ## 2.10.12 release
 
 2.10.12 fixes the Windows 10 corner silhouette and makes the low-latency
@@ -116,9 +132,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.12**
+- Version: **2.10.13**
 - Portable executable: **550,400 bytes**
-- SHA-256: `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`
+- SHA-256: `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **39 / 39**
 - Runtime dependencies: **0**

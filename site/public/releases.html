@@ -5,29 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Droplet releases — 2.10.12 ledger</title>
-  <meta name="description" content="Droplet 2.10.12 release notes: authoritative GDI corners on Windows 10, a reasserted 0.5 ms timer and anti-sleep state, tagged-source GNU build, reproducible SHA-256, GitHub build provenance, a 550,400-byte portable exe, 39/39 tests, and the full version ledger.">
+  <title>Droplet releases — 2.10.13 ledger</title>
+  <meta name="description" content="Droplet 2.10.13 release notes: the DWM square frame is removed from the authoritative GDI region path, captures use the live window region, and the 2.10.12 0.5 ms timer and anti-sleep work is retained. Tagged-source GNU build, reproducible SHA-256, GitHub build provenance, a 550,400-byte portable exe, 39/39 tests, and the full version ledger.">
   <link rel="canonical" href="https://fuvji.github.io/droplet/releases.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Droplet releases — 2.10.12 ledger">
+  <meta property="og:title" content="Droplet releases — 2.10.13 ledger">
   <meta property="og:description" content="Tagged-source build, reproducible artifact, provenance attestation, and a local input harness for gate and Shield verification.">
   <meta property="og:url" content="https://fuvji.github.io/droplet/releases.html">
-  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.12">
+  <meta property="og:image" content="https://fuvji.github.io/droplet/assets/droplet-core.png?v=2.10.13">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="favicon.ico?v=2.10.12-2" type="image/x-icon" sizes="any">
-  <link rel="icon" href="favicon.svg?v=2.10.12-2" type="image/svg+xml" sizes="any">
-  <link rel="icon" href="assets/favicon-32.png?v=2.10.12-2" sizes="32x32" type="image/png">
-  <link rel="icon" href="assets/favicon-16.png?v=2.10.12-2" sizes="16x16" type="image/png">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.10.12-2" sizes="180x180" type="image/png">
-  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2.10.12-2" sizes="180x180" type="image/png">
-  <link rel="mask-icon" href="favicon.svg?v=2.10.12-2" color="#f4f3ef">
-  <link rel="manifest" href="site.webmanifest?v=2.10.12-2" type="application/manifest+json">
+  <link rel="icon" href="favicon.ico?v=2.10.13-2" type="image/x-icon" sizes="any">
+  <link rel="icon" href="favicon.svg?v=2.10.13-2" type="image/svg+xml" sizes="any">
+  <link rel="icon" href="assets/favicon-32.png?v=2.10.13-2" sizes="32x32" type="image/png">
+  <link rel="icon" href="assets/favicon-16.png?v=2.10.13-2" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.10.13-2" sizes="180x180" type="image/png">
+  <link rel="apple-touch-icon-precomposed" href="apple-touch-icon.png?v=2.10.13-2" sizes="180x180" type="image/png">
+  <link rel="mask-icon" href="favicon.svg?v=2.10.13-2" color="#f4f3ef">
+  <link rel="manifest" href="site.webmanifest?v=2.10.13-2" type="application/manifest+json">
   <meta name="application-name" content="Droplet">
   <meta name="apple-mobile-web-app-title" content="Droplet">
-  <link rel="stylesheet" href="style.css?v=2.10.12-1">
-  <link rel="stylesheet" href="refine.css?v=2.10.12-1">
-  <link rel="stylesheet" href="motion.css?v=2.10.12-4">
-  <script src="motion.js?v=2.10.12-6" defer></script>
+  <link rel="stylesheet" href="style.css?v=2.10.13-1">
+  <link rel="stylesheet" href="refine.css?v=2.10.13-1">
+  <link rel="stylesheet" href="motion.css?v=2.10.13-4">
+  <script src="motion.js?v=2.10.13-6" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -38,7 +38,7 @@
       <a class="brand" href="./" aria-label="Droplet home">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.7S5.7 9.4 5.7 14a6.3 6.3 0 0 0 12.6 0C18.3 9.4 12 2.7 12 2.7Z" fill="currentColor" fill-opacity=".11" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
         <span class="brand-name">Droplet</span>
-        <span class="brand-version">2.10.12</span>
+        <span class="brand-version">2.10.13</span>
       </a>
       <nav class="site-nav" aria-label="Primary">
         <a href="index.html#download">Download</a>
@@ -56,8 +56,8 @@
     <section class="page-hero release-hero wrap" aria-labelledby="release-title">
       <div>
         <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Release ledger <span aria-hidden="true">/</span> 2026-11-16</p>
-        <h1 id="release-title">Droplet<br><em>2.10.12.</em></h1>
-        <p class="lede">The Windows 10 corner bug and the non-sticky low-latency timer are fixed: the GDI region is now the primary clip, and the 0.5 ms request is reasserted while the feature is on. The tagged source still builds the published exe, with pinned GNU toolchain, release tests first, a reproducible normalized artifact, verified SHA-256, GitHub build provenance, and the local input harness.</p>
+        <h1 id="release-title">Droplet<br><em>2.10.13.</em></h1>
+        <p class="lede">The rounded window is finally clean: the authoritative GDI region is still the primary clip, and DWM no longer paints a light square frame around it. The region path clears the border color and tells DWM not to round; non-client rendering stays enabled for acrylic. The published captures now take their alpha from the live region, not a hardcoded mask. The 2.10.12 timer and anti-sleep work is retained, and the tagged source still builds the published exe with pinned GNU toolchain, release tests first, a reproducible normalized artifact, verified SHA-256, GitHub build provenance, and the local input harness.</p>
         <div class="actions">
           <a class="button button-primary" href="downloads/droplet.exe" download>Download exe <span aria-hidden="true">↓</span></a>
           <a class="button button-quiet" href="downloads/SHA256SUMS.txt">Checksums</a>
@@ -68,8 +68,8 @@
           <li>No streamproof mode</li>
         </ul>
       </div>
-      <aside class="console-card" aria-label="2.10.12 release card">
-        <div class="console-head"><span>Release / 2.10.12</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
+      <aside class="console-card" aria-label="2.10.13 release card">
+        <div class="console-head"><span>Release / 2.10.13</span><span class="status-live"><i aria-hidden="true"></i>Portable</span></div>
         <div class="console-main">
           <span class="console-label">Portable executable</span>
           <div class="console-value">550,400<small>B</small></div>
@@ -84,7 +84,7 @@
           <div class="signal-caption"><span>release tests 39 / 39</span><span>timer 0.5 ms</span></div>
         </div>
         <dl class="console-grid">
-          <div><dt>Version</dt><dd>2.10.12</dd></div>
+          <div><dt>Version</dt><dd>2.10.13</dd></div>
           <div><dt>Artifact</dt><dd>exe only</dd></div>
           <div><dt>Runtime deps</dt><dd>0</dd></div>
           <div><dt>Network</dt><dd>None</dd></div>
@@ -101,7 +101,7 @@
       <table class="release-table">
         <thead><tr><th>Artifact</th><th>Size / SHA-256</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>550,400 B<br><code>17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df</code></td><td>Download and run. No installer or package registration.</td></tr>
+          <tr><td><a href="downloads/droplet.exe" download>droplet.exe</a></td><td>550,400 B<br><code>0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e</code></td><td>Download and run. No installer or package registration.</td></tr>
           <tr><td><a href="downloads/SHA256SUMS.txt">SHA256SUMS.txt</a></td><td>exe</td><td>Verify before running.</td></tr>
           <tr><td>Linux / macOS</td><td>Not built</td><td>The core is Win32/GDI+. A real port is a separate project; no fake package is offered.</td></tr>
         </tbody>
@@ -110,16 +110,17 @@
 
     <section class="section wrap" aria-labelledby="notes-title">
       <div class="section-head">
-        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.12 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
+        <div><p class="section-tag"><span aria-hidden="true"></span>2.10.13 notes</p><h2 id="notes-title">What changed,<br><em>and what did not.</em></h2></div>
         <p class="section-lede">A readable ledger. Every item is implemented in the source or measured on the release build; the unverified items are labelled.</p>
       </div>
       <div class="download-grid">
         <article class="release-block">
-          <h3>Windows 10 corners</h3>
+          <h3>Real corners, no square frame</h3>
           <ul>
             <li>The 8 px GDI window region is installed first with <code>SetWindowRgn</code> on every supported Windows version. Windows 10 could report success for DWM's newer corner attribute while still drawing a square popup.</li>
             <li>DWM is now only a fallback if the region API fails. A failed install deletes the orphaned GDI handle; <code>WM_DPICHANGED</code> replaces the old region so a monitor move cannot leave a stale clip.</li>
-            <li>The transparent quarter-rounds remain click-through, and the capture mask uses the same radius. The all-four-corner state was checked in the regenerated capture.</li>
+            <li>The region path now clears the border color and tells DWM not to round. DWM is allowed to round only on the fallback. This removes the light square frame that 2.10.12 still drew outside the region; non-client rendering stays enabled so the acrylic backdrop remains.</li>
+            <li>The transparent quarter-rounds remain click-through. The capture helper now reads the live window region with <code>GetWindowRgn</code> instead of using a hardcoded radius, so the PNG cannot hide a square frame.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -136,7 +137,7 @@
             <li>The tag workflow installs Rust 1.99.1 and the GNU target, checks formatting, runs the release tests, builds the exe, verifies its normalized SHA-256, and attests the exe and checksum with GitHub build provenance.</li>
             <li><code>tools/build-release.ps1</code> remaps workspace and target paths; <code>tools/normalize-pe.ps1</code> zeroes the PE timestamp. Two clean targets produce the same 550,400-byte artifact.</li>
             <li>The workflow publishes only the source-built exe, checksum, and <code>droplet.intoto.jsonl</code>; the checked-in exe is a comparison target, not the uploaded file.</li>
-            <li>Tests are <strong>39 / 39</strong>. SHA-256 <code>17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df</code>. No CPU, latency, or speedup claim.</li>
+            <li>Tests are <strong>39 / 39</strong>. SHA-256 <code>0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e</code>. No CPU, latency, or speedup claim.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -164,7 +165,7 @@
             <li>Assigning a trigger clears the previous owner. Load-time normalization removes legacy duplicate chips in the same last-wins order, so the UI and hook agree; Anchor can use <code>XButton1</code> despite Breach's default.</li>
             <li>Lost capture or a missed button-up now drops the pointer gesture, not just a window drag.</li>
             <li>Captured keys without a friendly name use <code>vkXX</code>, which the parser accepts, so every captured key can be rebound.</li>
-            <li>Tests are <strong>39 / 39</strong>. Portable exe: <strong>550,400 bytes</strong>, SHA-256 <code>17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df</code>. No CPU, latency, or speedup claim.</li>
+            <li>Tests are <strong>39 / 39</strong>. Portable exe: <strong>550,400 bytes</strong>, SHA-256 <code>0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e</code>. No CPU, latency, or speedup claim.</li>
           </ul>
         </article>
         <article class="release-block">
@@ -172,7 +173,7 @@
           <ul>
             <li>Process-verified Java/Bedrock detection from 2.10.1, with browser, chat, editor, and launcher rejection.</li>
             <li>Hydrogen's literal A6 Anchor order, 47/53 ms defaults, fixed 37–43 ms early settles, and the Air loop.</li>
-            <li>The 8 px logical radius across paint, authoritative window region, fallback compositor clip, and capture mask.</li>
+            <li>The 8 px logical radius across paint, authoritative window region, fallback compositor clip, and the live-region capture alpha.</li>
             <li>Other modules keep their configured delays. The game tick and Windows scheduling remain.</li>
             <li>Self-destruct still holds for one second, purges Droplet's data, and recycles the portable executable.</li>
             <li>Dash, Shield, and Pearl still select and click in one SendInput batch.</li>
@@ -199,6 +200,7 @@
         <p class="section-lede">The versioned notes in the repository are the source of truth. This page is a readable mirror, not an automatically generated feed.</p>
       </div>
       <div class="release-timeline">
+        <article><strong>2.10.13</strong><div><h3>DWM square frame removed</h3><p>The authoritative GDI region is unchanged, but the region path now clears the border color and tells DWM not to round; non-client rendering stays enabled for acrylic. The light square outside the corners is gone. Captures use GetWindowRgn for alpha instead of a hardcoded mask. The 2.10.12 timer, anti-sleep, DPI, and provenance work is retained. Tests: 39 / 39; exe: 550,400 bytes.</p></div></article>
         <article><strong>2.10.12</strong><div><h3>Windows 10 corners, held 0.5 ms timer</h3><p>The GDI 8 px region is now the primary clip on Windows 10 and 11, and DWM is only a fallback. Low latency requests the kernel's finest timer value, reasserts 0.5 ms once per second while enabled, and holds a system-required execution state. Tagged-source build, provenance attestation, and the local input harness remain. Tests: 39 / 39; exe: 550,400 bytes.</p></div></article>
         <article><strong>2.10.11</strong><div><h3>Final handoff, deterministic captures</h3><p>rustfmt-clean source, load-time cleanup of legacy duplicate bindings, and four captures generated from an isolated deterministic profile. Anchor is shown on XButton1. Tests: 38 / 38; exe: 547,840 bytes.</p></div></article>
         <article><strong>2.10.10</strong><div><h3>Busy-safe Crystal, trigger ownership</h3><p>A busy Crystal action cannot consume a toggle-off Return request; DPI changes clear the slider drag; trigger rebinding takes ownership, and legacy duplicates resolve to the later module. Captured vkXX keys round-trip. Tests: 37 / 37; exe: 547,328 bytes.</p></div></article>
@@ -230,7 +232,7 @@
       <div class="download-verify">
         <span>Windows PowerShell</span>
         <code>Get-FileHash .\droplet.exe -Algorithm SHA256</code>
-        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.12.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
+        <a class="text-link" href="https://github.com/fuvji/droplet/blob/main/releases/v2.10.13.md" rel="noopener">Markdown release notes <span aria-hidden="true">↗</span></a>
       </div>
     </section>
   </main>

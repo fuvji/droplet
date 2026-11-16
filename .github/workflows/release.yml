@@ -43,7 +43,7 @@ jobs:
       - name: Stage and verify the source-built artifact
         shell: pwsh
         run: |
-          $expected = "17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df"
+          $expected = "0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e"
           $artifact = "target\x86_64-pc-windows-gnu\release\droplet.exe"
           $actual = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
           if ($actual -ne $expected) {

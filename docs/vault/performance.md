@@ -11,6 +11,17 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.13 changes
+
+- Visual hotfix only. The GDI region path now clears DWM's border color and
+  tells DWM not to round, removing the light square that remained outside the
+  rounded region. Non-client rendering stays enabled so the acrylic backdrop is
+  preserved. The capture helper reads the live region for alpha instead of
+  using a hardcoded rounded path. No routing, render, timer, or input path
+  changed.
+- Tests: 39 / 39. Portable exe: 550,400 B. No CPU, input-latency, or
+  render-speed benchmark was run, and no speedup is claimed.
+
 ## 2.10.12 changes
 
 - Device-dependent display and timer fixes: the GDI window region is now the

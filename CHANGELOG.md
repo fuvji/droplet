@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.10.13
+
+- Remove DWM's square non-client frame from the authoritative region path. The
+  region was clipping the client correctly, but DWM still painted a light
+  one-pixel square around it, visible against any contrasting desktop. Droplet
+  now clears the border color and asks DWM not to round whenever the region is
+  installed; DWM is allowed to round only on the region-failure fallback. The
+  border-color attribute is a Windows 11 extra; the region remains the clip on
+  Windows 10. Non-client rendering stays enabled so the acrylic backdrop is
+  preserved.
+- Replace the hardcoded rounded screenshot mask with the live window region.
+  `tools/capture-tabs.ps1` now uses `GetWindowRgn` and `PtInRegion` for the
+  capture alpha, so the four published 624×408 images reflect the actual
+  silhouette and cannot conceal a square frame.
+- Retain the 2.10.12 timer, anti-sleep, DPI, and provenance work. No routing,
+  render, or timing path changed in this hotfix.
+- Tests: **39 / 39**. Portable executable: **550,400 bytes**, SHA-256
+  `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.12
 
 - Fix incomplete rounded corners on Windows 10. The 8 px GDI window region is
