@@ -5,9 +5,10 @@ document is not a licence to reuse the source. See [LICENSE](LICENSE).
 
 ## Build
 
-Requirements: the pinned Rust 1.99.1 toolchain and Windows 10/11. The
-`rust-toolchain.toml` file installs the `x86_64-pc-windows-gnu` target and
-`rustfmt` automatically.
+Requirements: the pinned GNU-hosted Rust 1.99.1 toolchain and Windows 10/11.
+The `rust-toolchain.toml` file installs the `x86_64-pc-windows-gnu` target and
+`rustfmt` automatically. Use the GNU host, not an MSVC host with a GNU target;
+the GNU host carries the self-contained Windows import libraries.
 
 ```powershell
 cargo test --release
