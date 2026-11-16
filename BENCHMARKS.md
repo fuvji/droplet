@@ -3,6 +3,21 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.14 release
+
+2.10.14 is a visual hotfix for the square compositor shadow that remained
+after 2.10.13. The GDI region was already rounded, but the region path told DWM
+`DWMWCP_DONOTROUND`, so DWM drew a square shadow around the full window
+rectangle. The path now requests `DWMWCP_ROUND`; the shadow follows the 8 px
+region. Border color stays cleared and non-client rendering stays enabled so
+acrylic remains intact. No routing, timer, input, or render path changed.
+
+- Version: **2.10.14**
+- Portable executable: **550,400 bytes**
+- SHA-256: `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`
+- Release tests: **39 / 39**
+- No CPU, latency, render-speed, or size win is claimed.
+
 ## 2.10.13 release
 
 2.10.13 is a visual hotfix. The GDI 8 px region already clipped the client, but
@@ -132,9 +147,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.13**
+- Version: **2.10.14**
 - Portable executable: **550,400 bytes**
-- SHA-256: `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`
+- SHA-256: `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **39 / 39**
 - Runtime dependencies: **0**

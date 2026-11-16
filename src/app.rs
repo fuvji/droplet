@@ -1906,11 +1906,11 @@ unsafe fn apply_window_shape(hwnd: HWND, w: i32, h: i32, dpi: f32) {
     let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
     if rgn != 0 {
         if win::SetWindowRgn(hwnd, rgn, 1) != 0 {
-            // A hard region does not disable the compositor's square frame.
-            // Always suppress DWM's border and corner preference here. The
-            // border-color attribute is a Windows 11 extra and fails on
-            // Windows 10, where the region remains the clip.
-            let _ = set_dwm_frame(hwnd, false);
+            // A hard region does not disable the compositor's square frame or
+            // shadow. Tell DWM to round as well: its shadow then follows the
+            // same 8 px silhouette instead of drawing a square corner wedge
+            // outside the region. The GDI region remains the actual clip.
+            let _ = set_dwm_frame(hwnd);
             return;
         }
         // SetWindowRgn only takes ownership on success. Delete the orphan so
@@ -1927,10 +1927,12 @@ unsafe fn apply_window_shape(hwnd: HWND, w: i32, h: i32, dpi: f32) {
     }
 }
 
-/// Configure DWM for a borderless edge. `round` is only used when the hard
-/// region itself failed; the normal path explicitly asks DWM not to round so
-/// there is exactly one silhouette: the GDI region.
-unsafe fn set_dwm_frame(hwnd: HWND, round: bool) -> bool {
+/// Configure DWM for a borderless edge. DWM is asked to round even though the
+/// GDI region is authoritative: its compositor shadow must follow the rounded
+/// silhouette too, otherwise a square shadow wedge remains visible outside the
+/// region. On Windows 10, where the preference is unsupported, the region is
+/// still the clip.
+unsafe fn set_dwm_frame(hwnd: HWND) -> bool {
     let dll = win::dyn_load("dwmapi.dll");
     if dll == 0 {
         return false;
@@ -1940,7 +1942,7 @@ unsafe fn set_dwm_frame(hwnd: HWND, round: bool) -> bool {
         return false;
     }
     let f: unsafe extern "system" fn(HWND, u32, *const c_void, u32) -> i32 = std::mem::transmute(p);
-    let pref: i32 = if round { 2 } else { 1 }; // ROUND or DONOTROUND
+    let pref: i32 = 2; // DWMWCP_ROUND
     let ok = f(hwnd, 33, &pref as *const i32 as *const c_void, 4) == 0;
     let dark: i32 = 1; // DWMWA_USE_IMMERSIVE_DARK_MODE
     let _ = f(hwnd, 20, &dark as *const i32 as *const c_void, 4);
@@ -1948,14 +1950,14 @@ unsafe fn set_dwm_frame(hwnd: HWND, round: bool) -> bool {
     // disable non-client rendering here: that also disables the acrylic
     // composition and makes the panel translucent enough to read the desktop
     // through it. Border suppression is enough on Windows 11; Windows 10
-    // rejects the attribute and stays on the region path.
+    // rejects this attribute and stays on the region path.
     let border: u32 = 0xFFFF_FFFE; // DWMWA_COLOR_NONE
     let _ = f(hwnd, 34, &border as *const u32 as *const c_void, 4);
     ok
 }
 
 unsafe fn round_corners(hwnd: HWND) -> bool {
-    set_dwm_frame(hwnd, true)
+    set_dwm_frame(hwnd)
 }
 
 #[cfg(test)]

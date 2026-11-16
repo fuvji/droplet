@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.13
+Version: 2.10.14
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,14 +15,16 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.13 portable executable: 550,400 bytes.
-- 2.10.13 removes DWM's light square non-client frame from the region path. The
-  8 px GDI region already clipped the client, but DWM still drew outside it;
-  Droplet now clears the border color and asks DWM not to round so there is only
-  one silhouette. The border-color attribute is a Windows 11 extra; the region
-  remains the clip on Windows 10. Non-client rendering stays enabled so the
-  acrylic backdrop is preserved. The screenshots use `GetWindowRgn` for alpha
-  instead of a hardcoded mask.
+- 2.10.14 portable executable: 550,400 bytes.
+- 2.10.14 makes DWM's compositor shadow follow the rounded region. The GDI
+  region was already rounded, but the region path asked DWM for
+  `DWMWCP_DONOTROUND`, so the drop shadow still had square corners. It now asks
+  for `DWMWCP_ROUND`. The border color stays clear, non-client rendering stays
+  enabled for acrylic, and Windows 10 keeps the region clip where the attribute
+  is unsupported. The screenshots use `GetWindowRgn` for alpha instead of a
+  hardcoded mask.
+- 2.10.13 removed DWM's light square non-client border from the region path;
+  2.10.14 fixes the square shadow that remained outside it.
 - 2.10.12 fixed the Windows 10 corner clip and the non-sticky low-latency
   timer. The GDI region is installed first with `SetWindowRgn` on every
   supported Windows version; DWM is only a fallback. The region is replaced on
@@ -61,7 +63,7 @@ visible to screen capture.
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
 - Tests: 39 / 39. Four native 624×408 captures were regenerated from the
-  2.10.13 build using the live window region as their alpha mask. No CPU, latency, or speedup claim is made.
+  2.10.14 build using the live window region as their alpha mask. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
 - The GDI 8 px window region is the primary clip on Windows 10 and 11; DWM is

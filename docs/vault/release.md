@@ -1,5 +1,18 @@
 # release
 
+## 2.10.14 — 2026-11-16
+
+- Portable exe: 550,400 B,
+  `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`.
+- Tests: 39 / 39.
+- Changes: ask DWM for `DWMWCP_ROUND` on the region path instead of
+  `DONOTROUND`, so its compositor shadow follows the 8 px region rather than
+  drawing a square corner wedge. Border color remains clear and non-client
+  rendering remains enabled for acrylic. Captures use the live region. No
+  routing, timer, input, or render path changed. A magenta-backdrop capture
+  showed magenta at the exact corner; no live game or separate Windows 10
+  device was available.
+
 ## 2.10.13 — 2026-11-16
 
 - Portable exe: 550,400 B,

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.10.14
+
+- Remove the square DWM shadow that remained after 2.10.13. The GDI region was
+  already rounded, but the region path asked DWM for `DWMWCP_DONOTROUND`; DWM
+  consequently drew its drop shadow around the square window rectangle. The
+  path now requests `DWMWCP_ROUND`, so the compositor shadow follows the same
+  8 px silhouette as the region.
+- Keep the border color cleared and non-client rendering enabled. Disabling
+  non-client rendering also disables acrylic and lets desktop text show through
+  the panel, so it is not used.
+- Regenerate all four captures with `PrintWindow` and the live `GetWindowRgn`
+  alpha. No routing, timer, input, or render path changed.
+- Tests: **39 / 39**. Portable executable: **550,400 bytes**, SHA-256
+  `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.13
 
 - Remove DWM's square non-client frame from the authoritative region path. The

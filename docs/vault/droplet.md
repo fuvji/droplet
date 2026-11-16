@@ -15,10 +15,11 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.13 portable exe: 550,400 bytes. Single artifact; no MSIX/AppX or ZIP.
-  The region path clears DWM's border color and tells DWM not to round, so the
-  rounded silhouette has no light square border; non-client rendering stays on
-  for acrylic. Captures use the live window region for alpha.
+- 2.10.14 portable exe: 550,400 bytes. Single artifact; no MSIX/AppX or ZIP.
+  The region path asks DWM for `DWMWCP_ROUND`, clears its border color, and
+  keeps non-client rendering enabled for acrylic. DWM's shadow follows the
+  8 px silhouette instead of drawing a square corner wedge. Captures use the
+  live window region for alpha.
 - The tag workflow builds the GNU exe from source, checks formatting and tests,
   verifies the normalized artifact hash, and attests the exe and checksum with
   GitHub build provenance. `tools/build-release.ps1` remaps build paths and

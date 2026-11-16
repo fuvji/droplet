@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.13 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.14 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -28,8 +28,13 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.13
+## What is in 2.10.14
 
+- **DWM shadow follows the radius (2.10.14)**: the region path now asks DWM for
+  `DWMWCP_ROUND` instead of `DONOTROUND`. The compositor's drop shadow follows
+  the same 8 px silhouette as the GDI region, removing the square corner wedge
+  that was still visible after 2.10.13. Border color stays cleared and acrylic
+  stays enabled.
 - **No square DWM frame (2.10.13)**: the region path now clears DWM's border
   color and tells DWM not to round. This removes the light one-pixel square
   that 2.10.12 still drew outside the rounded region on Windows 11; the GDI
@@ -154,7 +159,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.13 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.14 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
 clips the window; the GDI region supplies the rounded edge on every supported
@@ -201,12 +206,12 @@ name, not a latency claim. Details and reproduction:
 
 - `cargo test --release`: **39 / 39**.
 - Portable executable: **550,400 bytes**,
-  `0dba32e8dc665754d911122de55ba29760cfc5e384e5132662193e5d2b5e264e`.
+  `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.13 build with the live window region as their alpha mask.
+  2.10.14 build with the live window region as their alpha mask.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.13 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.14 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game.
 

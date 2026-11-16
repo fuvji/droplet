@@ -11,6 +11,16 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.14 changes
+
+- Visual hotfix only. The region path now asks DWM for `DWMWCP_ROUND`, so its
+  compositor shadow follows the rounded silhouette instead of drawing a square
+  corner wedge. Border color stays clear and non-client rendering stays enabled
+  for acrylic. The capture helper uses the live region for alpha. No routing,
+  render, timer, or input path changed.
+- Tests: 39 / 39. Portable exe: 550,400 B. No CPU, input-latency, or
+  render-speed benchmark was run, and no speedup is claimed.
+
 ## 2.10.13 changes
 
 - Visual hotfix only. The GDI region path now clears DWM's border color and
