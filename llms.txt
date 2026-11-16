@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.11
+Version: 2.10.12
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,11 +15,29 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.11 portable executable: 547,840 bytes.
-- 2.10.11 is the final handoff build: the source tree is rustfmt-clean, legacy
-  duplicate trigger chips are normalized on load to match last-wins routing,
-  and the four captures use an isolated deterministic profile. Anchor is shown
-  on `XButton1`; the old Breach owner is cleared. Tests: 38 / 38.
+- 2.10.12 portable executable: 550,400 bytes.
+- 2.10.12 fixes the Windows 10 corner silhouette and the non-sticky low-latency
+  timer. The 8 px GDI window region is installed first with `SetWindowRgn` on
+  every supported Windows version; Windows 10 could report success for DWM's
+  newer corner attribute while still drawing a square popup, so DWM is now only
+  a fallback. The region is replaced on DPI changes, and a failed install
+  deletes its orphaned GDI handle.
+- `NtQueryTimerResolution` returns the coarsest value in `min` and the finest
+  hardware value in `max`. The timer target now uses `max` and requests
+  5,000 x 100 ns (0.5 ms) when supported; a one-second guard reasserts it while
+  low latency is enabled and stops when the feature is off. The UI shows the
+  value actually granted. Low latency also holds
+  `ES_CONTINUOUS | ES_SYSTEM_REQUIRED` so an idle sleep transition cannot drop
+  the request; it is cleared on toggle-off or exit. The OS can still deny
+  0.5 ms on unsupported hardware. Tests: 39 / 39.
+- The tagged workflow installs Rust 1.99.1 and the GNU target, checks
+  formatting, runs the release tests, builds the exe, verifies its normalized
+  SHA-256, and attests it with GitHub build provenance.
+  `tools/build-release.ps1` remaps build paths and `tools/normalize-pe.ps1`
+  zeroes the PE timestamp, so two clean targets agree.
+- `tools/input-harness.ps1` records Droplet's injected keyboard/mouse output
+  with low-level hooks and a temporary profile. It checks the focus-only gate,
+  master gate, and Shield sequence; it is not shipped in the exe.
 - Crystal toggle-off restore now acquires `CRYSTAL_BUSY` before consuming its
   generation request. A busy Crystal action leaves the request pending and the
   restore retries; a fresh Crystal cycle cancels a stale delayed restore.
@@ -37,13 +55,13 @@ visible to screen capture.
 - `WM_DPICHANGED` updates scale, physical window size, rounded clip, hover,
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
-- Tests: 38 / 38. Four native 624×408 captures were regenerated from the
-  2.10.11 build. No CPU, latency, or speedup claim is made.
+- Tests: 39 / 39. Four native 624×408 captures were regenerated from the
+  2.10.12 build. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
-- DWM supplies the antialiased 8 px corner when available; the GDI region is
-  used only as a fallback, avoiding a hard second clip. The transparent
-  quarter-rounds are click-through.
+- The GDI 8 px window region is the primary clip on Windows 10 and 11; DWM is
+  only a fallback if the region API fails. The transparent quarter-rounds are
+  click-through.
 - Once a foreground game HWND is verified, the presence watcher reuses it until
   focus moves instead of re-resolving the same process image every 160 ms.
 - The favicon and site header/footer use one transparent outlined droplet mark,
@@ -63,7 +81,7 @@ visible to screen capture.
 - No MSIX, AppX, installer, or ZIP is published. The executable is direct.
 - Linux and macOS are not supported yet. The hook, window, and paint layers are
   Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
-- 38 release tests pass.
+- 39 release tests pass.
 - Game detection resolves the owning process: Java (`javaw.exe`/`java.exe` with
   a game signature) or Bedrock (`Minecraft.Windows.exe`). Browsers, Discord,
   editors, and the launcher are rejected, and two samples confirm presence.
