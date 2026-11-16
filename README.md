@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.11 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.12 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 547,840 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 550,400 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,12 +28,38 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.11
+## What is in 2.10.12
 
+- **Complete rounded corners on Windows 10 (2.10.12)**: the 8 px window
+  region is installed with `SetWindowRgn` first on every supported Windows
+  version. Windows 10 could report success for DWM's newer corner attribute
+  while still drawing a square popup; the compositor is now only a fallback if
+  the region API fails. DPI changes replace the region, and a failed install
+  deletes the orphaned GDI handle.
+- **A held 0.5 ms timer (2.10.12)**: the kernel query's `max` value is the
+  finest resolution, not `min`. Droplet now requests 5,000 × 100 ns (0.5 ms)
+  when the hardware supports it, records the value actually granted, and shows
+  that exact value in System > Performance. A one-second guard reasserts the
+  request while low latency is enabled and stops when it is switched off.
+- **Anti-sleep while low latency is on (2.10.12)**: the app holds
+  `ES_CONTINUOUS | ES_SYSTEM_REQUIRED` so an idle system transition cannot drop
+  the timer request. Switching the feature off or exiting clears it. The
+  display is not forced on, and the OS can still deny 0.5 ms on hardware that
+  does not expose it.
+- **Source-built provenance (2.10.12)**: the tag workflow now installs the
+  pinned GNU toolchain, checks formatting, tests the release target, builds the
+  exe, verifies its normalized SHA-256, attests it with GitHub build
+  provenance, and publishes only that source-built artifact. Two clean builds
+  in separate target directories produce the same hash.
+- **Input-recording harness (2.10.12)**: `tools/input-harness.ps1` records
+  Droplet's injected keyboard/mouse output with low-level hooks. It verifies
+  the focus-only gate, the master gate, and an open-gate Shield sequence using
+  a temporary profile. It is a local Windows test tool and is not shipped in
+  the executable.
 - **Final handoff polish (2.10.11)**: the source tree is rustfmt-clean, legacy
   duplicate trigger chips are normalized on load to match last-wins routing,
   and captures now come from an isolated, deterministic profile. The final
-  artifact is 547,840 bytes with 38 release tests.
+  handoff artifact was 547,840 bytes with 38 release tests.
 - **Busy-safe Crystal restore (2.10.10)**: a toggle-off restore now waits for
   the Crystal re-entrancy gate instead of consuming the request while another
   Crystal action is busy. The pending request survives a busy cycle and a
@@ -89,16 +115,16 @@ published because those builds do not exist.
 - **Leaner presence loop**: the focus-only gate is cached in an atomic updated
   when settings publish, so the 160 ms presence loop no longer clones the
   settings snapshot or takes its lock.
-- **Click-through corners**: DWM's antialiased clip now owns the edge, and the
-  transparent quarter-rounds return `HTTRANSPARENT` instead of swallowing
-  clicks. The center and straight edges still hit the panel; the hard-region
-  fallback is unchanged.
+- **Click-through corners**: the transparent quarter-rounds return
+  `HTTRANSPARENT` instead of swallowing clicks. The center and straight edges
+  still hit the panel; the authoritative window region has the same 8 px
+  silhouette.
 - **Less redundant presence work**: once the foreground window is the verified
   game, the watcher reuses that HWND instead of resolving its process image
   every 160 ms. Presence, focus, and the cold-discovery scan are unchanged.
-- **Cleaner corners**: Windows 11 now uses DWM's compositor-rounded, antialiased
-  corner. The GDI region is only a fallback when DWM cannot round the popup, so
-  the window is no longer clipped twice.
+- **Raw corners on Windows 10 and 11**: the GDI window region is the primary
+  silhouette, not a Windows 11-only compositor attribute. This closes the
+  device-dependent incomplete-corner bug while keeping one 8 px logical radius.
 - **Game detection fixed**: a visible window is no longer enough. Droplet
   resolves the owning process and accepts only `javaw.exe`, `java.exe` with a
   game signature, or `Minecraft.Windows.exe`. Browsers, Discord, editors, and
@@ -111,8 +137,9 @@ published because those builds do not exist.
   held-repeat behavior.
 - **One portable exe**: MSIX/AppX, installer, and ZIP packaging are gone. The
   release is a single unsigned `droplet.exe` plus checksums.
-- **8 px shared corner**: paint, fallback region, DWM clip, and capture mask
-  agree on the radius. There is no top accent strip or painted rim.
+- **8 px shared corner**: paint, authoritative window region, fallback
+  compositor clip, and capture mask agree on the radius. There is no top
+  accent strip or painted rim.
 - **Independent sliders and knob switches** remain from 2.9.2.
 - **No unrestricted-speed mode**. Other modules keep their configured delays;
   the game tick and Windows scheduling remain the real boundary.
@@ -121,11 +148,11 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.11 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.12 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 8 px radius paints and
-clips the window; DWM supplies the rounded edge, and there is no outer stroke
-or top accent line.
+clips the window; the GDI region supplies the rounded edge on every supported
+Windows version, and there is no outer stroke or top accent line.
 Painting is event-driven; an idle panel does not schedule animation frames.
 Binding and slot chips borrow their labels instead of allocating a `String` per
 chip per frame.
@@ -166,14 +193,14 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **38 / 38**.
-- Portable executable: **547,840 bytes**,
-  `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`.
+- `cargo test --release`: **39 / 39**.
+- Portable executable: **550,400 bytes**,
+  `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.11 build with an isolated deterministic profile.
+  2.10.12 build with an isolated deterministic profile.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.11 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.12 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game.
 

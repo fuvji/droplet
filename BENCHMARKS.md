@@ -3,6 +3,27 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.12 release
+
+2.10.12 fixes the Windows 10 corner silhouette and makes the low-latency
+timer request persistent. The GDI window region is now the primary clip on
+every supported Windows version; it is installed first, replaced on DPI
+changes, and only falls back to DWM if the region API fails. The timer path
+now reads the kernel's finest resolution (`max`, not its coarsely named `min`),
+requests 5,000 × 100 ns, displays the value actually granted, and reasserts it
+while low latency is enabled. A system-required execution state is held for
+the same interval. The tag workflow still builds and verifies the artifact
+from the tagged source.
+
+- Version: **2.10.12**
+- Portable executable: **550,400 bytes**
+- SHA-256: `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`
+- Release tests: **39 / 39**
+- No CPU, latency, render-speed, or size win is claimed. Trigger routing and
+  watcher cadence are unchanged. On this host the System panel and an
+  independent kernel query both reported 0.5 ms while low latency was on; that
+  is a timer-resolution reading, not an end-to-end latency benchmark.
+
 ## 2.10.11 release
 
 2.10.11 is the final handoff build. The source tree is rustfmt-clean, duplicate
@@ -95,11 +116,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.11**
-- Portable executable: **547,840 bytes**
-- SHA-256: `aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71`
+- Version: **2.10.12**
+- Portable executable: **550,400 bytes**
+- SHA-256: `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **38 / 38**
+- Release tests: **39 / 39**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**

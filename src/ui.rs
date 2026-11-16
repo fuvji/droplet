@@ -8,8 +8,9 @@ use crate::gp::{Canvas, Fonts};
 
 pub const WIN_W: f32 = 624.0;
 pub const WIN_H: f32 = 408.0;
-/// One radius for the window region. The panel is deliberately borderless; only
-/// DWM's rounded clip defines the edge.
+/// One radius for the window region. The panel is deliberately borderless;
+/// the GDI window region is authoritative on every supported Windows version,
+/// so Windows 10 cannot silently fall back to a square frame.
 pub const CORNER_RADIUS: f32 = 8.0;
 
 pub const HEADER_H: f32 = 44.0;
@@ -255,8 +256,9 @@ impl<'a> Ui<'a> {
             _ => self.tab_system(),
         }
         self.footer();
-        // No painted outer stroke. DWM supplies the rounded clip and the app
-        // paints the surface edge-to-edge, so there is no double-thickness rim.
+        // No painted outer stroke. The platform window region supplies the
+        // rounded clip and the app paints the surface edge-to-edge, so there
+        // is no double-thickness rim.
     }
 
     fn header(&mut self) {

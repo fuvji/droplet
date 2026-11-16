@@ -79,7 +79,6 @@ static ENGINE: OnceLock<Arc<Engine>> = OnceLock::new();
 static mut APP: *mut App = std::ptr::null_mut();
 static MAIN_HWND: AtomicIsize = AtomicIsize::new(0);
 static GAME: AtomicIsize = AtomicIsize::new(0);
-static DWM_ROUNDED: AtomicBool = AtomicBool::new(false);
 static HOOK_TID: AtomicU32 = AtomicU32::new(0);
 static SPRINT_WAIT: OnceLock<thread::Thread> = OnceLock::new();
 
@@ -97,6 +96,8 @@ static RENDER_US: AtomicU32 = AtomicU32::new(0);
 static SD_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SD_PROGRESS: AtomicU32 = AtomicU32::new(0);
 static TIMER_100NS: AtomicU32 = AtomicU32::new(156_250);
+static TIMER_ON: AtomicBool = AtomicBool::new(false);
+static TIMER_GUARD_STARTED: AtomicBool = AtomicBool::new(false);
 static REALTIME_ACTIVE: AtomicBool = AtomicBool::new(false);
 
 thread_local! {
@@ -775,7 +776,10 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
         win::WM_ERASEBKGND => 1,
         win::WM_MOUSEACTIVATE => win::WM_MOUSEACTIVATE_NOACTIVATE,
         win::WM_NCHITTEST => {
-            if DWM_ROUNDED.load(Ordering::Relaxed) && corner_hit(hwnd, lp, app.dpi) {
+            // The region already clips the window. Keep the same corner test
+            // active for the compositor fallback so a click in a transparent
+            // quarter-round never starts a drag on a square edge.
+            if corner_hit(hwnd, lp, app.dpi) {
                 win::HTTRANSPARENT
             } else {
                 win::HTCLIENT
@@ -1107,10 +1111,10 @@ fn pointer_state(x: i32, y: i32, dpi: f32) -> (f32, f32, bool) {
     (x as f32, y as f32, x >= 0 && y >= 0 && x < w && y < h)
 }
 
-/// True only in the transparent quarter-rounds DWM clips at the panel edge.
-/// Keeping this in sync with `ui::CORNER_RADIUS` makes the visible corners
-/// click-through when the compositor, rather than a hard GDI region, owns the
-/// clip. The fallback region already removes these points from hit testing.
+/// True only in the transparent quarter-rounds at the panel edge. Keeping this
+/// in sync with `ui::CORNER_RADIUS` makes the visible corners click-through;
+/// the authoritative GDI region already removes these points from hit testing,
+/// while the same geometry remains correct for the compositor fallback.
 fn in_rounded_corner(x: f32, y: f32, w: f32, h: f32, radius: f32) -> bool {
     let r = radius.max(1.0);
     if x < 0.0 || y < 0.0 || x >= w || y >= h {
@@ -1408,76 +1412,177 @@ fn apply_priority(on: bool) {
     }
 }
 
-/// 0.5 ms is the native timer floor on current Windows hardware. The multimedia
-/// call is still made first because the two APIs interact; NtSet then asks for
-/// 5,000 x 100 ns and records the resolution the kernel actually granted.
-fn apply_timer(on: bool) {
-    unsafe {
-        let ntdll = win::dyn_load("ntdll.dll");
-        let query = if ntdll != 0 {
-            win::load_proc(ntdll, "NtQueryTimerResolution")
-        } else {
-            0
-        };
-        let set = if ntdll != 0 {
-            win::load_proc(ntdll, "NtSetTimerResolution")
-        } else {
-            0
-        };
-        let query: Option<unsafe extern "system" fn(*mut u32, *mut u32, *mut u32) -> i32> =
-            if query != 0 {
-                Some(std::mem::transmute(query))
-            } else {
-                None
-            };
-        let set: Option<unsafe extern "system" fn(u32, u8, *mut u32) -> i32> = if set != 0 {
-            Some(std::mem::transmute(set))
-        } else {
-            None
-        };
+type TimerQuery = unsafe extern "system" fn(*mut u32, *mut u32, *mut u32) -> i32;
+type TimerSet = unsafe extern "system" fn(u32, u8, *mut u32) -> i32;
 
-        if on {
-            time_begin_period(1);
-            let mut min = 0u32;
-            let mut max = 0u32;
-            let mut current = 0u32;
-            if let Some(q) = query {
-                let _ = q(&mut min, &mut max, &mut current);
+const TIMER_TARGET_100NS: u32 = 5_000;
+const TIMER_IDLE_100NS: u32 = 156_250;
+const ES_CONTINUOUS: u32 = 0x8000_0000;
+const ES_SYSTEM_REQUIRED: u32 = 0x0000_0001;
+
+fn timer_fns() -> (Option<TimerQuery>, Option<TimerSet>) {
+    static QUERY: OnceLock<Option<TimerQuery>> = OnceLock::new();
+    static SET: OnceLock<Option<TimerSet>> = OnceLock::new();
+    let query = *QUERY.get_or_init(|| unsafe {
+        let ntdll = win::dyn_load("ntdll.dll");
+        if ntdll == 0 {
+            None
+        } else {
+            let p = win::load_proc(ntdll, "NtQueryTimerResolution");
+            if p == 0 {
+                None
+            } else {
+                Some(std::mem::transmute(p))
             }
-            let target = if min > 5_000 { min } else { 5_000 };
-            let mut actual = 0u32;
-            if let Some(s) = set {
-                if s(target, 1, &mut actual) == 0 && actual > 0 {
+        }
+    });
+    let set = *SET.get_or_init(|| unsafe {
+        let ntdll = win::dyn_load("ntdll.dll");
+        if ntdll == 0 {
+            None
+        } else {
+            let p = win::load_proc(ntdll, "NtSetTimerResolution");
+            if p == 0 {
+                None
+            } else {
+                Some(std::mem::transmute(p))
+            }
+        }
+    });
+    (query, set)
+}
+
+/// NtQueryTimerResolution returns the coarsest value in `min` and the finest
+/// hardware value in `max` (the naming is counter-intuitive). The kernel's
+/// finest value is normally 5,000 (0.5 ms). Request 0.5 ms when the hardware
+/// supports it; if the finest available value is coarser, request that instead
+/// of silently accepting the 15.625 ms idle default. The UI displays the value
+/// the kernel actually granted.
+fn timer_target_100ns(finest: u32) -> u32 {
+    finest.max(TIMER_TARGET_100NS)
+}
+
+fn timer_query() -> (u32, u32) {
+    let (query, _) = timer_fns();
+    if let Some(q) = query {
+        let mut min = 0u32;
+        let mut max = 0u32;
+        let mut current = 0u32;
+        unsafe {
+            if q(&mut min, &mut max, &mut current) == 0 {
+                // `max` is the finest available resolution, not the coarsest.
+                return (max, current);
+            }
+        }
+    }
+    (0, 0)
+}
+
+fn timer_set(target: u32, on: bool) -> u32 {
+    let (_, set) = timer_fns();
+    if let Some(s) = set {
+        let mut actual = 0u32;
+        unsafe {
+            if s(target, on as u8, &mut actual) == 0 {
+                return actual;
+            }
+        }
+    }
+    0
+}
+
+/// Keep a 0.5 ms timer request alive after startup. Windows can drop or raise
+/// a process timer request after a power transition, a session event, or a
+/// higher-resolution request from another app. A cheap one-second query-and-
+/// reassert loop fixes the "re-enable low latency" workaround without polling
+/// on the input path.
+fn ensure_timer_guard() {
+    if TIMER_GUARD_STARTED.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let spawned = thread::Builder::new()
+        .name("droplet-timer-guard".to_string())
+        .stack_size(32 * 1024)
+        .spawn(|| loop {
+            if !TIMER_ON.load(Ordering::SeqCst) {
+                TIMER_GUARD_STARTED.store(false, Ordering::SeqCst);
+                return;
+            }
+            let (finest, current) = timer_query();
+            let target = timer_target_100ns(finest);
+            if current == 0 || current > target {
+                let actual = timer_set(target, true);
+                // If low latency was switched off while the guard was in the
+                // kernel call, release the request instead of leaving a
+                // stale 0.5 ms hold behind.
+                if !TIMER_ON.load(Ordering::SeqCst) {
+                    let _ = timer_set(TIMER_TARGET_100NS, false);
+                    TIMER_GUARD_STARTED.store(false, Ordering::SeqCst);
+                    return;
+                }
+                if actual > 0 {
                     TIMER_100NS.store(actual, Ordering::Relaxed);
-                } else {
-                    TIMER_100NS.store(10_000, Ordering::Relaxed);
                 }
             } else {
-                TIMER_100NS.store(10_000, Ordering::Relaxed);
+                TIMER_100NS.store(current, Ordering::Relaxed);
             }
-        } else {
-            if let Some(s) = set {
-                let mut actual = 0u32;
-                let _ = s(5_000, 0, &mut actual);
-            }
-            time_end_period(1);
-            let mut min = 0u32;
-            let mut max = 0u32;
-            let mut current = 0u32;
-            if let Some(q) = query {
-                let _ = q(&mut min, &mut max, &mut current);
-            }
-            TIMER_100NS.store(
-                if current > 0 { current } else { 156_250 },
-                Ordering::Relaxed,
-            );
+            thread::sleep(Duration::from_millis(1000));
+        });
+    if spawned.is_err() {
+        TIMER_GUARD_STARTED.store(false, Ordering::SeqCst);
+    }
+}
+
+unsafe fn keep_awake(on: bool) {
+    let flags = ES_CONTINUOUS | if on { ES_SYSTEM_REQUIRED } else { 0 };
+    win::SetThreadExecutionState(flags);
+}
+
+/// Request the kernel's native 0.5 ms floor and keep it held. The multimedia
+/// call is made first because the two APIs interact; NtSet records the
+/// resolution the kernel actually granted, which the UI displays verbatim.
+fn apply_timer(on: bool) {
+    if on {
+        TIMER_ON.store(true, Ordering::SeqCst);
+        unsafe {
+            time_begin_period(1);
         }
+        let (finest, current) = timer_query();
+        let target = timer_target_100ns(finest);
+        let actual = timer_set(target, true);
+        let shown = if actual > 0 {
+            actual
+        } else if current > 0 {
+            current
+        } else {
+            TIMER_IDLE_100NS
+        };
+        TIMER_100NS.store(shown, Ordering::Relaxed);
+        ensure_timer_guard();
+    } else {
+        TIMER_ON.store(false, Ordering::SeqCst);
+        let _ = timer_set(TIMER_TARGET_100NS, false);
+        unsafe {
+            time_end_period(1);
+        }
+        let (_, current) = timer_query();
+        TIMER_100NS.store(
+            if current > 0 {
+                current
+            } else {
+                TIMER_IDLE_100NS
+            },
+            Ordering::Relaxed,
+        );
     }
 }
 
 fn apply_low_latency(on: bool) {
     apply_priority(on);
     apply_timer(on);
+    unsafe {
+        keep_awake(on);
+    }
     unsafe {
         let tid = HOOK_TID.load(Ordering::Relaxed);
         if tid != 0 {
@@ -1683,10 +1788,11 @@ pub fn run() {
         };
         win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
 
-        // Prefer DWM's compositor-rounded corner on Windows 11: it is
-        // antialiased and follows the system DPI. Only install the hard GDI
-        // region as a fallback when DWM cannot round this popup. The helper is
-        // reused by WM_DPICHANGED so a monitor change cannot leave a stale clip.
+        // The GDI region is the primary silhouette on every Windows version.
+        // Windows 10 can report success for DWM's newer corner attribute while
+        // still drawing a square popup, so the compositor is only a fallback
+        // if the region API fails. The helper is reused by WM_DPICHANGED so a
+        // monitor change cannot leave a stale clip.
         apply_window_shape(hwnd, w, h, dpi);
 
         let icon = native_icon();
@@ -1717,6 +1823,7 @@ pub fn run() {
             app.settings.save();
         }
         apply_timer(false);
+        keep_awake(false);
         if icon != 0 {
             win::DestroyIcon(icon);
         }
@@ -1785,23 +1892,33 @@ unsafe fn system_backdrop(hwnd: HWND) -> bool {
     f(hwnd, 38, &kind as *const i32 as *const std::ffi::c_void, 4) == 0
 }
 
-/// Apply the single logical corner radius to the live window. DWM's rounded
-/// clip is preferred; the GDI region is the only fallback. Reapplying this on
-/// a DPI change also removes a stale region from the previous monitor.
+/// Apply the single logical corner radius to the live window. The GDI region
+/// is installed first and is authoritative on every supported Windows version:
+/// Windows 10 can report success for the newer DWM corner attribute while
+/// still rendering a square popup. DWM is only a last-resort fallback when the
+/// region API itself fails. Reapplying this on a DPI change replaces the old
+/// region, so a monitor move cannot leave a stale clip.
 unsafe fn apply_window_shape(hwnd: HWND, w: i32, h: i32, dpi: f32) {
     if w <= 0 || h <= 0 {
         return;
     }
     let radius = (ui::CORNER_RADIUS * dpi).round().max(1.0) as i32;
-    if round_corners(hwnd, radius) {
-        DWM_ROUNDED.store(true, Ordering::Relaxed);
-        win::SetWindowRgn(hwnd, 0, 1);
-    } else {
-        DWM_ROUNDED.store(false, Ordering::Relaxed);
-        let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
-        if rgn != 0 {
-            win::SetWindowRgn(hwnd, rgn, 1);
+    let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
+    if rgn != 0 {
+        if win::SetWindowRgn(hwnd, rgn, 1) != 0 {
+            return;
         }
+        // SetWindowRgn only takes ownership on success. Delete the orphan so
+        // repeated DPI changes cannot leak GDI handles.
+        win::DeleteObject(rgn);
+    }
+
+    // The hard region failed for an unexpected platform reason. Ask the
+    // compositor to round instead; this preserves a usable window rather than
+    // leaving a square frame or crashing the paint path.
+    let ok = round_corners(hwnd, radius);
+    if ok {
+        win::SetWindowRgn(hwnd, 0, 1);
     }
 }
 
@@ -1828,7 +1945,9 @@ unsafe fn round_corners(hwnd: HWND, radius: i32) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{game_window_matches, in_rounded_corner, pointer_state, process_leaf};
+    use super::{
+        game_window_matches, in_rounded_corner, pointer_state, process_leaf, timer_target_100ns,
+    };
     use crate::ui;
 
     #[test]
@@ -1916,6 +2035,13 @@ mod tests {
 
         // The right/bottom edge is exclusive, matching Rect::has.
         assert!(!pointer_state(780, 510, 1.25).2);
+    }
+
+    #[test]
+    fn timer_target_never_requests_coarser_than_half_ms() {
+        assert_eq!(timer_target_100ns(0), 5_000);
+        assert_eq!(timer_target_100ns(5_000), 5_000);
+        assert_eq!(timer_target_100ns(6_250), 6_250);
     }
 
     #[test]

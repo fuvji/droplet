@@ -503,6 +503,7 @@ extern "system" {
     pub fn GetCurrentThreadId() -> u32;
     pub fn SetPriorityClass(proc: HANDLE, class: u32) -> BOOL;
     pub fn SetThreadPriority(thread: HANDLE, prio: i32) -> BOOL;
+    pub fn SetThreadExecutionState(flags: u32) -> u32;
     pub fn GetLastError() -> u32;
     pub fn SetLastError(err: u32);
     pub fn Sleep(ms: u32);

@@ -15,8 +15,12 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.11 portable exe: 547,840 bytes. Single artifact; no MSIX/AppX or ZIP.
-- Tests: 38 / 38.
+- 2.10.12 portable exe: 550,400 bytes. Single artifact; no MSIX/AppX or ZIP.
+- The tag workflow builds the GNU exe from source, checks formatting and tests,
+  verifies the normalized artifact hash, and attests the exe and checksum with
+  GitHub build provenance. `tools/build-release.ps1` remaps build paths and
+  zeroes the PE timestamp so separate clean targets agree.
+- Tests: 39 / 39.
 - The full source tree is rustfmt-clean. Duplicate legacy trigger bindings are
   normalized on load so the later module owns the input, matching runtime
   last-wins routing. The four site captures use an isolated deterministic
@@ -34,6 +38,10 @@ Canonical site: <https://fuvji.github.io/droplet/>
   same order, and the later module wins. This is why Anchor can use
   `XButton1` although Breach ships with it as a default. Captured keys without
   a friendly name use `vkXX`, which the parser accepts.
+- `tools/input-harness.ps1` records Droplet's injected keyboard/mouse output
+  with low-level Windows hooks and verifies the focus gate, master gate, and a
+  Shield sequence from a temporary profile. It is a local test tool, not part
+  of the exe.
 - `tools/check-release.ps1` checks version, artifact size and SHA-256, test
   count, 624×408 captures, workflow hash, and local site links.
 - The self-destruct waiter uses hidden `ShellExecuteW` instead of
@@ -54,10 +62,13 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Design
 
-One 8 px radius. Corners prefer DWM's antialiased compositor clip; the transparent
-quarter-rounds are click-through and the GDI region is a fallback only. The
-presence watcher reuses a verified foreground game HWND, and its focus-only gate
-is cached in an atomic. The favicon and site marks are one transparent outlined
+One 8 px radius. The GDI window region is the authoritative clip on every
+supported Windows version, because Windows 10 can report success for DWM's
+corner attribute while still drawing a square popup. The region is installed
+first, replaced on DPI changes, and the compositor is only a fallback if the
+region API fails. Transparent quarter-rounds are click-through. The presence
+watcher reuses a verified foreground game HWND, and its focus-only gate is
+cached in an atomic. The favicon and site marks are one transparent outlined
 droplet with no plate, border, background, or shadow. Event-driven paint.
 Borderless module cards with the original 28×16 sliding knob switch and no
 module glyphs. Small original line icons remain in the navigation rail only.
@@ -66,6 +77,12 @@ Min/Max sliders are independent.
 
 ## Current work
 
+- Low latency now requests the kernel's finest available timer resolution
+  (normally 5,000 × 100 ns, or 0.5 ms), records the value actually granted, and
+  displays it in System > Performance. A one-second guard reasserts the request
+  while the feature is enabled, and the guard stops when it is switched off.
+  `SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED)` is held for the
+  same interval so an idle sleep transition cannot drop the timer request.
 - Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
   160 ms restores it after release and a latched toggle restores it when
   switched off; a short tap intentionally leaves the selected slot alone.

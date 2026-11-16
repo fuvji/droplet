@@ -1,5 +1,20 @@
 # release
 
+## 2.10.12 — 2026-11-16
+
+- Portable exe: 550,400 B,
+  `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`.
+- Tests: 39 / 39.
+- Changes: authoritative GDI 8 px window region on every supported Windows
+  version, fixing incomplete corners on Windows 10; timer target now uses the
+  kernel's finest value (`max`) and a one-second guard reasserts 0.5 ms while
+  low latency is on; a system-required execution state is held for the same
+  interval. Tagged-source GNU build, formatted and tested first, reproducible
+  path remapping and zeroed PE timestamp, verified artifact hash, GitHub
+  build-provenance attestation, and the local input harness remain. Timer
+  resolution was observed at 0.5 ms here; that is not an end-to-end latency
+  claim. No live injection or separate Windows 10 device was available.
+
 ## 2.10.11 — 2026-11-15
 
 - Portable exe: 547,840 B,

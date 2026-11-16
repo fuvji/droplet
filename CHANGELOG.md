@@ -1,5 +1,42 @@
 # Changelog
 
+## 2.10.12
+
+- Fix incomplete rounded corners on Windows 10. The 8 px GDI window region is
+  now installed first on every supported Windows version; DWM is only a
+  fallback if `SetWindowRgn` fails. Windows 10 could return success from the
+  newer compositor corner attribute while leaving a square popup. A failed
+  region install deletes the orphaned GDI handle, and `WM_DPICHANGED` replaces
+  the region so a monitor move cannot retain the old clip. The transparent
+  quarter-rounds remain click-through.
+- Fix the low-latency timer request. `NtQueryTimerResolution` returns the
+  coarsest value in `min` and the finest hardware value in `max`; the old code
+  passed `min` to the target helper and could request 15.625 ms. Droplet now
+  requests 5,000 × 100 ns when supported, records the granted value, and shows
+  it in System > Performance. A guard reasserts the request once per second
+  while low latency is on and stops when it is off; a request racing with the
+  off switch is released.
+- Hold a system-required execution state while low latency is enabled, so an
+  idle system transition cannot drop the timer request. Switching the feature
+  off or exiting clears it. This is not a display-awake or latency guarantee.
+- Add a regression test for the timer target floor. It cannot silently request
+  a coarser resolution again.
+- Build the published exe from the tagged source in CI. The release workflow
+  now installs Rust 1.99.1 and the GNU target, checks formatting, runs the
+  release tests, builds with `tools/build-release.ps1`, verifies the normalized
+  SHA-256, and attests the exe and checksum with GitHub build provenance.
+  Release notes and the site link the attestation bundle.
+- Make clean Windows GNU builds reproducible. The build wrapper remaps the
+  workspace and target paths and zeroes the PE timestamp; two separate clean
+  target directories produce the same artifact.
+- Add `tools/input-harness.ps1`. It installs low-level keyboard/mouse hooks,
+  records Droplet's injected output from a temporary profile, and asserts the
+  focus-only gate, master gate, and Shield sequence. The harness needs an
+  interactive Windows desktop and is not part of the shipped executable.
+- Tests: **39 / 39**. Portable executable: **550,400 bytes**, SHA-256
+  `17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.11
 
 - Format the complete source tree with rustfmt and make `cargo fmt --check`

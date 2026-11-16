@@ -11,6 +11,21 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.12 changes
+
+- Device-dependent display and timer fixes: the GDI window region is now the
+  primary 8 px corner clip on every supported Windows version, and the timer
+  path requests the kernel's finest value (`max`) instead of the coarsely
+  named `min`. A one-second guard reasserts 0.5 ms while low latency is on.
+- The release workflow still builds from the tagged source, normalizes the PE
+  timestamp, verifies the hash, and attests the artifact.
+  `tools/input-harness.ps1` remains a local test tool, not shipped code.
+- Tests: 39 / 39. Portable exe: 550,400 B. On this host, the System panel and
+  an independent kernel query both reported 0.5 ms while low latency was on.
+  That is a timer-resolution reading, not an end-to-end latency benchmark. No
+  CPU, input-latency, or render-speed benchmark was run, and no speedup is
+  claimed.
+
 ## 2.10.11 changes
 
 - Final handoff only: formatting, load-time cleanup of duplicate legacy trigger
@@ -118,10 +133,11 @@ one codegen unit, panic-abort, stripped.
 
 ## 2.10.2 changes
 
-- The window now uses DWM's composited rounded clip when available and falls
-  back to the GDI region only when DWM cannot round the popup. This removes a
-  redundant hard clip; it is a visual fix and no frame-time or startup speedup
-  is claimed. The logical 8 px radius, capture mask, and routing are unchanged.
+- 2.10.12 supersedes the DWM-first corner choice: the GDI region is now the
+  primary clip on every supported Windows version because Windows 10 could
+  report success while rendering a square popup. The compositor remains only a
+  fallback when the region API fails. The logical 8 px radius, capture mask,
+  and routing are unchanged.
 
 ## 2.10.3 changes
 

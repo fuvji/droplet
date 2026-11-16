@@ -5,21 +5,25 @@ document is not a licence to reuse the source. See [LICENSE](LICENSE).
 
 ## Build
 
-Requirements: a recent stable Rust toolchain, the
-`x86_64-pc-windows-gnu` target, and Windows 10/11.
+Requirements: the pinned Rust 1.99.1 toolchain and Windows 10/11. The
+`rust-toolchain.toml` file installs the `x86_64-pc-windows-gnu` target and
+`rustfmt` automatically.
 
 ```powershell
-rustup target add x86_64-pc-windows-gnu
 cargo test --release
-cargo build --release
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-release.ps1
 ```
 
-The release binary is written to
-`target/x86_64-pc-windows-gnu/release/droplet.exe`. The project has no crate
-dependencies; `.cargo/config.toml` selects the GNU target and self-contained
-linking. Copy that one file to `apps/droplet/droplet.exe` and
-`site/public/downloads/droplet.exe` for distribution. There is no MSIX, AppX,
-installer, or signing step.
+The release wrapper writes
+`target/x86_64-pc-windows-gnu/release/droplet.exe`. It remaps the workspace and
+target paths to `/droplet` and `/target`, builds the GNU target, and zeroes the
+PE timestamp. Two clean builds in different target directories must produce
+SHA-256
+`17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df`.
+The project has no crate dependencies; `.cargo/config.toml` selects the GNU
+target, bundled `rust-lld`, self-contained linking, and ICF. Copy that one file
+to `apps/droplet/droplet.exe` and `site/public/downloads/droplet.exe` for
+distribution. There is no MSIX, AppX, installer, or signing step.
 
 ## Site
 
@@ -38,7 +42,7 @@ release artifact and site layout.
 
 ## Verification
 
-The release currently carries **38 / 38** tests:
+The release currently carries **39 / 39** tests:
 
 ```powershell
 cargo test --release
@@ -51,7 +55,7 @@ physical rail hit testing at 125%/150%, the allocation-free binding lookup,
 rebinding conflict ownership, load-time duplicate cleanup, `XButton1`/Anchor
 routing, captured-key round-trips, Anchor slot validation, W-Tap planning, Sprint's 100 ms deadline,
 cadence adaptation, profile parsing, and trigger-index equivalence plus its
-routing benchmark.
+routing benchmark, and the timer target floor.
 
 Before publishing, run the release consistency checker:
 
@@ -63,6 +67,29 @@ It verifies the version in `Cargo.toml`/`Cargo.lock`, checksum and size for both
 copied executables, SHA256SUMS, the workflow hash, the test count claimed in
 docs, all four 624×408 captures, and local site links. It also runs
 `cargo test --release`. A release check should not use `-SkipTests`.
+
+## Input harness
+
+The input harness is a local Windows integration test, not part of the shipped
+panel. It needs an interactive desktop because it installs `WH_KEYBOARD_LL` and
+`WH_MOUSE_LL` hooks in a hidden message loop and injects one labelled trigger.
+It does not use game memory, the network, or a live Minecraft client.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/input-harness.ps1
+```
+
+It starts Droplet with a temporary `LOCALAPPDATA` and a seeded config, then
+records only events carrying Droplet's `dwExtraInfo` marker. The three cases
+are: focus-only gate on with no game (no macro output), master off with the
+gate open (no macro output), and the normal Shield sequence (exactly `h`
+down/up followed by left click down/up). The harness cleans up the process and
+profile and exits non-zero on any mismatch. Use `-OutFile` to save the complete
+JSON event record.
+
+Hosted CI does not run this harness: a GitHub-hosted Windows runner has no
+interactive desktop or foreground game session. The release workflow covers
+formatting, unit tests, the reproducible artifact, and attestation instead.
 
 Captures use a temporary `LOCALAPPDATA` and seeded config; the caller's real
 settings are never read or changed. This keeps the published four-image set
@@ -84,10 +111,11 @@ For a complete release pass, run these in order from the repository root:
 ```powershell
 cargo fmt --check
 cargo test --release
-cargo build --release
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-release.ps1
 Copy-Item target/x86_64-pc-windows-gnu/release/droplet.exe apps/droplet/droplet.exe
 Copy-Item target/x86_64-pc-windows-gnu/release/droplet.exe site/public/downloads/droplet.exe
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/capture-tabs.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/input-harness.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/check-release.ps1
 ```
 
@@ -103,8 +131,12 @@ only the contents of `site/public/` to `gh-pages`.
 
 The release artifact is generated from the release build and published under
 `site/public/downloads/`. The tag workflow in `.github/workflows/release.yml`
-builds and uploads the single Windows executable and its checksum with the notes
-in `releases/`. Do not put credentials or signing private keys in the repository.
+installs the pinned toolchain, checks formatting and tests the GNU target,
+builds through the reproducible wrapper, verifies the normalized hash, attests
+the exe and checksum, and uploads those files plus `droplet.intoto.jsonl` with
+the notes in `releases/`. The checked-in exe is only a comparison target; the
+workflow never publishes it directly. Do not put credentials or signing private
+keys in the repository.
 
 ## Design rules
 

@@ -7,28 +7,61 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-pc-windows-msvc
-      - name: Test
-        run: cargo test --release --target x86_64-pc-windows-msvc
-      - name: Stage verified exe
+          persist-credentials: false
+
+      - name: Install pinned Rust toolchain
         shell: pwsh
         run: |
-          $expected = "aa9f514c7ad890c60e99836c88e4ba4052dbb737d580d90f3b5ffbc1cbbccc71"
-          $artifact = "site/public/downloads/droplet.exe"
-          $actual = (Get-FileHash $artifact -Algorithm SHA256).Hash.ToLower()
-          if ($actual -ne $expected) { throw "Published exe hash does not match the release notes." }
+          rustup toolchain install 1.99.1 --profile minimal --target x86_64-pc-windows-gnu --component rustfmt
+          rustup default 1.99.1
+          rustc --version
+          cargo --version
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Test the GNU release target
+        run: cargo test --release --locked --target x86_64-pc-windows-gnu
+
+      - name: Build the release artifact
+        shell: pwsh
+        run: .\tools\build-release.ps1
+
+      - name: Stage and verify the source-built artifact
+        shell: pwsh
+        run: |
+          $expected = "17de486afd22f1a2485e859fd708495dedeb3ded32343121cbdaacf125fc34df"
+          $artifact = "target\x86_64-pc-windows-gnu\release\droplet.exe"
+          $actual = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) {
+            throw "Source-built exe does not match the checked-in release hash: $actual != $expected"
+          }
           New-Item -ItemType Directory -Force -Path dist | Out-Null
-          Copy-Item $artifact "dist/droplet.exe"
+          Copy-Item -LiteralPath $artifact "dist/droplet.exe"
           "Droplet $env:GITHUB_REF_NAME - SHA-256`n`n$actual  droplet.exe" |
             Set-Content "dist/SHA256SUMS.txt" -Encoding ascii
+
+      - name: Attest build provenance
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/droplet.exe
+            dist/SHA256SUMS.txt
+
+      - name: Stage attestation bundle
+        shell: pwsh
+        run: Copy-Item -LiteralPath "${{ steps.attest.outputs.bundle-path }}" "dist/droplet.intoto.jsonl"
+
       - name: Publish release
         shell: pwsh
         env:
@@ -39,5 +72,6 @@ jobs:
           gh release create $env:GITHUB_REF_NAME `
             "dist/droplet.exe" `
             "dist/SHA256SUMS.txt" `
+            "dist/droplet.intoto.jsonl" `
             --title "Droplet $env:GITHUB_REF_NAME" `
             --notes-file $notes

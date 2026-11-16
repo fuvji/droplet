@@ -82,6 +82,19 @@ function Check-Regex([string]$Relative, [string]$Pattern, [string]$Label) {
     }
 }
 
+function Check-Absent([string]$Relative, [string]$Needle, [string]$Label) {
+    try {
+        $text = Read-Text $Relative
+        if (-not $text.Contains($Needle)) {
+            Pass $Label
+        } else {
+            Fail "$Label ($Relative still contains '$Needle')"
+        }
+    } catch {
+        Fail "$Label ($($_.Exception.Message))"
+    }
+}
+
 try {
     $cargoText = Read-Text "Cargo.toml"
     $cargoVersion = [regex]::Match($cargoText, '(?m)^version\s*=\s*"([^"]+)"')
@@ -133,6 +146,13 @@ try {
     Check-Text "site/public/downloads/SHA256SUMS.txt" "Droplet $ver" "SHA256SUMS.txt version"
 
     Check-Text ".github/workflows/release.yml" ('$expected = "' + $appHash + '"') "release workflow expected hash"
+    Check-Text ".github/workflows/release.yml" "x86_64-pc-windows-gnu" "release workflow GNU target"
+    Check-Text ".github/workflows/release.yml" "tools\build-release.ps1" "release workflow reproducible build"
+    Check-Text ".github/workflows/release.yml" "attest-build-provenance" "release workflow attestation"
+    Check-Text ".github/workflows/release.yml" "id-token: write" "release workflow OIDC permission"
+    Check-Text ".github/workflows/release.yml" "attestations: write" "release workflow attestations permission"
+    Check-Text "rust-toolchain.toml" 'channel = "1.99.1"' "pinned Rust toolchain"
+    Check-Absent ".github/workflows/release.yml" "x86_64-pc-windows-msvc" "release workflow does not test MSVC instead of publishing GNU"
     Check-Text "site/public/downloads/README.txt" "Droplet $ver" "downloads README version"
     Check-Text "site/public/downloads/README.txt" "$sizeText bytes" "downloads README size"
 
