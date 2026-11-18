@@ -1,4 +1,4 @@
-Droplet 2.10.16 — Windows x64 portable (558,080 bytes)
+Droplet 2.10.17 — Windows x64 portable (561,152 bytes)
 
 Run droplet.exe. Windows 10 19041 or newer, x64.
 The panel starts open. Press Ctrl + Right Shift to show or hide it.
@@ -7,6 +7,10 @@ The close button exits the process; there is no tray icon.
 Droplet sends ordinary keyboard and mouse input through SendInput. It does
 not read or write game memory, does not use the network, and has no telemetry.
 It does not hide from screen capture, bypass anti-cheat, or disguise input.
+
+The panel is a translucent layered surface: the desktop shows through the
+graphite glass. It is not capture-evading; every pixel remains visible to
+ordinary screen capture.
 
 There is no installer, MSIX/AppX package, or ZIP wrapper. The executable is
 not code-signed, so Windows SmartScreen may warn.

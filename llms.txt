@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.16
+Version: 2.10.17
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,29 +15,33 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.16 portable executable: 558,080 bytes.
-- 2.10.16 captures the live panel at 100%, 125%, and 150% DPI and
+- 2.10.17 portable executable: 561,152 bytes.
+- 2.10.17 captures the live panel at 100%, 125%, and 150% DPI and
   `tools/check-dpi-corners.ps1` requires four transparent, mirrored corners
   plus an opaque straight edge at every scale. The same mask rule is a Rust
   unit test.
-- 2.10.16 composes the panel through `UpdateLayeredWindow` with an antialiased
-  per-pixel alpha mask. All four 12 px quarter-circles use mirrored 4×4
-  coverage sampling, so the right and bottom corner spikes are gone; the
-  interim path had centred those arcs on the window edge. This silhouette is
-  Windows 10-safe: it does not depend on DWM's Windows 11-only corner
-  preference. The old GDI region is cleared on every DPI pass.
-- The GUI uses a soft graphite tonal wash, a filled rounded rail selection,
-  bold titles, white switch knobs with deeper accent tracks, and slider
-  thumb halos. The Apple reference images supplied the design language only;
-  no brand assets, textures, or network resources were added.
+- 2.10.17 composes the panel through `UpdateLayeredWindow` with an antialiased
+  per-pixel alpha mask at 84% opacity, so the desktop reads through the glass.
+  All four 18 px quarter-circles use mirrored 4×4 coverage sampling, so the
+  right and bottom corner spikes are gone; the interim path had centred those
+  arcs on the window edge. This silhouette is Windows 10-safe: it does not
+  depend on DWM's Windows 11-only corner preference. The old GDI region is
+  cleared on every DPI pass. DWM backdrop requests are off because they made
+  the layered window opaque.
+- The GUI is a gray graphite aurora with low-alpha slate, indigo, and mauve
+  blooms, a second-pane glass rail, a filled rounded selection, and thin Segoe
+  UI Light type with no bold weight. The `LOCAL / WINDOWS` eyebrow is gone. The
+  window radius is 18 px and cards use 15 px. The Apple reference images
+  supplied the design language only; no brand assets, textures, or network
+  resources were added.
 - Reset restores the shipped defaults, including Keep panel open on. The
   alpha, premultiply, and corner rewrite work is one buffer pass now.
-- 2.10.16 writes a local diagnostic to `%LOCALAPPDATA%\Droplet\dwm.log` with the
+- 2.10.17 writes a local diagnostic to `%LOCALAPPDATA%\Droplet\dwm.log` with the
   HRESULTs for DWM attributes 33, 20, and 34, plus the region clear, size, and
   DPI. It is capped at 32 KiB and never transmitted.
 - 2.10.13 removed DWM's light square non-client border from the region path;
-  2.10.14 made the compositor shadow follow the rounded region. 2.10.16 replaces
-  the hard clip with the layered alpha surface.
+  2.10.14 made the compositor shadow follow the rounded region; 2.10.15
+  replaced the hard clip with the layered alpha surface.
 - The input harness recorder now pumps `GetMessage` directly instead of a
   hidden WinForms form, but its Shield case still intermittently records no
   output on this desktop. A separate low-level probe observed Droplet emit `h`
@@ -82,11 +86,11 @@ visible to screen capture.
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
 - Tests: 42 / 42. Four native 624×408 captures plus 624×408, 780×510, and
-  936×612 DPI captures were regenerated from the 2.10.16 build using the
+  936×612 DPI captures were regenerated from the 2.10.17 build using the
   layered alpha mask. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
-- The layered 12 px alpha surface is the primary clip on Windows 10 and 11;
+- The layered 18 px alpha surface is the primary clip on Windows 10 and 11;
   DWM is not required for the silhouette. The transparent quarter-rounds are
   click-through.
 - Once a foreground game HWND is verified, the presence watcher reuses it until
@@ -112,7 +116,8 @@ visible to screen capture.
 - Game detection resolves the owning process: Java (`javaw.exe`/`java.exe` with
   a game signature) or Bedrock (`Minecraft.Windows.exe`). Browsers, Discord,
   editors, and the launcher are rejected, and two samples confirm presence.
-- Compact 624x408 graphite acrylic overlay with a 12 px shared corner radius,
+- Compact 624x408 translucent graphite acrylic overlay at 84% opacity, with
+  an 18 px shared corner radius,
   no painted outer rim, and no top accent line.
 - Borderless module cards with the original 28x16 sliding knob switch. No
   module glyphs and no ON/OFF text.
