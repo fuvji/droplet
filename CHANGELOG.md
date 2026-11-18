@@ -1,5 +1,38 @@
 # Changelog
 
+## 2.10.15
+
+- Replace the hard GDI window region with a per-pixel alpha surface composed by
+  `UpdateLayeredWindow`. Every quarter-circle now uses 4×4 coverage sampling,
+  and the shared window radius is 12 px, so the arcs blend into the desktop
+  without the coarse single-sample staircase. This is the Windows 10-safe
+  silhouette: it does not depend on the Windows 11-only DWM corner preference.
+  The old region is cleared on every DPI pass.
+- **Fix the corner spikes.** The 2.10.15 preview put the right and bottom arc
+  centres on the window edge instead of one radius inside it, which left a
+  one-pixel spike at every right and bottom corner. All four centres now share
+  the same mirrored geometry and the hit test, paint, and capture mask agree on
+  the 12 px radius.
+- Collapse the old alpha pass, premultiply pass, and corner rewrite into one
+  full-buffer pass. No speedup is claimed without a benchmark.
+- Add `%LOCALAPPDATA%\Droplet\dwm.log`, a local, 32 KiB-capped diagnostic that
+  records the HRESULTs for DWM attributes 33, 20, and 34, plus the region clear,
+  size, and DPI. It does not transmit anything.
+- Teach the capture helper to apply the same mirrored, supersampled silhouette
+  and regenerate all four 624×408 captures.
+- Reset now restores the shipped defaults, including **Keep panel open** on.
+  The default itself was already on; reset previously carried the old value
+  forward and could leave the panel able to hide on the next focus tick.
+- Fix the input harness recorder's message loop: it now pumps `GetMessage`
+  directly instead of relying on a hidden WinForms form whose `Application.Run`
+  could return immediately. The Shield case still intermittently records no
+  output on this desktop; a separate low-level probe has observed Droplet emit
+  `h` down/up plus left click down/up, so the macro path is not the missing
+  piece. The official Shield check remains unresolved here.
+- Tests: **41 / 41**. Portable executable: **556,032 bytes**, SHA-256
+  `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`.
+  No CPU, latency, or speedup claim is made.
+
 ## 2.10.14
 
 - Remove the square DWM shadow that remained after 2.10.13. The GDI region was

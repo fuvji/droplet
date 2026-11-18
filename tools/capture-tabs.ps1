@@ -82,6 +82,10 @@ public static class DropletTabs {
         IntPtr region = CreateRectRgn(0, 0, 0, 0);
         try {
             if (GetWindowRgn(hwnd, region) == 0) {
+                // The layered-alpha window has no binary region. Apply the same
+                // 8 px antialiased silhouette the app rendered instead of
+                // leaving a square screenshot.
+                ApplyRoundedAlpha(bitmap, 12);
                 return;
             }
             for (int y = 0; y < bitmap.Height; y++) {
@@ -93,6 +97,35 @@ public static class DropletTabs {
             }
         } finally {
             DeleteObject(region);
+        }
+    }
+
+    public static void ApplyRoundedAlpha(Bitmap bitmap, int radius) {
+        int w = bitmap.Width;
+        int h = bitmap.Height;
+        const int Samples = 4;
+        for (int y = 0; y < radius; y++) {
+            for (int x = 0; x < radius; x++) {
+                foreach (bool right in new bool[] { false, true }) {
+                    foreach (bool bottom in new bool[] { false, true }) {
+                        int px = right ? w - 1 - x : x;
+                        int py = bottom ? h - 1 - y : y;
+                        int inside = 0;
+                        for (int sy = 0; sy < Samples; sy++) {
+                            for (int sx = 0; sx < Samples; sx++) {
+                                double fx = x + (sx + 0.5) / Samples;
+                                double fy = y + (sy + 0.5) / Samples;
+                                double dx = fx - radius;
+                                double dy = fy - radius;
+                                if (dx * dx + dy * dy <= radius * radius) inside++;
+                            }
+                        }
+                        double coverage = inside / (double)(Samples * Samples);
+                        Color c = bitmap.GetPixel(px, py);
+                        bitmap.SetPixel(px, py, Color.FromArgb((int)(255 * coverage), c.R, c.G, c.B));
+                    }
+                }
+            }
         }
     }
 }

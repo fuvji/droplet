@@ -3,6 +3,28 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.15 release
+
+2.10.15 replaces the hard GDI window region with an antialiased per-pixel alpha
+surface composed by `UpdateLayeredWindow`. All four 12 px quarter-circles use
+4×4 coverage sampling now, and the right/bottom centres are mirrored one radius
+inside the window rather than sitting on its edge. The silhouette does not
+depend on DWM's Windows 11 corner preference. The alpha, premultiply, and corner
+rewrite passes were folded into one full-buffer pass; no separate render-speed
+measurement was run. A local DWM HRESULT log is written under
+`%LOCALAPPDATA%\Droplet\dwm.log`. The input harness recorder now pumps
+`GetMessage` directly instead of relying on a hidden WinForms form, but its
+Shield case still intermittently records no output here; a separate low-level
+probe has observed the app emit `h` down/up plus left click down/up. That
+official check is unresolved, not a pass. No routing, timer, or input path
+changed.
+
+- Version: **2.10.15**
+- Portable executable: **556,032 bytes**
+- SHA-256: `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`
+- Release tests: **41 / 41**
+- No CPU, latency, render-speed, or size win is claimed.
+
 ## 2.10.14 release
 
 2.10.14 is a visual hotfix for the square compositor shadow that remained
@@ -147,11 +169,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.14**
-- Portable executable: **550,400 bytes**
-- SHA-256: `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`
+- Version: **2.10.15**
+- Portable executable: **556,032 bytes**
+- SHA-256: `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **39 / 39**
+- Release tests: **41 / 41**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**

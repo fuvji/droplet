@@ -142,6 +142,22 @@ pub struct WNDCLASSEXW {
 
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
+pub struct SIZE {
+    pub cx: i32,
+    pub cy: i32,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct BLENDFUNCTION {
+    pub BlendOp: u8,
+    pub BlendFlags: u8,
+    pub SourceConstantAlpha: u8,
+    pub AlphaFormat: u8,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
 pub struct PAINTSTRUCT {
     pub hdc: HDC,
     pub fErase: BOOL,
@@ -363,6 +379,9 @@ pub const REALTIME_PRIORITY_CLASS: u32 = 0x0000_0100;
 pub const HIGH_PRIORITY_CLASS: u32 = 0x0000_0080;
 
 pub const SRCCOPY: u32 = 0x00CC_0020;
+pub const ULW_ALPHA: u32 = 0x0000_0002;
+pub const AC_SRC_ALPHA: u8 = 1;
+pub const AC_SRC_OVER: u8 = 0;
 
 pub const DIB_RGB_COLORS: u32 = 0;
 
@@ -407,6 +426,7 @@ extern "system" {
     pub fn GetClientRect(hwnd: HWND, r: *mut RECT) -> BOOL;
     pub fn SetWindowRgn(hwnd: HWND, rgn: HRGN, redraw: BOOL) -> i32;
     pub fn GetMessageW(msg: *mut MSG, hwnd: HWND, min: u32, max: u32) -> BOOL;
+    pub fn PeekMessageW(msg: *mut MSG, hwnd: HWND, min: u32, max: u32, remove: u32) -> BOOL;
     pub fn TranslateMessage(msg: *const MSG) -> BOOL;
     pub fn DispatchMessageW(msg: *const MSG) -> LRESULT;
     pub fn PostQuitMessage(code: i32);
@@ -415,6 +435,17 @@ extern "system" {
     pub fn KillTimer(hwnd: HWND, id: usize) -> BOOL;
     pub fn InvalidateRect(hwnd: HWND, r: *const RECT, erase: BOOL) -> BOOL;
     pub fn GetDC(hwnd: HWND) -> HDC;
+    pub fn UpdateLayeredWindow(
+        hwnd: HWND,
+        dst: HDC,
+        dst_pos: *const POINT,
+        size: *const SIZE,
+        src: HDC,
+        src_pos: *const POINT,
+        key: u32,
+        blend: *const BLENDFUNCTION,
+        flags: u32,
+    ) -> BOOL;
     pub fn ReleaseDC(hwnd: HWND, hdc: HDC) -> i32;
     pub fn BeginPaint(hwnd: HWND, ps: *mut PAINTSTRUCT) -> HDC;
     pub fn EndPaint(hwnd: HWND, ps: *const PAINTSTRUCT) -> BOOL;

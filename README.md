@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.14 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.15 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 550,400 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 556,032 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,25 +28,32 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.14
+## What is in 2.10.15
 
-- **DWM shadow follows the radius (2.10.14)**: the region path now asks DWM for
-  `DWMWCP_ROUND` instead of `DONOTROUND`. The compositor's drop shadow follows
-  the same 8 px silhouette as the GDI region, removing the square corner wedge
-  that was still visible after 2.10.13. Border color stays cleared and acrylic
-  stays enabled.
-- **No square DWM frame (2.10.13)**: the region path now clears DWM's border
-  color and tells DWM not to round. This removes the light one-pixel square
-  that 2.10.12 still drew outside the rounded region on Windows 11; the GDI
-  region remains the clip on Windows 10. Non-client rendering is left enabled
-  so the acrylic backdrop is preserved. The screenshots now use the live window
-  region instead of a hardcoded mask.
-- **Complete rounded corners on Windows 10 (2.10.12)**: the 8 px window
-  region is installed with `SetWindowRgn` first on every supported Windows
-  version. Windows 10 could report success for DWM's newer corner attribute
-  while still drawing a square popup; the compositor is now only a fallback if
-  the region API fails. DPI changes replace the region, and a failed install
-  deletes the orphaned GDI handle.
+- **Antialiased corners on the panel surface (2.10.15)**: the window now
+  publishes a per-pixel alpha surface with `UpdateLayeredWindow`. All four
+  12 px quarter-circles use 4×4 coverage sampling, removing the spikes and
+  binary staircase that still read as a square detail around the corner.
+- **Corrected corner geometry (2.10.15)**: the interim layered path put the
+  right and bottom arc centres on the window edge instead of one radius inside
+  it. The mirrored geometry now makes all four corners identical, and paint,
+  hit testing, window sizing, and capture use the same 12 px radius.
+- **Windows 10-safe silhouette (2.10.15)**: the layered surface is the visible
+  clip on both Windows 10 and Windows 11; it does not depend on the Windows
+  11-only DWM corner preference. The old GDI region is cleared on every DPI
+  pass, so a monitor move cannot reintroduce a stair step.
+- **Reset means defaults (2.10.15)**: Reset restores **Keep panel open** to its
+  shipped on state instead of carrying the previous value forward. The default
+  itself has been on since 2.10.9.
+- **Local DWM diagnostic (2.10.15)**: `%LOCALAPPDATA%\Droplet\dwm.log` records
+  the HRESULTs for DWM attributes 33, 20, and 34 plus the region clear, size,
+  and DPI. It is local only and capped at 32 KiB.
+- **DWM shadow follows the radius (2.10.14)**: the compositor path still asks
+  DWM for `DWMWCP_ROUND` and clears the border color; the layered alpha surface
+  now provides the final antialiased edge.
+- **Complete rounded corners on Windows 10 (2.10.12)**: the 8 px region was
+  installed with `SetWindowRgn` first on every supported Windows version.
+  The 2.10.15 layered path replaces that hard clip with the antialiased mask.
 - **A held 0.5 ms timer (2.10.12)**: the kernel query's `max` value is the
   finest resolution, not `min`. Droplet now requests 5,000 × 100 ns (0.5 ms)
   when the hardware supports it, records the value actually granted, and shows
@@ -128,14 +135,13 @@ published because those builds do not exist.
   settings snapshot or takes its lock.
 - **Click-through corners**: the transparent quarter-rounds return
   `HTTRANSPARENT` instead of swallowing clicks. The center and straight edges
-  still hit the panel; the authoritative window region has the same 8 px
-  silhouette.
+  still hit the panel; the layered alpha silhouette has the same 12 px radius.
 - **Less redundant presence work**: once the foreground window is the verified
   game, the watcher reuses that HWND instead of resolving its process image
   every 160 ms. Presence, focus, and the cold-discovery scan are unchanged.
-- **Raw corners on Windows 10 and 11**: the GDI window region is the primary
-  silhouette, not a Windows 11-only compositor attribute. This closes the
-  device-dependent incomplete-corner bug while keeping one 8 px logical radius.
+- **Raw corners on Windows 10 and 11**: the layered alpha surface is the
+  primary silhouette, not a Windows 11-only compositor attribute. This closes
+  the device-dependent incomplete-corner bug while keeping one logical radius.
 - **Game detection fixed**: a visible window is no longer enough. Droplet
   resolves the owning process and accepts only `javaw.exe`, `java.exe` with a
   game signature, or `Minecraft.Windows.exe`. Browsers, Discord, editors, and
@@ -148,9 +154,8 @@ published because those builds do not exist.
   held-repeat behavior.
 - **One portable exe**: MSIX/AppX, installer, and ZIP packaging are gone. The
   release is a single unsigned `droplet.exe` plus checksums.
-- **8 px shared corner**: paint, authoritative window region, fallback
-  compositor clip, and capture mask agree on the radius. There is no top
-  accent strip or painted rim.
+- **12 px shared corner**: paint, layered alpha surface, hit test, and capture
+  mask agree on the radius. There is no top accent strip or painted rim.
 - **Independent sliders and knob switches** remain from 2.9.2.
 - **No unrestricted-speed mode**. Other modules keep their configured delays;
   the game tick and Windows scheduling remain the real boundary.
@@ -159,12 +164,13 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.14 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.15 System panel](site/public/assets/droplet-system.png)
 
-The panel is a native 624×408 acrylic surface. One 8 px radius paints and
-clips the window; the GDI region supplies the rounded edge on every supported
-Windows version, and there is no outer stroke or top accent line.
-Painting is event-driven; an idle panel does not schedule animation frames.
+The panel is a native 624×408 acrylic surface. One 12 px radius paints and
+clips the window; a supersampled layered alpha mask supplies the rounded edge
+on every supported Windows version, and there is no outer stroke or top accent
+line. Painting is event-driven; an idle panel does not schedule animation
+frames.
 Binding and slot chips borrow their labels instead of allocating a `String` per
 chip per frame.
 
@@ -204,16 +210,19 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **39 / 39**.
-- Portable executable: **550,400 bytes**,
-  `7ab6aed9862148dce35872fed3dbe029082cb6dd2ac1ca79f4170ee7511d3ded`.
+- `cargo test --release`: **41 / 41**.
+- Portable executable: **556,032 bytes**,
+  `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.14 build with the live window region as their alpha mask.
+  2.10.15 build with the layered alpha mask as their silhouette.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.14 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.15 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
-  game.
+  game. The input harness recorder now pumps `GetMessage` directly, but its
+  Shield case still intermittently records no output here; a separate low-level
+  probe has observed Droplet emit `h` down/up plus left click down/up. That
+  official check is reported as unresolved, not passed.
 
 ## Deliberate boundaries
 

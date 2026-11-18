@@ -15,16 +15,19 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.14 portable exe: 550,400 bytes. Single artifact; no MSIX/AppX or ZIP.
-  The region path asks DWM for `DWMWCP_ROUND`, clears its border color, and
-  keeps non-client rendering enabled for acrylic. DWM's shadow follows the
-  8 px silhouette instead of drawing a square corner wedge. Captures use the
-  live window region for alpha.
+- 2.10.15 portable exe: 556,032 bytes. Single artifact; no MSIX/AppX or ZIP.
+  The panel uses an antialiased per-pixel alpha surface through
+  `UpdateLayeredWindow`, so the 12 px corners blend into the desktop and the
+  silhouette no longer depends on DWM's Windows 11-only corner preference. All
+  four arcs use mirrored 4×4 coverage sampling; the earlier right/bottom
+  centres were on the window edge and left visible spikes. The old GDI region
+  is cleared on DPI changes. A local `dwm.log` records the DWM HRESULTs.
+  Captures use the layered alpha mask.
 - The tag workflow builds the GNU exe from source, checks formatting and tests,
   verifies the normalized artifact hash, and attests the exe and checksum with
   GitHub build provenance. `tools/build-release.ps1` remaps build paths and
   zeroes the PE timestamp so separate clean targets agree.
-- Tests: 39 / 39.
+- Tests: 41 / 41.
 - The full source tree is rustfmt-clean. Duplicate legacy trigger bindings are
   normalized on load so the later module owns the input, matching runtime
   last-wins routing. The four site captures use an isolated deterministic
@@ -66,11 +69,12 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Design
 
-One 8 px radius. The GDI window region is the authoritative clip on every
+One 12 px radius. The layered alpha surface is the visible clip on every
 supported Windows version, because Windows 10 can report success for DWM's
-corner attribute while still drawing a square popup. The region is installed
-first, replaced on DPI changes, and the compositor is only a fallback if the
-region API fails. Transparent quarter-rounds are click-through. The presence
+corner attribute while still drawing a square popup. The alpha mask is
+recomputed on DPI changes and the old GDI region is cleared, so a compositor
+fallback cannot reintroduce a square edge. Transparent quarter-rounds are
+click-through. The presence
 watcher reuses a verified foreground game HWND, and its focus-only gate is
 cached in an atomic. The favicon and site marks are one transparent outlined
 droplet with no plate, border, background, or shadow. Event-driven paint.

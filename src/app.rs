@@ -5,12 +5,13 @@
 
 use std::collections::HashMap;
 use std::ffi::c_void;
+use std::io::Write;
 use std::sync::atomic::{AtomicBool, AtomicIsize, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, RwLock};
 use std::thread;
 use std::time::Duration;
 
-use crate::config::Settings;
+use crate::config::{self, Settings};
 use crate::gp::{self, BackBuffer, Canvas, Fonts};
 use crate::input::{self, Probe};
 use crate::keys::{self, Btn, Ev};
@@ -203,6 +204,9 @@ impl App {
     // ------------------------------------------------------------- drawing
 
     fn draw(&mut self, hdc: HDC, interact: bool) {
+        // Kept for the BeginPaint/GetDC callers; the layered update below owns
+        // the visible pixels.
+        let _ = hdc;
         let (cw, ch) = self.client();
         if cw <= 8 || ch <= 8 {
             return;
@@ -274,7 +278,16 @@ impl App {
         }
 
         unsafe {
-            win::BitBlt(hdc, 0, 0, cw, ch, bdc, 0, 0, win::SRCCOPY);
+            // A layered window owns its pixels through UpdateLayeredWindow. The
+            // old BitBlt path would draw a square, region-clipped surface.
+            if let Some(back) = self.back.as_ref() {
+                crate::layered::prepare(
+                    back,
+                    (ui::CORNER_RADIUS * scale).round() as i32,
+                    ACRYLIC_ALPHA,
+                );
+                crate::layered::update(self.hwnd, back);
+            }
         }
         let elapsed = input::now().wrapping_sub(render_start).max(0) as f64;
         let qpf = input::qpf().max(1) as f64;
@@ -368,9 +381,10 @@ impl App {
                 }
                 Act::Reset => {
                     macros::stop_all_toggles();
-                    let persist = self.settings.persist;
+                    // Reset means the shipped defaults, including keeping the
+                    // panel open. Carrying the old toggle forward made a reset
+                    // leave the panel able to disappear on the next focus tick.
                     self.settings = Settings::default();
-                    self.settings.persist = persist;
                     self.changed();
                 }
                 Act::Capture(k) => {
@@ -776,9 +790,9 @@ unsafe extern "system" fn wndproc(hwnd: HWND, msg: u32, wp: WPARAM, lp: LPARAM) 
         win::WM_ERASEBKGND => 1,
         win::WM_MOUSEACTIVATE => win::WM_MOUSEACTIVATE_NOACTIVATE,
         win::WM_NCHITTEST => {
-            // The region already clips the window. Keep the same corner test
-            // active for the compositor fallback so a click in a transparent
-            // quarter-round never starts a drag on a square edge.
+            // The layered alpha mask makes the quarter-rounds transparent.
+            // Keep the matching hit test so a click there never starts a drag
+            // on a square edge.
             if corner_hit(hwnd, lp, app.dpi) {
                 win::HTTRANSPARENT
             } else {
@@ -1113,8 +1127,8 @@ fn pointer_state(x: i32, y: i32, dpi: f32) -> (f32, f32, bool) {
 
 /// True only in the transparent quarter-rounds at the panel edge. Keeping this
 /// in sync with `ui::CORNER_RADIUS` makes the visible corners click-through;
-/// the authoritative GDI region already removes these points from hit testing,
-/// while the same geometry remains correct for the compositor fallback.
+/// the layered alpha mask removes these pixels from the visible surface, while
+/// the same geometry defines the hit target.
 fn in_rounded_corner(x: f32, y: f32, w: f32, h: f32, radius: f32) -> bool {
     let r = radius.max(1.0);
     if x < 0.0 || y < 0.0 || x >= w || y >= h {
@@ -1340,12 +1354,15 @@ fn spawn_watchers(engine: Arc<Engine>, hwnd: HWND) {
 
 fn spawn_hooks(engine: Arc<Engine>) {
     thread::spawn(move || unsafe {
-        let mut msg = MSG::default();
         HOOK_TID.store(win::GetCurrentThreadId(), Ordering::Relaxed);
         if engine.settings().low_latency {
             input::boost_thread();
         }
-        // Install first: a blocking GetMessage here would starve the hooks forever.
+        // Low-level hooks are delivered through the installing thread's message
+        // queue. Create that queue before SetWindowsHookEx; installing first can
+        // succeed yet never reach the callback on a fresh worker thread.
+        let mut msg = MSG::default();
+        win::PeekMessageW(&mut msg, 0, 0, 0, 0);
         let kb = win::SetWindowsHookExW(win::WH_KEYBOARD_LL, kb_hook as *const () as usize, 0, 0);
         let ms = win::SetWindowsHookExW(win::WH_MOUSE_LL, ms_hook as *const () as usize, 0, 0);
         loop {
@@ -1778,21 +1795,15 @@ pub fn run() {
         );
 
         // Desktop acrylic is composited by DWM, so it stays off the app's
-        // paint thread. The window alpha is what lets the blur read through
-        // the dark panel; without it the opaque back buffer would hide it.
-        let acrylic = apply_acrylic(hwnd);
-        let alpha = if acrylic != "none" {
-            ACRYLIC_ALPHA
-        } else {
-            255
-        };
-        win::SetLayeredWindowAttributes(hwnd, 0, alpha, win::LWA_ALPHA);
+        // paint thread. The per-pixel alpha surface still owns the final
+        // pixels; this call keeps the material available where the platform
+        // supports it.
+        let _ = apply_acrylic(hwnd);
 
-        // The GDI region is the primary silhouette on every Windows version.
-        // Windows 10 can report success for DWM's newer corner attribute while
-        // still drawing a square popup, so the compositor is only a fallback
-        // if the region API fails. The helper is reused by WM_DPICHANGED so a
-        // monitor change cannot leave a stale clip.
+        // The layered alpha surface is the primary silhouette on every Windows
+        // version, including Windows 10 where DWM's newer corner attribute is
+        // unsupported. The helper is reused by WM_DPICHANGED so a monitor
+        // change cannot leave an old corner mask.
         apply_window_shape(hwnd, w, h, dpi);
 
         let icon = native_icon();
@@ -1892,72 +1903,68 @@ unsafe fn system_backdrop(hwnd: HWND) -> bool {
     f(hwnd, 38, &kind as *const i32 as *const std::ffi::c_void, 4) == 0
 }
 
-/// Apply the single logical corner radius to the live window. The GDI region
-/// is installed first and is authoritative on every supported Windows version:
-/// Windows 10 can report success for the newer DWM corner attribute while
-/// still rendering a square popup. DWM is only a last-resort fallback when the
-/// region API itself fails. Reapplying this on a DPI change replaces the old
-/// region, so a monitor move cannot leave a stale clip.
+/// Append one local diagnostic line. This is the same `%LOCALAPPDATA%\Droplet`
+/// directory as the config and goes nowhere else: no network, telemetry, or
+/// external process. Cap it so a long-lived install cannot grow it forever.
+fn dwm_log(line: &str) {
+    let path = config::data_dir().join("dwm.log");
+    if let Ok(meta) = std::fs::metadata(&path) {
+        if meta.len() > 32 * 1024 {
+            let _ = std::fs::remove_file(&path);
+        }
+    }
+    if let Ok(mut file) = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+    {
+        let _ = writeln!(file, "{line}");
+    }
+}
+
+/// The visible silhouette now comes from the per-pixel alpha mask in
+/// `layered::prepare`, not a binary GDI region. Clear any region left by an
+/// older DPI pass so it cannot cut a stair step through the antialiased edge.
+/// The layered surface itself is the Windows 10 fallback: it does not depend on
+/// the Windows 11 corner attribute, and DWM's square popup shadow is not part of
+/// the per-pixel surface. Every DWM result is recorded in `dwm.log`.
 unsafe fn apply_window_shape(hwnd: HWND, w: i32, h: i32, dpi: f32) {
     if w <= 0 || h <= 0 {
         return;
     }
-    let radius = (ui::CORNER_RADIUS * dpi).round().max(1.0) as i32;
-    let rgn = win::CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2);
-    if rgn != 0 {
-        if win::SetWindowRgn(hwnd, rgn, 1) != 0 {
-            // A hard region does not disable the compositor's square frame or
-            // shadow. Tell DWM to round as well: its shadow then follows the
-            // same 8 px silhouette instead of drawing a square corner wedge
-            // outside the region. The GDI region remains the actual clip.
-            let _ = set_dwm_frame(hwnd);
-            return;
-        }
-        // SetWindowRgn only takes ownership on success. Delete the orphan so
-        // repeated DPI changes cannot leak GDI handles.
-        win::DeleteObject(rgn);
-    }
-
-    // The hard region failed for an unexpected platform reason. Ask the
-    // compositor to round instead; this preserves a usable window rather than
-    // leaving a square frame or crashing the paint path.
-    let ok = round_corners(hwnd);
-    if ok {
-        win::SetWindowRgn(hwnd, 0, 1);
-    }
+    let round = set_dwm_frame(hwnd);
+    let cleared = win::SetWindowRgn(hwnd, 0, 1);
+    dwm_log(&format!(
+        "shape size={w}x{h} dpi={dpi:.2} mode=layered-alpha attr33_ok={round} region_cleared={cleared}"
+    ));
 }
 
-/// Configure DWM for a borderless edge. DWM is asked to round even though the
-/// GDI region is authoritative: its compositor shadow must follow the rounded
-/// silhouette too, otherwise a square shadow wedge remains visible outside the
-/// region. On Windows 10, where the preference is unsupported, the region is
-/// still the clip.
+/// Configure DWM for a borderless edge and record every HRESULT. DWM is asked
+/// to round on Windows 11, but the layered alpha surface owns the visible
+/// silhouette on both Windows 10 and 11.
 unsafe fn set_dwm_frame(hwnd: HWND) -> bool {
     let dll = win::dyn_load("dwmapi.dll");
     if dll == 0 {
+        dwm_log("dwm dll=missing");
         return false;
     }
     let p = win::load_proc(dll, "DwmSetWindowAttribute");
     if p == 0 {
+        dwm_log("dwm entry=missing");
         return false;
     }
     let f: unsafe extern "system" fn(HWND, u32, *const c_void, u32) -> i32 = std::mem::transmute(p);
     let pref: i32 = 2; // DWMWCP_ROUND
-    let ok = f(hwnd, 33, &pref as *const i32 as *const c_void, 4) == 0;
+    let round = f(hwnd, 33, &pref as *const i32 as *const c_void, 4);
     let dark: i32 = 1; // DWMWA_USE_IMMERSIVE_DARK_MODE
-    let _ = f(hwnd, 20, &dark as *const i32 as *const c_void, 4);
-    // Remove DWM's square border so the rounded surface owns the edge. Do not
-    // disable non-client rendering here: that also disables the acrylic
-    // composition and makes the panel translucent enough to read the desktop
-    // through it. Border suppression is enough on Windows 11; Windows 10
-    // rejects this attribute and stays on the region path.
+    let dark_hr = f(hwnd, 20, &dark as *const i32 as *const c_void, 4);
+    // Remove DWM's square border so the rounded surface owns the edge.
     let border: u32 = 0xFFFF_FFFE; // DWMWA_COLOR_NONE
-    let _ = f(hwnd, 34, &border as *const u32 as *const c_void, 4);
-    ok
-}
-
-unsafe fn round_corners(hwnd: HWND) -> bool {
-    set_dwm_frame(hwnd)
+    let border_hr = f(hwnd, 34, &border as *const u32 as *const c_void, 4);
+    dwm_log(&format!(
+        "DwmSetWindowAttribute attr33=0x{round:08X} attr20=0x{dark_hr:08X} attr34=0x{border_hr:08X}"
+    ));
+    round == 0
 }
 
 #[cfg(test)]

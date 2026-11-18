@@ -11,6 +11,18 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.15 changes
+
+- Visual path: the window publishes an antialiased per-pixel alpha surface
+  instead of a hard GDI region. All four 12 px corners use mirrored 4×4
+  coverage, and alpha, premultiply, and corner rewriting now run in one
+  full-buffer pass. A local DWM HRESULT log records the calls. No routing,
+  timer, or input path changed. The input harness recorder now pumps
+  `GetMessage` directly, but its Shield case still intermittently records no
+  output here; that is an unresolved test, not a pass.
+- Tests: 41 / 41. Portable exe: 556,032 B. No CPU, input-latency, or
+  render-speed benchmark was run, and no speedup is claimed.
+
 ## 2.10.14 changes
 
 - Visual hotfix only. The region path now asks DWM for `DWMWCP_ROUND`, so its

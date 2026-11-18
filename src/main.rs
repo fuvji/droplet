@@ -5,6 +5,7 @@ mod config;
 mod gp;
 mod input;
 mod keys;
+mod layered;
 mod macros;
 mod smart;
 mod ui;

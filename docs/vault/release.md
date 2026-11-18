@@ -1,5 +1,23 @@
 # release
 
+## 2.10.15 — 2026-11-18
+
+- Portable exe: 556,032 B,
+  `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`.
+- Tests: 41 / 41.
+- Changes: fix the corner spikes in the interim layered path by mirroring the
+  right and bottom arcs one radius inside the window, then sampling all four
+  12 px corners 4×4. Fold alpha, premultiply, and corner rewrite into one
+  buffer pass. Reset now restores Keep panel open to its shipped on state. The
+  silhouette is Windows 10-safe because it does not rely on DWM's corner
+  preference. A local `%LOCALAPPDATA%\Droplet\dwm.log` records the DWM
+  HRESULTs, region clear, size, and DPI. Captures use the layered alpha mask.
+  The input harness recorder now pumps `GetMessage` directly instead of a
+  hidden WinForms form, but its Shield case still intermittently records no
+  output here; a separate low-level probe observed the app emit `h` down/up
+  plus left click down/up. That official check is unresolved, not passed. No
+  routing, timer, or input path changed.
+
 ## 2.10.14 — 2026-11-16
 
 - Portable exe: 550,400 B,

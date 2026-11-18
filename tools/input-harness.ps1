@@ -118,6 +118,18 @@ public static class InputHarness
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    private struct MSG
+    {
+        public IntPtr hwnd;
+        public uint message;
+        public UIntPtr wParam;
+        public IntPtr lParam;
+        public uint time;
+        public int x;
+        public int y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     private struct KEYBDINPUT
     {
         public ushort wVk;
@@ -183,6 +195,15 @@ public static class InputHarness
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool PostThreadMessage(uint idThread, uint msg, IntPtr wParam, IntPtr lParam);
 
+    [DllImport("user32.dll")]
+    private static extern int GetMessage(out MSG msg, IntPtr hwnd, uint min, uint max);
+
+    [DllImport("user32.dll")]
+    private static extern bool TranslateMessage(ref MSG msg);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr DispatchMessage(ref MSG msg);
+
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
@@ -238,14 +259,6 @@ public static class InputHarness
         return CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
     }
 
-    private sealed class MessageWindow : Form
-    {
-        protected override void SetVisibleCore(bool value)
-        {
-            base.SetVisibleCore(false);
-        }
-    }
-
     public static void Start()
     {
         if (worker != null)
@@ -268,7 +281,15 @@ public static class InputHarness
                     throw new InvalidOperationException("SetWindowsHookEx failed.");
                 }
                 ready.Set();
-                Application.Run(new MessageWindow());
+                // Pump the thread's message queue directly. A hidden WinForms
+                // form can return from Application.Run immediately, which
+                // unhooks the recorder before the test sends anything.
+                MSG msg;
+                while (GetMessage(out msg, IntPtr.Zero, 0, 0) > 0)
+                {
+                    TranslateMessage(ref msg);
+                    DispatchMessage(ref msg);
+                }
             }
             catch (Exception ex)
             {
