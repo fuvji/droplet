@@ -11,6 +11,15 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.16 changes
+
+- DPI regression only on the visual path: the live panel is captured through
+  `WM_DPICHANGED` at 100/125/150 and the PNG checker requires transparent,
+  mirrored corners. The Apple-inspired surface pass keeps the single
+  alpha/premultiply buffer pass. A card shadow path was measured and removed
+  after it raised the System render readout; no end-to-end speedup is claimed.
+- Tests: 42 / 42. Portable exe: 558,080 B.
+
 ## 2.10.15 changes
 
 - Visual path: the window publishes an antialiased per-pixel alpha surface

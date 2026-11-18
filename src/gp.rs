@@ -262,6 +262,29 @@ impl Canvas {
         unsafe { (api().GdipFillRectangle)(self.g, self.brush, x, y, w, h) };
     }
 
+    /// A vertical tonal wash. Small, fixed-step bands keep the paint path
+    /// allocation-free and are indistinguishable from a gradient at this panel
+    /// size. Used for the glass-like frame and rail layers.
+    pub fn vgrad(&mut self, x: f32, y: f32, w: f32, h: f32, top: u32, bottom: u32, steps: usize) {
+        if w <= 0.0 || h <= 0.0 || steps == 0 {
+            return;
+        }
+        let steps = steps.max(2);
+        let band = h / steps as f32;
+        for i in 0..steps {
+            let t = i as f32 / (steps - 1) as f32;
+            let ch = |sh: u32| {
+                let a = ((top >> sh) & 0xFF) as f32;
+                let b = ((bottom >> sh) & 0xFF) as f32;
+                ((a + (b - a) * t) as u32) & 0xFF
+            };
+            let color = (ch(24) << 24) | (ch(16) << 16) | (ch(8) << 8) | ch(0);
+            let by = y + band * i as f32;
+            let bh = if i + 1 == steps { y + h - by } else { band };
+            self.rect(x, by, w, bh, color);
+        }
+    }
+
     pub fn round_rect(&mut self, x: f32, y: f32, w: f32, h: f32, r: f32, color: u32) {
         if w <= 0.0 || h <= 0.0 {
             return;

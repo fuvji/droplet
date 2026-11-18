@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.10.16
+
+- Add live DPI coverage at 100%, 125%, and 150%. `tools/capture-tabs.ps1`
+  sends the real `WM_DPICHANGED` message and writes 624×408, 780×510, and
+  936×612 captures. `tools/check-dpi-corners.ps1` requires four transparent
+  corners, mirrored alpha on both axes, and an opaque straight edge; it runs
+  from `tools/check-release.ps1`. A unit test covers the same mask at all three
+  scales.
+- Refine the panel's visual hierarchy using the supplied Apple references as
+  design language, not copied assets: a soft graphite tonal wash, a quiet rail
+  with a filled rounded selection, larger bold titles, white switch knobs
+  with deeper accent tracks, and slider thumb halos. No new dependencies,
+  textures, or network behavior.
+- Remove the card shadow path after it measurably raised the System render
+  readout. The layered alpha/premultiply work remains one full-buffer pass. No
+  CPU, latency, or end-to-end speedup claim is made.
+- Tests: **42 / 42**. Portable executable: **558,080 bytes**, SHA-256
+  `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`.
+
 ## 2.10.15
 
 - Replace the hard GDI window region with a per-pixel alpha surface composed by

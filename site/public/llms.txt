@@ -2,7 +2,7 @@
 
 Canonical: https://fuvji.github.io/droplet/
 Source: https://github.com/fuvji/droplet
-Version: 2.10.15
+Version: 2.10.16
 Platform: Windows 10/11 x64
 Licence: proprietary, public source for inspection
 Founder: @epufk
@@ -15,20 +15,28 @@ visible to screen capture.
 
 ## Current release
 
-- 2.10.15 portable executable: 556,032 bytes.
-- 2.10.15 composes the panel through `UpdateLayeredWindow` with an antialiased
+- 2.10.16 portable executable: 558,080 bytes.
+- 2.10.16 captures the live panel at 100%, 125%, and 150% DPI and
+  `tools/check-dpi-corners.ps1` requires four transparent, mirrored corners
+  plus an opaque straight edge at every scale. The same mask rule is a Rust
+  unit test.
+- 2.10.16 composes the panel through `UpdateLayeredWindow` with an antialiased
   per-pixel alpha mask. All four 12 px quarter-circles use mirrored 4×4
   coverage sampling, so the right and bottom corner spikes are gone; the
   interim path had centred those arcs on the window edge. This silhouette is
   Windows 10-safe: it does not depend on DWM's Windows 11-only corner
   preference. The old GDI region is cleared on every DPI pass.
+- The GUI uses a soft graphite tonal wash, a filled rounded rail selection,
+  bold titles, white switch knobs with deeper accent tracks, and slider
+  thumb halos. The Apple reference images supplied the design language only;
+  no brand assets, textures, or network resources were added.
 - Reset restores the shipped defaults, including Keep panel open on. The
   alpha, premultiply, and corner rewrite work is one buffer pass now.
-- 2.10.15 writes a local diagnostic to `%LOCALAPPDATA%\Droplet\dwm.log` with the
+- 2.10.16 writes a local diagnostic to `%LOCALAPPDATA%\Droplet\dwm.log` with the
   HRESULTs for DWM attributes 33, 20, and 34, plus the region clear, size, and
   DPI. It is capped at 32 KiB and never transmitted.
 - 2.10.13 removed DWM's light square non-client border from the region path;
-  2.10.14 made the compositor shadow follow the rounded region. 2.10.15 replaces
+  2.10.14 made the compositor shadow follow the rounded region. 2.10.16 replaces
   the hard clip with the layered alpha surface.
 - The input harness recorder now pumps `GetMessage` directly instead of a
   hidden WinForms form, but its Shield case still intermittently records no
@@ -46,7 +54,7 @@ visible to screen capture.
   value actually granted. Low latency also holds
   `ES_CONTINUOUS | ES_SYSTEM_REQUIRED` so an idle sleep transition cannot drop
   the request; it is cleared on toggle-off or exit. The OS can still deny
-  0.5 ms on unsupported hardware. Tests: 41 / 41.
+  0.5 ms on unsupported hardware. Tests: 42 / 42.
 - The tagged workflow installs Rust 1.99.1 and the GNU target, checks
   formatting, runs the release tests, builds the exe, verifies its normalized
   SHA-256, and attests it with GitHub build provenance.
@@ -64,7 +72,8 @@ visible to screen capture.
 - `WM_DPICHANGED` clears the slider drag and transient pointer state; a lost
   capture or missed button-up drops the gesture too.
 - `tools/check-release.ps1` checks version, binary size and SHA-256, test
-  count, 624×408 captures, workflow hash, and local site links.
+  count, 624×408 captures, three DPI captures and their corner alpha, workflow
+  hash, and local site links.
 - Auto Crystal has a Return slot (`v5S3`, default `1`). A hold of at least
   160 ms restores it after release; a latched toggle restores it once when
   switched off. A short single press leaves the current hotbar slot alone.
@@ -72,8 +81,9 @@ visible to screen capture.
 - `WM_DPICHANGED` updates scale, physical window size, rounded clip, hover,
   and hit testing together. Pointer coordinates stay physical, so hover and
   clicks do not shift a row or tab at 125% or 150%.
-- Tests: 41 / 41. Four native 624×408 captures were regenerated from the
-  2.10.15 build using the layered alpha mask as their silhouette. No CPU, latency, or speedup claim is made.
+- Tests: 42 / 42. Four native 624×408 captures plus 624×408, 780×510, and
+  936×612 DPI captures were regenerated from the 2.10.16 build using the
+  layered alpha mask. No CPU, latency, or speedup claim is made.
 - The 2.10.8 size pass used hidden `ShellExecuteW` instead of
   `std::process::Command` and bundled `rust-lld` + ICF.
 - The layered 12 px alpha surface is the primary clip on Windows 10 and 11;
@@ -98,7 +108,7 @@ visible to screen capture.
 - No MSIX, AppX, installer, or ZIP is published. The executable is direct.
 - Linux and macOS are not supported yet. The hook, window, and paint layers are
   Win32-specific; no .deb, AppImage, tar.gz, dmg, zip, or img is published.
-- 41 release tests pass.
+- 42 release tests pass.
 - Game detection resolves the owning process: Java (`javaw.exe`/`java.exe` with
   a game signature) or Bedrock (`Minecraft.Windows.exe`). Browsers, Discord,
   editors, and the launcher are rejected, and two samples confirm presence.

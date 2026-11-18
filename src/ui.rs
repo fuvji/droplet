@@ -102,18 +102,18 @@ impl Theme {
         let (r, g, b) = s.theme_rgb();
         let accent = 0xFF00_0000 | ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
         Theme {
-            bg: 0xFF07_0708,
-            rail: 0xFF0A_0A0C,
-            card: 0xFF10_1013,
-            card_on: 0xFF15_1519,
-            border: with_alpha(accent, 22),
-            border_on: with_alpha(accent, 46),
-            text: 0xFFF4_F3EF,
-            dim: 0xFF9C_9C_A2,
-            faint: 0xFF68_686E,
+            bg: 0xFF07_080B,
+            rail: 0xFF0B_0C12,
+            card: 0xFF15_161C,
+            card_on: 0xFF1A_1B23,
+            border: with_alpha(0xFFF4_F3EF, 10),
+            border_on: with_alpha(accent, 34),
+            text: 0xFFF5_F4F0,
+            dim: 0xFFA3_A3AA,
+            faint: 0xFF6E_6F78,
             accent,
-            chip: 0xFF1C_1C20,
-            track: 0xFF2C_2C31,
+            chip: 0xFF20_2127,
+            track: 0xFF31_323A,
             danger: 0xFFD2_6E6E,
         }
     }
@@ -243,10 +243,16 @@ impl<'a> Ui<'a> {
 
     pub fn frame(&mut self) {
         let s = self.scale;
-        self.c.rect(0.0, 0.0, WIN_W * s, WIN_H * s, self.th.bg);
-        self.c.rect(0.0, 0.0, RAIL_W * s, WIN_H * s, self.th.rail);
+        // Layered tonal frame: a soft graphite wash and a restrained accent
+        // bloom replace the old flat black fill. The surfaces stay opaque
+        // enough to read at a glance, but gain the depth of the reference
+        // glass without a per-frame blur or a second window.
         self.c
-            .rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 8));
+            .vgrad(0.0, 0.0, WIN_W * s, WIN_H * s, 0xFF0B_0C12, 0xFF07_080B, 10);
+        self.c
+            .vgrad(0.0, 0.0, RAIL_W * s, WIN_H * s, 0xFF10_1117, 0xFF0A_0B10, 8);
+        self.c
+            .rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 7));
         self.header();
         self.rail();
         match self.tab {
@@ -270,24 +276,51 @@ impl<'a> Ui<'a> {
         let titles = ["Core", "Crystal", "Assist", "System"];
         self.label(
             (RAIL_W + PAD) * s,
-            10.0 * s,
+            7.0 * s,
             200.0 * s,
             22.0 * s,
             titles[self.tab],
-            16.0,
-            false,
+            17.0,
+            true,
             self.th.text,
+        );
+        self.label(
+            (RAIL_W + PAD + 1.0) * s,
+            27.0 * s,
+            220.0 * s,
+            10.0 * s,
+            "LOCAL / WINDOWS",
+            6.5,
+            false,
+            self.th.faint,
         );
 
         let [master, hide, close] = header_buttons(WIN_W, s);
         let armed = self.s.bool_at("v0");
         let hot = self.hovered(master);
         let hv = self.anim(wid("master", 1), if hot { 1.0 } else { 0.0 });
-        let bg = with_alpha(self.th.text, (6.0 + 6.0 * hv) as u8);
+        let bg = with_alpha(self.th.text, (7.0 + 7.0 * hv) as u8);
         let radius = master.h * 0.5;
         self.c
             .round_rect(master.x, master.y, master.w, master.h, radius, bg);
+        self.c.round_stroke(
+            master.x,
+            master.y,
+            master.w,
+            master.h,
+            radius,
+            with_alpha(self.th.text, (7.0 + 8.0 * hv) as u8),
+            1.0,
+        );
         let dot = if armed { self.th.accent } else { self.th.faint };
+        if armed {
+            self.c.circle(
+                master.x + 13.0 * s,
+                master.y + master.h * 0.5,
+                5.0 * s,
+                with_alpha(self.th.accent, 28),
+            );
+        }
         self.c
             .circle(master.x + 13.0 * s, master.y + master.h * 0.5, 2.5 * s, dot);
         let fg = if armed { self.th.text } else { self.th.dim };
@@ -313,7 +346,7 @@ impl<'a> Ui<'a> {
             HEADER_H * s - 1.0,
             (WIN_W - RAIL_W) * s,
             1.0,
-            self.th.border,
+            with_alpha(self.th.text, 6),
         );
     }
 
@@ -383,19 +416,13 @@ impl<'a> Ui<'a> {
             let hot = self.hovered(r);
             let hv = self.anim(wid(name, 2), if hot { 1.0 } else { 0.0 });
             if active {
+                // A filled glass selection, like a source-list row: no left
+                // accent bar or outline, just a quiet tonal lift and tinted icon.
                 self.c
-                    .round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 7));
-                self.c.round_rect(
-                    r.x,
-                    r.y + 10.0 * s,
-                    2.0 * s,
-                    r.h - 20.0 * s,
-                    1.0 * s,
-                    self.th.accent,
-                );
+                    .round_rect(r.x, r.y, r.w, r.h, 11.0 * s, with_alpha(self.th.text, 12));
             } else if hot {
                 self.c
-                    .round_rect(r.x, r.y, r.w, r.h, 9.0 * s, with_alpha(self.th.text, 5));
+                    .round_rect(r.x, r.y, r.w, r.h, 11.0 * s, with_alpha(self.th.text, 6));
             }
             let tint = if active {
                 self.th.accent
@@ -409,8 +436,8 @@ impl<'a> Ui<'a> {
                 r.w - 34.0 * s,
                 r.h,
                 name,
-                9.5,
-                false,
+                10.0,
+                active,
                 if active { self.th.text } else { tint },
             );
             if self.pressed && hot {
@@ -539,19 +566,20 @@ impl<'a> Ui<'a> {
         let s = self.scale;
         let on = toggle.map(|k| self.s.bool_at(k)).unwrap_or(true);
         let active = toggle.is_none() || on;
-        // One surface, no outline. Per-card strokes read as extra thickness
-        // at fractional DPI and cost a path draw on every repaint.
+        // One surface, no outline and no shadow path. The tonal fill against
+        // the graphite wash gives the glass-tile lift without an extra
+        // antialiased path per card on every repaint.
         self.c.round_rect(
             r.x,
             r.y,
             r.w,
             r.h,
-            12.0 * s,
+            14.0 * s,
             if on { self.th.card_on } else { self.th.card },
         );
         let color = if active { self.th.text } else { self.th.dim };
         let tr = Rect::new(r.x + 12.0 * s, r.y + 4.0 * s, r.w - 60.0 * s, 17.0 * s);
-        self.label(tr.x, tr.y, tr.w, tr.h, title, 11.5, false, color);
+        self.label(tr.x, tr.y, tr.w, tr.h, title, 12.0, true, color);
         if let Some(k) = toggle {
             let sw = Rect::new(r.x + r.w - 40.0 * s, r.y + 4.0 * s, 28.0 * s, 16.0 * s);
             self.switch(sw.x, sw.y, k, on);
@@ -573,14 +601,22 @@ impl<'a> Ui<'a> {
             self.th.text,
             (0.045 + 0.035 * hv) * (1.0 - t),
         );
-        let track = mix(track, self.th.accent, t);
+        // Keep the white knob legible even when the chosen accent is a light
+        // neutral. A slightly deeper track still carries the accent hue.
+        let track = mix(track, mix(self.th.accent, 0xFF00_0000, 0.32), t);
         self.c.round_rect(r.x, r.y, w, h, h * 0.5, track);
         let knob = if on {
-            0xFF07_0708
+            self.th.text
         } else {
             mix(self.th.dim, self.th.text, 0.35 + 0.65 * hv)
         };
         let kx = r.x + 3.0 * s + (w - 16.0 * s) * t;
+        self.c.circle(
+            kx + 5.0 * s,
+            r.y + h * 0.5 + 0.8 * s,
+            5.3 * s,
+            with_alpha(0x000000, 80),
+        );
         self.c.circle(kx + 5.0 * s, r.y + h * 0.5, 5.0 * s, knob);
         if self.pressed && hot {
             self.acts.push(Act::Toggle(key));
@@ -777,9 +813,11 @@ impl<'a> Ui<'a> {
             0.0
         };
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+            .round_rect(tx, cy - 1.5 * s, tw, 3.0 * s, 1.5 * s, self.th.track);
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
+            .round_rect(tx, cy - 1.5 * s, tw * t, 3.0 * s, 1.5 * s, self.th.accent);
+        self.c
+            .circle(tx + tw * t, cy, 6.5 * s, with_alpha(self.th.text, 16));
         self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
         self.label_right(
             card.x + card.w - 10.0 * s - 36.0 * s,
@@ -839,9 +877,9 @@ impl<'a> Ui<'a> {
         let cy = y + ROW_H * 0.5 * s;
         let t = (v - 1) as f32 * 0.5;
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+            .round_rect(tx, cy - 1.5 * s, tw, 3.0 * s, 1.5 * s, self.th.track);
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, self.th.accent);
+            .round_rect(tx, cy - 1.5 * s, tw * t, 3.0 * s, 1.5 * s, self.th.accent);
         for n in 0..3 {
             let x = tx + tw * (n as f32 * 0.5);
             let selected = n + 1 == v;
@@ -932,7 +970,7 @@ impl<'a> Ui<'a> {
                     with_alpha(self.th.accent, 13),
                 );
             }
-            let color = if on { self.th.accent } else { self.th.faint };
+            let color = if on { self.th.text } else { self.th.faint };
             let hot = self.hovered(r);
             let c2 = if hot && !on { self.th.dim } else { color };
             self.label_center(r.x, r.y - 0.5 * s, r.w, r.h, opt, 8.5, false, c2);
@@ -1027,9 +1065,11 @@ impl<'a> Ui<'a> {
         let cy = y + ROW_H * 0.5 * s;
         let t = v as f32 / 255.0;
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw, 2.0 * s, 1.0 * s, self.th.track);
+            .round_rect(tx, cy - 1.5 * s, tw, 3.0 * s, 1.5 * s, self.th.track);
         self.c
-            .round_rect(tx, cy - 1.0 * s, tw * t, 2.0 * s, 1.0 * s, color);
+            .round_rect(tx, cy - 1.5 * s, tw * t, 3.0 * s, 1.5 * s, color);
+        self.c
+            .circle(tx + tw * t, cy, 6.5 * s, with_alpha(self.th.text, 16));
         self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
         self.label_right(
             card.x + card.w - 10.0 * s - 36.0 * s,

@@ -1,5 +1,16 @@
 # release
 
+## 2.10.16 — 2026-11-18
+
+- Portable exe: 558,080 B,
+  `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`.
+- Tests: 42 / 42.
+- Changes: live 100/125/150 DPI captures and a PNG corner regression, plus the
+  graphite/glass visual pass (filled rail selection, stronger titles, white
+  switch knobs, deeper tracks). The alpha/premultiply path stays one buffer
+  pass; a measured card-shadow experiment was removed. No network, telemetry,
+  or input path changed.
+
 ## 2.10.15 — 2026-11-18
 
 - Portable exe: 556,032 B,

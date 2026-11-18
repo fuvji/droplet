@@ -3,6 +3,24 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.16 release
+
+2.10.16 adds a DPI regression over the mirrored 12 px layered-alpha mask. The
+live panel is captured through the real `WM_DPICHANGED` path at 100%, 125%, and
+150%; the PNG checker requires transparent, symmetric corners and an opaque
+straight edge at each scale. The supplied Apple references informed the visual
+pass—tonal graphite surfaces, a filled sidebar selection, stronger type
+hierarchy, and white switch knobs—without adding a dependency, texture, or
+network path. The alpha/premultiply composition remains one full-buffer pass.
+A card shadow experiment was removed after it raised the System render readout.
+
+- Version: **2.10.16**
+- Portable executable: **558,080 bytes**
+- SHA-256: `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`
+- Release tests: **42 / 42**
+- DPI corner regression: **9 / 9** over 100/125/150
+- No CPU, latency, render-speed, or end-to-end size win is claimed.
+
 ## 2.10.15 release
 
 2.10.15 replaces the hard GDI window region with an antialiased per-pixel alpha
@@ -169,11 +187,11 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.15**
-- Portable executable: **556,032 bytes**
-- SHA-256: `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`
+- Version: **2.10.16**
+- Portable executable: **558,080 bytes**
+- SHA-256: `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
-- Release tests: **41 / 41**
+- Release tests: **42 / 42**
 - Runtime dependencies: **0**
 - Network calls: **0**
 - Telemetry: **none**

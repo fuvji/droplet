@@ -1,5 +1,5 @@
 //! Per-pixel layered-window composition. A hard GDI region is binary, so its
-//! 8 px arc is a visible pixel staircase. This module publishes the same panel
+//! 12 px arc is a visible pixel staircase. This module publishes the same panel
 //! through UpdateLayeredWindow with an antialiased alpha mask; the window still
 //! paints into its existing 32bpp back buffer.
 
@@ -39,6 +39,33 @@ fn corner_coverage(radius: i32, x: i32, y: i32) -> f32 {
     inside as f32 / (samples * samples)
 }
 
+/// Alpha for a mirrored corner sample. `radius` is already clamped to the
+/// surface; `mx`/`my` are local to the top-left corner box. Callers use this
+/// same primitive at every DPI scale, so the mask geometry cannot drift
+/// between paint, capture, and tests.
+#[inline]
+fn mirrored_alpha(radius: i32, mx: i32, my: i32, alpha: u8) -> u8 {
+    if mx < 0 || my < 0 || mx >= radius || my >= radius {
+        return alpha;
+    }
+    (alpha as f32 * corner_coverage(radius, mx, my)) as u8
+}
+
+/// Alpha of one pixel in the final layered surface. This is the testable
+/// definition of the silhouette: mirror right/bottom pixels into one corner
+/// box, then apply the same 4×4 coverage mask. The four outer corner pixels
+/// are always zero and mirrored pixels always agree.
+#[cfg(test)]
+pub fn alpha_at(w: i32, h: i32, radius: i32, x: i32, y: i32, alpha: u8) -> u8 {
+    if w <= 0 || h <= 0 || x < 0 || y < 0 || x >= w || y >= h {
+        return 0;
+    }
+    let radius = radius.clamp(1, w.min(h) / 2);
+    let mx = if x >= w - radius { w - 1 - x } else { x };
+    let my = if y >= h - radius { h - 1 - y } else { y };
+    mirrored_alpha(radius, mx, my, alpha)
+}
+
 /// Apply a rounded, antialiased alpha mask to the back buffer. Interior pixels
 /// use `alpha`; the quarter-circles are coverage-sampled so the edge blends
 /// into the desktop instead of showing a stair step or a corner spike.
@@ -60,12 +87,11 @@ pub unsafe fn prepare(back: &BackBuffer, radius: i32, alpha: u8) {
         for x in 0..w {
             let mx = if x >= w - radius { w - 1 - x } else { x };
             let corner_x = mx < radius;
-            let coverage = if corner_x && corner_y {
-                corner_coverage(radius, mx, my)
+            let a = if corner_x && corner_y {
+                mirrored_alpha(radius, mx, my, alpha) as u32
             } else {
-                1.0
+                panel_alpha
             };
-            let a = (panel_alpha as f32 * coverage).clamp(0.0, panel_alpha as f32) as u32;
             let idx = (y * w + x) as usize;
             bits[idx] = premultiply(bits[idx] & 0x00FF_FFFF, a);
         }
@@ -74,7 +100,8 @@ pub unsafe fn prepare(back: &BackBuffer, radius: i32, alpha: u8) {
 
 #[cfg(test)]
 mod tests {
-    use super::corner_coverage;
+    use super::{alpha_at, corner_coverage};
+    use crate::ui::{CORNER_RADIUS, WIN_H, WIN_W};
 
     #[test]
     fn corner_coverage_spans_empty_to_full() {
@@ -90,6 +117,53 @@ mod tests {
             for x in 0..12 {
                 assert!((corner_coverage(12, x, y) - corner_coverage(12, y, x)).abs() < 0.001);
             }
+        }
+    }
+
+    #[test]
+    fn all_dpi_corners_are_transparent_and_symmetric() {
+        for scale in [1.0f32, 1.25, 1.5] {
+            let w = (WIN_W * scale).round() as i32;
+            let h = (WIN_H * scale).round() as i32;
+            let radius = (CORNER_RADIUS * scale).round() as i32;
+            let alpha = 250u8;
+
+            // Every outer corner is fully transparent: no square pixel and no
+            // upward spike can survive at any tested scale.
+            assert_eq!(
+                alpha_at(w, h, radius, 0, 0, alpha),
+                0,
+                "top-left at {scale}"
+            );
+            assert_eq!(
+                alpha_at(w, h, radius, w - 1, 0, alpha),
+                0,
+                "top-right at {scale}"
+            );
+            assert_eq!(
+                alpha_at(w, h, radius, 0, h - 1, alpha),
+                0,
+                "bottom-left at {scale}"
+            );
+            assert_eq!(
+                alpha_at(w, h, radius, w - 1, h - 1, alpha),
+                0,
+                "bottom-right at {scale}"
+            );
+
+            // The whole corner box mirrors horizontally and vertically. This
+            // is the regression that catches a right/bottom centre placed on
+            // the window edge instead of one radius inside it.
+            for y in 0..radius {
+                for x in 0..radius {
+                    let a = alpha_at(w, h, radius, x, y, alpha);
+                    assert_eq!(a, alpha_at(w, h, radius, w - 1 - x, y, alpha));
+                    assert_eq!(a, alpha_at(w, h, radius, x, h - 1 - y, alpha));
+                    assert_eq!(a, alpha_at(w, h, radius, w - 1 - x, h - 1 - y, alpha));
+                }
+            }
+
+            assert_eq!(alpha_at(w, h, radius, w / 2, h / 2, alpha), alpha);
         }
     }
 }

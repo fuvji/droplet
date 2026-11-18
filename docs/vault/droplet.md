@@ -15,19 +15,20 @@ Canonical site: <https://fuvji.github.io/droplet/>
 
 ## Core facts
 
-- 2.10.15 portable exe: 556,032 bytes. Single artifact; no MSIX/AppX or ZIP.
+- 2.10.16 portable exe: 558,080 bytes. Single artifact; no MSIX/AppX or ZIP.
   The panel uses an antialiased per-pixel alpha surface through
   `UpdateLayeredWindow`, so the 12 px corners blend into the desktop and the
-  silhouette no longer depends on DWM's Windows 11-only corner preference. All
+  silhouette does not depend on DWM's Windows 11-only corner preference. All
   four arcs use mirrored 4×4 coverage sampling; the earlier right/bottom
   centres were on the window edge and left visible spikes. The old GDI region
   is cleared on DPI changes. A local `dwm.log` records the DWM HRESULTs.
-  Captures use the layered alpha mask.
+  Captures use the layered alpha mask. The 100/125/150 DPI captures are checked
+  by `tools/check-dpi-corners.ps1` and a matching unit test.
 - The tag workflow builds the GNU exe from source, checks formatting and tests,
   verifies the normalized artifact hash, and attests the exe and checksum with
   GitHub build provenance. `tools/build-release.ps1` remaps build paths and
   zeroes the PE timestamp so separate clean targets agree.
-- Tests: 41 / 41.
+- Tests: 42 / 42.
 - The full source tree is rustfmt-clean. Duplicate legacy trigger bindings are
   normalized on load so the later module owns the input, matching runtime
   last-wins routing. The four site captures use an isolated deterministic
@@ -74,7 +75,9 @@ supported Windows version, because Windows 10 can report success for DWM's
 corner attribute while still drawing a square popup. The alpha mask is
 recomputed on DPI changes and the old GDI region is cleared, so a compositor
 fallback cannot reintroduce a square edge. Transparent quarter-rounds are
-click-through. The presence
+click-through. The visual hierarchy uses a graphite tonal wash, a filled
+rounded rail selection, bold titles, white switch knobs, and a 624×408
+fixed layout; the references informed the material, not the product behavior. The presence
 watcher reuses a verified foreground game HWND, and its focus-only gate is
 cached in an atomic. The favicon and site marks are one transparent outlined
 droplet with no plate, border, background, or shadow. Event-driven paint.

@@ -1,5 +1,6 @@
 param(
-    [string]$OutDir = "site/public/assets"
+    [string]$OutDir = "site/public/assets",
+    [string]$DpiOutDir = "site/public/assets/dpi"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,6 +11,7 @@ if (-not (Test-Path -LiteralPath $exe)) {
 }
 
 $out = Join-Path $root $OutDir
+$dpiOut = Join-Path $root $DpiOutDir
 New-Item -ItemType Directory -Force -Path $out | Out-Null
 
 # Capture from a fresh, isolated profile. Using the caller's real config makes
@@ -37,6 +39,7 @@ Add-Type -ReferencedAssemblies System.Drawing -TypeDefinition @"
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Text;
 
 public static class DropletTabs {
     [StructLayout(LayoutKind.Sequential)]
@@ -45,11 +48,43 @@ public static class DropletTabs {
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr FindWindow(string className, string windowName);
 
+    public delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    public static extern int GetWindowText(IntPtr hwnd, StringBuilder text, int max);
+
+    public static IntPtr FindWindowForProcess(uint targetPid) {
+        IntPtr found = IntPtr.Zero;
+        EnumWindows((hwnd, lParam) => {
+            uint pid;
+            GetWindowThreadProcessId(hwnd, out pid);
+            if (pid == targetPid) {
+                var title = new StringBuilder(128);
+                GetWindowText(hwnd, title, title.Capacity);
+                if (title.ToString() == "Droplet") {
+                    found = hwnd;
+                    return false;
+                }
+            }
+            return true;
+        }, IntPtr.Zero);
+        return found;
+    }
+
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 
     [DllImport("user32.dll")]
     public static extern bool ShowWindow(IntPtr hwnd, int command);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
 
     [DllImport("user32.dll")]
     public static extern IntPtr SendMessage(IntPtr hwnd, uint msg, IntPtr wParam, ref RECT lParam);
@@ -78,14 +113,15 @@ public static class DropletTabs {
     // Apply the live window's own region, not a hardcoded radius. This makes
     // the published PNG prove the real silhouette and cannot hide a square
     // frame with a decorative mask.
-    public static void ApplyWindowRegionAlpha(Bitmap bitmap, IntPtr hwnd) {
+    public static void ApplyWindowRegionAlpha(Bitmap bitmap, IntPtr hwnd, int radius) {
         IntPtr region = CreateRectRgn(0, 0, 0, 0);
         try {
             if (GetWindowRgn(hwnd, region) == 0) {
                 // The layered-alpha window has no binary region. Apply the same
-                // 8 px antialiased silhouette the app rendered instead of
-                // leaving a square screenshot.
-                ApplyRoundedAlpha(bitmap, 12);
+                // logical silhouette the app rendered instead of leaving a
+                // square screenshot. The radius is physical, so it tracks the
+                // current DPI scale.
+                ApplyRoundedAlpha(bitmap, radius);
                 return;
             }
             for (int y = 0; y < bitmap.Height; y++) {
@@ -131,15 +167,22 @@ public static class DropletTabs {
 }
 "@
 
-function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
+function Save-Panel(
+    [IntPtr]$Hwnd,
+    [string]$Name,
+    [string]$TargetDir,
+    [int]$ExpectedWidth,
+    [int]$ExpectedHeight,
+    [int]$Radius
+) {
     $rect = New-Object DropletTabs+RECT
     if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$rect)) {
         throw 'GetWindowRect failed.'
     }
     $width = $rect.Right - $rect.Left
     $height = $rect.Bottom - $rect.Top
-    if ($width -ne 624 -or $height -ne 408) {
-        throw "Expected the native 624x408 capture, got ${width}x${height}."
+    if ($width -ne $ExpectedWidth -or $height -ne $ExpectedHeight) {
+        throw "Expected ${ExpectedWidth}x${ExpectedHeight}, got ${width}x${height}."
     }
 
     $bitmap = New-Object System.Drawing.Bitmap($width, $height)
@@ -159,13 +202,13 @@ function Save-Panel([IntPtr]$Hwnd, [string]$Name) {
         # Use the live region. The old hardcoded GraphicsPath could make a
         # square DWM frame look rounded in the screenshot even when the app
         # itself did not clip that frame.
-        [DropletTabs]::ApplyWindowRegionAlpha($bitmap, $Hwnd)
-        $target = Join-Path $out $Name
+        [DropletTabs]::ApplyWindowRegionAlpha($bitmap, $Hwnd, $Radius)
+        $target = Join-Path $TargetDir $Name
         $bitmap.Save($target, [System.Drawing.Imaging.ImageFormat]::Png)
         $image = [System.Drawing.Image]::FromFile($target)
         try {
-            if ($image.Width -ne 624 -or $image.Height -ne 408) {
-                throw "Saved capture is $($image.Width)x$($image.Height), expected 624x408."
+            if ($image.Width -ne $ExpectedWidth -or $image.Height -ne $ExpectedHeight) {
+                throw "Saved capture is $($image.Width)x$($image.Height), expected ${ExpectedWidth}x${ExpectedHeight}."
             }
         } finally {
             $image.Dispose()
@@ -184,6 +227,35 @@ function Click-Tab([IntPtr]$Hwnd, [int]$X, [int]$Y) {
     Start-Sleep -Milliseconds 350
 }
 
+function Set-PanelDpi([IntPtr]$Hwnd, [int]$Percent) {
+    $scale = $Percent / 100.0
+    $expectedWidth = [int][Math]::Round(624 * $scale)
+    $expectedHeight = [int][Math]::Round(408 * $scale)
+    $dpi = [int][Math]::Round(96 * $scale)
+    $current = New-Object DropletTabs+RECT
+    if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$current)) {
+        throw 'GetWindowRect failed before the DPI change.'
+    }
+    $suggested = New-Object DropletTabs+RECT
+    $suggested.Left = $current.Left
+    $suggested.Top = $current.Top
+    $suggested.Right = $current.Left + $expectedWidth
+    $suggested.Bottom = $current.Top + $expectedHeight
+    $dpiWord = $dpi -bor ($dpi -shl 16)
+    [DropletTabs]::SendMessage($Hwnd, 0x02E0, [IntPtr]::new($dpiWord), [ref]$suggested) | Out-Null
+    Start-Sleep -Milliseconds 600
+    $actual = New-Object DropletTabs+RECT
+    if (-not [DropletTabs]::GetWindowRect($Hwnd, [ref]$actual)) {
+        throw 'GetWindowRect failed after the DPI change.'
+    }
+    $actualWidth = $actual.Right - $actual.Left
+    $actualHeight = $actual.Bottom - $actual.Top
+    if ($actualWidth -ne $expectedWidth -or $actualHeight -ne $expectedHeight) {
+        throw "DPI ${Percent}% expected ${expectedWidth}x${expectedHeight}, got ${actualWidth}x${actualHeight}."
+    }
+    Write-Output "DPI ${Percent}% -> ${expectedWidth}x${expectedHeight}"
+}
+
 # The PowerShell host may be DPI-unaware. Make it per-monitor v2 before it
 # reads any window rect or screen pixels; otherwise Windows virtualizes a
 # 120-DPI panel back to 624x408 and clips the capture.
@@ -196,31 +268,24 @@ try {
     $env:TMP = $captureRoot
     $process = Start-Process -FilePath $exe -WorkingDirectory $root -PassThru
     Start-Sleep -Seconds 2
-    $hwnd = [DropletTabs]::FindWindow('DropletOverlay', 'Droplet')
+    # Target this process, not the first Droplet window on the desktop. A
+    # user-launched instance may be sitting at another size; FindWindow would
+    # silently capture that instance instead of the release build under test.
+    $hwnd = [DropletTabs]::FindWindowForProcess([uint32]$process.Id)
     if ($hwnd -eq [IntPtr]::Zero) {
-        $hwnd = [DropletTabs]::FindWindow($null, 'Droplet')
+        throw 'The Droplet panel window was not created for this process.'
     }
-    if ($hwnd -eq [IntPtr]::Zero) {
-        throw 'The Droplet panel window was not created.'
-    }
+    $targetPid = [uint32]0
+    [DropletTabs]::GetWindowThreadProcessId($hwnd, [ref]$targetPid) | Out-Null
+    Write-Output "Capture window hwnd=$hwnd pid=$targetPid expected=$($process.Id)"
 
     [DropletTabs]::ShowWindow($hwnd, 5) | Out-Null
     Start-Sleep -Milliseconds 700
 
-    # Force the panel to 100% for the canonical 624x408 site assets. This
-    # exercises the same WM_DPICHANGED path used by a real monitor move.
-    $current = New-Object DropletTabs+RECT
-    if (-not [DropletTabs]::GetWindowRect($hwnd, [ref]$current)) {
-        throw 'GetWindowRect failed before the DPI reset.'
-    }
-    $suggested = New-Object DropletTabs+RECT
-    $suggested.Left = $current.Left
-    $suggested.Top = $current.Top
-    $suggested.Right = $current.Left + 624
-    $suggested.Bottom = $current.Top + 408
-    $dpiWord = 96 -bor (96 -shl 16)
-    [DropletTabs]::SendMessage($hwnd, 0x02E0, [IntPtr]::new($dpiWord), [ref]$suggested) | Out-Null
-    Start-Sleep -Milliseconds 600
+    # Force the canonical 624x408 assets to 100%. This exercises the same
+    # WM_DPICHANGED path used by a real monitor move on a 96 DPI host.
+    Set-PanelDpi $hwnd 100
+    New-Item -ItemType Directory -Force -Path $dpiOut | Out-Null
 
     # Rail items start at y=52 with a 34px height and 36px pitch at 96 DPI.
     # These are physical client coordinates, matching App::on_pointer.
@@ -231,11 +296,38 @@ try {
         @{ Name = 'droplet-system.png';  Y = 177; X = 50 }
     )
 
+    # Live DPI evidence first. The Core rail target scales with the panel; the
+    # capture stays at physical pixels so the four corner alphas can be
+    # checked without a resampling step. The canonical four are recaptured
+    # after this pass, from the same settled window, so a stale first paint
+    # cannot leak into the published images.
+    foreach ($percent in @(100, 125, 150)) {
+        Set-PanelDpi $hwnd $percent
+        $scale = $percent / 100.0
+        Click-Tab $hwnd ([int](50 * $scale)) ([int](69 * $scale))
+        $width = [int][Math]::Round(624 * $scale)
+        $height = [int][Math]::Round(408 * $scale)
+        $radius = [int][Math]::Round(12 * $scale)
+        Save-Panel $hwnd "droplet-core-$percent.png" $dpiOut $width $height $radius
+        Write-Output "Captured DPI $percent% at ${width}x${height}"
+    }
+
+    # Return to 100% for the native-size site images after the DPI path has
+    # settled. These are the four canonical captures used by the site and
+    # README.
+    # A layered window at the same 624x408 size as a previous instance can
+    # leave DWM with a cached surface; PrintWindow may then return that stale
+    # surface even though the app has drawn the new one. Resize through a
+    # different physical size and back so the final 100% image is composed
+    # from the current surface, not from the previous window at that size.
+    $beforeReset = New-Object DropletTabs+RECT
+    [DropletTabs]::GetWindowRect($hwnd, [ref]$beforeReset) | Out-Null
+    [DropletTabs]::SetWindowPos($hwnd, [IntPtr]::Zero, $beforeReset.Left, $beforeReset.Top, 625, 409, 0x0004 -bor 0x0010) | Out-Null
+    Start-Sleep -Milliseconds 300
+    Set-PanelDpi $hwnd 100
     foreach ($tab in $tabs) {
         Click-Tab $hwnd ([int]$tab.X) ([int]$tab.Y)
-        # The alpha mask comes from GetWindowRgn, so the PNG follows the
-        # actual window silhouette at the current DPI.
-        Save-Panel $hwnd $tab.Name
+        Save-Panel $hwnd $tab.Name $out 624 408 12
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

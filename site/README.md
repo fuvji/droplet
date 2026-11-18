@@ -10,7 +10,7 @@ Source: <https://github.com/fuvji/droplet>
 
 - `public/index.html` — product page: downloads, benchmark, previews, modules,
   audit, evidence vault, specs, sponsor inventory, FAQ, founder credit.
-- `public/releases.html` — detailed 2.10.15 release ledger and version history.
+- `public/releases.html` — detailed 2.10.16 release ledger and version history.
 - `public/sponsors.html` — direct sponsor inventory.
 - `public/style.css` — base visual system.
 - `public/refine.css` — editorial layer, download/vault cards, 3D previews,
@@ -20,13 +20,14 @@ Source: <https://github.com/fuvji/droplet>
 - `public/downloads.js` — local-only OS hint for the download cards. It sends
   nothing, stores nothing, and has no third-party imports.
 - `public/downloads/` — the direct portable exe, README, and SHA-256 list.
-- `public/assets/` — four native 624×408 captures, the transparent icon sprite,
-  and the transparent favicon/mark assets.
+- `public/assets/` — four native 624×408 captures, three DPI captures
+  (624×408, 780×510, 936×612), the transparent icon sprite, and the transparent
+  favicon/mark assets.
 - `public/sitemap.xml`, `robots.txt`, `llms.txt` — canonical GitHub Pages URLs.
 
 ## Release artifacts
 
-`droplet.exe` (2.10.15, 556,032 B) is the only published executable. It is unsigned and
+`droplet.exe` (2.10.16, 558,080 B) is the only published executable. It is unsigned and
 is downloaded directly; there is no MSIX/AppX, installer, or ZIP wrapper. Linux
 and macOS packages are not published because the Win32/GDI+ core has not been
 ported.

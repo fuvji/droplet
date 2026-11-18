@@ -26,7 +26,8 @@
 param(
     [string]$Root = (Split-Path -Parent $PSScriptRoot),
     [string]$Version = "",
-    [switch]$SkipTests
+    [switch]$SkipTests,
+    [switch]$SkipLinks
 )
 
 $ErrorActionPreference = "Stop"
@@ -262,6 +263,19 @@ try {
         } finally {
             $image.Dispose()
         }
+    }
+
+    # The DPI captures are produced from the running exe at 100/125/150. Run
+    # the PNG-level regression so a future mask change cannot silently leave a
+    # square corner or an asymmetric right/bottom edge.
+    $dpiScript = Join-Path $PSScriptRoot "check-dpi-corners.ps1"
+    $dpiOutput = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dpiScript -Root $Root 2>&1
+    $dpiExit = $LASTEXITCODE
+    $dpiOutput | Write-Host
+    if ($dpiExit -ne 0) {
+        Fail "DPI corner regression check failed"
+    } else {
+        Pass "DPI corner captures at 100/125/150%"
     }
 
     if (-not $SkipLinks) {

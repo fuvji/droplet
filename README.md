@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.15 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.16 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with white sliding knob switches.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 556,032 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 558,080 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,8 +28,20 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.15
+## What is in 2.10.16
 
+- **DPI corner regression (2.10.16)**: the live panel is captured at 100%,
+  125%, and 150%. The PNG-level check requires all four alpha corners to be
+  transparent, the corner boxes to mirror on both axes, and the straight edges
+  to stay opaque. A unit test applies the same check at every scale, so a
+  square corner cannot return silently.
+- **Cleaner glass hierarchy (2.10.16)**: a soft graphite wash replaces the flat
+  black surface, the active rail item is a filled rounded selection, and the
+  header and card titles use a stronger type hierarchy. Switches now use white
+  knobs with deeper accent tracks; sliders gain a small thumb halo.
+- **Kept fast (2.10.16)**: the frame and controls stay on the single
+  alpha/premultiply pass, and a card shadow path was removed after it raised
+  the render readout. No end-to-end speedup is claimed.
 - **Antialiased corners on the panel surface (2.10.15)**: the window now
   publishes a per-pixel alpha surface with `UpdateLayeredWindow`. All four
   12 px quarter-circles use 4×4 coverage sampling, removing the spikes and
@@ -164,7 +176,7 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.15 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.16 System panel](site/public/assets/droplet-system.png)
 
 The panel is a native 624×408 acrylic surface. One 12 px radius paints and
 clips the window; a supersampled layered alpha mask supplies the rounded edge
@@ -210,14 +222,16 @@ name, not a latency claim. Details and reproduction:
 
 ## Verify
 
-- `cargo test --release`: **41 / 41**.
-- Portable executable: **556,032 bytes**,
-  `a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`.
+- `cargo test --release`: **42 / 42**.
+- Portable executable: **558,080 bytes**,
+  `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.15 build with the layered alpha mask as their silhouette.
+  2.10.16 build with the layered alpha mask as their silhouette.
+- DPI evidence: 624×408, 780×510, and 936×612 captures in
+  `site/public/assets/dpi/`; the checker validates their corner alpha.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.15 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.16 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game. The input harness recorder now pumps `GetMessage` directly, but its
   Shield case still intermittently records no output here; a separate low-level

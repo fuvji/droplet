@@ -20,7 +20,7 @@ The release wrapper writes
 target paths to `/droplet` and `/target`, builds the GNU target, and zeroes the
 PE timestamp. Two clean builds in different target directories must produce
 SHA-256
-`a7061c54a2f5379e1e7df32dcb0b52b73b9e275a6034b1e9066dfec9c0ded31a`.
+`fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`.
 The project has no crate dependencies; `.cargo/config.toml` selects the GNU
 target, bundled `rust-lld`, self-contained linking, and ICF. Copy that one file
 to `apps/droplet/droplet.exe` and `site/public/downloads/droplet.exe` for
@@ -43,7 +43,7 @@ release artifact and site layout.
 
 ## Verification
 
-The release currently carries **41 / 41** tests:
+The release currently carries **42 / 42** tests:
 
 ```powershell
 cargo test --release

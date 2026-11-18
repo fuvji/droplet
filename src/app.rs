@@ -2069,13 +2069,22 @@ mod tests {
     }
 
     #[test]
-    fn corner_hit_test_matches_the_rounded_edge() {
-        let (w, h, r) = (624.0, 408.0, 8.0);
-        assert!(in_rounded_corner(0.0, 0.0, w, h, r));
-        assert!(in_rounded_corner(2.0, 2.0, w, h, r));
-        assert!(!in_rounded_corner(8.0, 8.0, w, h, r));
-        assert!(!in_rounded_corner(w - 8.0, 8.0, w, h, r));
-        assert!(!in_rounded_corner(w / 2.0, 2.0, w, h, r));
-        assert!(!in_rounded_corner(-1.0, 4.0, w, h, r));
+    fn corner_hit_test_matches_the_rounded_edge_at_every_dpi() {
+        for scale in [1.0f32, 1.25, 1.5] {
+            let w = ui::WIN_W * scale;
+            let h = ui::WIN_H * scale;
+            let r = (ui::CORNER_RADIUS * scale).round().max(1.0);
+            // Every outer corner is click-through, and the mirrored corners
+            // agree; the straight edge stays inside the client area.
+            assert!(in_rounded_corner(0.0, 0.0, w, h, r));
+            assert!(in_rounded_corner(w - 1.0, 0.0, w, h, r));
+            assert!(in_rounded_corner(0.0, h - 1.0, w, h, r));
+            assert!(in_rounded_corner(w - 1.0, h - 1.0, w, h, r));
+            assert!(!in_rounded_corner(r, r, w, h, r));
+            assert!(!in_rounded_corner(w - r, r, w, h, r));
+            assert!(!in_rounded_corner(r, h - r, w, h, r));
+            assert!(!in_rounded_corner(w / 2.0, 2.0, w, h, r));
+            assert!(!in_rounded_corner(-1.0, 4.0, w, h, r));
+        }
     }
 }
