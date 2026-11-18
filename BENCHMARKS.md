@@ -3,6 +3,28 @@
 This page records what the release measures, how it was measured, and what the
 numbers do not mean.
 
+## 2.10.17 release
+
+2.10.17 replaces the near-black surface with a translucent gray aurora. The
+layered panel composites at 84% opacity, a graphite wash and three low-alpha
+blooms supply the material, and the rail is a second pane of glass. Type is
+Segoe UI Light with no bold weight, the `LOCAL / WINDOWS` eyebrow is gone, and
+the window radius grew from 12 to 18 px with 15 px cards.
+
+The first GDI+ bloom implementation (four blooms of fourteen antialiased
+ellipse fills each) measured **81.45 ms** in the System render readout. The
+shipped version composes the backdrop once per surface size into a cached
+buffer and copies it into the DIB before each repaint; the same readout
+measures **5.32 ms** for a full repaint on this machine. That is a fix for a
+measured regression in the new material, not an end-to-end speedup claim.
+
+- Version: **2.10.17**
+- Portable executable: **561,152 bytes**
+- SHA-256: `601c1e60957f149949f61de0ddfb44d0513e1141b2c31e0e2a8ccd0460378027`
+- Release tests: **42 / 42**
+- DPI corner regression: **9 / 9** over 100/125/150
+- No CPU, latency, or end-to-end size win is claimed.
+
 ## 2.10.16 release
 
 2.10.16 adds a DPI regression over the mirrored 12 px layered-alpha mask. The
@@ -187,9 +209,9 @@ work; it cannot remove the game loop, the OS scheduler, or the device path.
 
 ## Release artifact
 
-- Version: **2.10.16**
-- Portable executable: **558,080 bytes**
-- SHA-256: `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`
+- Version: **2.10.17**
+- Portable executable: **561,152 bytes**
+- SHA-256: `601c1e60957f149949f61de0ddfb44d0513e1141b2c31e0e2a8ccd0460378027`
 - Distribution: one direct exe; no MSIX/AppX, installer, or ZIP
 - Release tests: **42 / 42**
 - Runtime dependencies: **0**

@@ -11,13 +11,14 @@ pub const WIN_H: f32 = 408.0;
 /// One radius for the window silhouette. The panel is deliberately borderless;
 /// the antialiased layered alpha mask is authoritative on every supported
 /// Windows version, so Windows 10 cannot silently fall back to a square frame.
-pub const CORNER_RADIUS: f32 = 12.0;
+pub const CORNER_RADIUS: f32 = 18.0;
 
 pub const HEADER_H: f32 = 44.0;
 const RAIL_W: f32 = 100.0;
 const FOOTER_H: f32 = 22.0;
-const CARD_TITLE: f32 = 22.0;
-const ROW_H: f32 = 21.0;
+const CARD_TITLE: f32 = 23.0;
+const ROW_H: f32 = 22.0;
+const CARD_RADIUS: f32 = 15.0;
 const CARD_PAD: f32 = 5.0;
 const GAP: f32 = 8.0;
 const PAD: f32 = 10.0;
@@ -81,9 +82,64 @@ fn wid(s: &str, slot: u32) -> u64 {
 
 // ------------------------------------------------------------------- theme
 
+const BG_TOP: u32 = 0xFF1C_1F26;
+const BG_BOTTOM: u32 = 0xFF12_141A;
+
+/// Acrylic-aurora backdrop, composed straight into the 32bpp back buffer.
+///
+/// The earlier GDI+ version stacked four blooms of fourteen antialiased
+/// ellipse fills each; that measured ~80 ms per repaint on this desktop. One
+/// linear pass over the pixels costs a fraction of that, keeps the same soft
+/// gray glass, and lets the layered alpha carry the real translucency.
+/// Coordinates are normalised, so the material is identical at every DPI.
+pub unsafe fn backdrop(bits: *mut u32, w: i32, h: i32) {
+    if bits.is_null() || w <= 0 || h <= 0 {
+        return;
+    }
+    let ch = |c: u32, sh: u32| ((c >> sh) & 0xFF) as f32;
+    let (tr, tg, tb) = (ch(BG_TOP, 16), ch(BG_TOP, 8), ch(BG_TOP, 0));
+    let (br, bg, bb) = (ch(BG_BOTTOM, 16), ch(BG_BOTTOM, 8), ch(BG_BOTTOM, 0));
+    // cx, cy, rx, ry, tint r/g/b, strength.
+    let blobs = [
+        (0.88f32, 0.10, 0.58, 0.58, 62.0, 110.0, 120.0, 10.0 / 255.0),
+        (0.04, 0.80, 0.48, 0.64, 85.0, 90.0, 114.0, 8.0 / 255.0),
+        (0.62, 1.04, 0.60, 0.50, 122.0, 98.0, 108.0, 6.0 / 255.0),
+        (0.26, -0.02, 0.52, 0.38, 246.0, 248.0, 251.0, 6.0 / 255.0),
+    ];
+    let wf = w as f32;
+    let hf = h as f32;
+    let dst = std::slice::from_raw_parts_mut(bits, (w * h) as usize);
+    for y in 0..h {
+        let fy = y as f32 / hf;
+        let base = [
+            tr + (br - tr) * fy,
+            tg + (bg - tg) * fy,
+            tb + (bb - tb) * fy,
+        ];
+        for x in 0..w {
+            let fx = x as f32 / wf;
+            let mut px = base;
+            for (cx, cy, rx, ry, cr, cg, cb, a) in blobs {
+                let dx = (fx - cx) / rx;
+                let dy = (fy - cy) / ry;
+                let d2 = dx * dx + dy * dy;
+                if d2 < 1.0 {
+                    let k = 1.0 - d2;
+                    let k = k * k * a;
+                    px[0] += (cr - px[0]) * k;
+                    px[1] += (cg - px[1]) * k;
+                    px[2] += (cb - px[2]) * k;
+                }
+            }
+            dst[(y * w + x) as usize] =
+                0xFF00_0000 | ((px[0] as u32) << 16) | ((px[1] as u32) << 8) | px[2] as u32;
+        }
+    }
+}
+
 pub struct Theme {
-    pub bg: u32,
     pub rail: u32,
+    pub rail_bottom: u32,
     pub card: u32,
     pub card_on: u32,
     pub border: u32,
@@ -102,19 +158,25 @@ impl Theme {
         let (r, g, b) = s.theme_rgb();
         let accent = 0xFF00_0000 | ((r as u32) << 16) | ((g as u32) << 8) | b as u32;
         Theme {
-            bg: 0xFF07_080B,
-            rail: 0xFF0B_0C12,
-            card: 0xFF15_161C,
-            card_on: 0xFF1A_1B23,
-            border: with_alpha(0xFFF4_F3EF, 10),
-            border_on: with_alpha(accent, 34),
-            text: 0xFFF5_F4F0,
-            dim: 0xFFA3_A3AA,
-            faint: 0xFF6E_6F78,
+            // Smooth gray graphite rather than near-black. The fills keep some
+            // alpha so the aurora wash below them reads through the glass.
+            rail: 0xE6_1619_1F,
+            rail_bottom: 0xE6_10_12_18,
+            // Cards stay opaque in the GDI+ pass; the layered alpha mask still
+            // makes the whole panel translucent against the desktop. Blending
+            // large translucent rectangles was the expensive part of the
+            // repaint, and an opaque tile reads just as frosted over the aurora.
+            card: 0xFF21_252D,
+            card_on: 0xFF26_2A33,
+            border: with_alpha(0xFFF4_F3EF, 9),
+            border_on: with_alpha(accent, 30),
+            text: 0xFFF4_F2EE,
+            dim: 0xFFB3_B5BD,
+            faint: 0xFF8A_8C95,
             accent,
-            chip: 0xFF20_2127,
-            track: 0xFF31_323A,
-            danger: 0xFFD2_6E6E,
+            chip: 0xFF26_2A33,
+            track: 0xFF3C_404A,
+            danger: 0xFFD2_7A7A,
         }
     }
 }
@@ -243,16 +305,24 @@ impl<'a> Ui<'a> {
 
     pub fn frame(&mut self) {
         let s = self.scale;
-        // Layered tonal frame: a soft graphite wash and a restrained accent
-        // bloom replace the old flat black fill. The surfaces stay opaque
-        // enough to read at a glance, but gain the depth of the reference
-        // glass without a per-frame blur or a second window.
+        // The aurora backdrop is composed into the back buffer before GDI+
+        // draws the interface (see `backdrop`). Here we only lay the second
+        // pane of glass over it: the rail is not an opaque strip, so the
+        // aurora keeps a little presence underneath the navigation.
+        let h = WIN_H * s;
+        // The rail is a second pane of glass, not an opaque strip: the aurora
+        // keeps a little presence underneath it.
+        self.c.vgrad(
+            0.0,
+            0.0,
+            RAIL_W * s,
+            h,
+            self.th.rail,
+            self.th.rail_bottom,
+            14,
+        );
         self.c
-            .vgrad(0.0, 0.0, WIN_W * s, WIN_H * s, 0xFF0B_0C12, 0xFF07_080B, 10);
-        self.c
-            .vgrad(0.0, 0.0, RAIL_W * s, WIN_H * s, 0xFF10_1117, 0xFF0A_0B10, 8);
-        self.c
-            .rect(RAIL_W * s, 0.0, 1.0, WIN_H * s, with_alpha(self.th.text, 7));
+            .rect(RAIL_W * s, 0.0, 1.0, h, with_alpha(self.th.text, 6));
         self.header();
         self.rail();
         match self.tab {
@@ -274,25 +344,17 @@ impl<'a> Ui<'a> {
         self.logo((RAIL_W - 22.0) * 0.5 * s, 10.0 * s, 22.0 * s);
 
         let titles = ["Core", "Crystal", "Assist", "System"];
+        // One light title, optically centred in the header. No eyebrow line:
+        // the reference panels trust a single label and quiet space.
         self.label(
             (RAIL_W + PAD) * s,
-            7.0 * s,
-            200.0 * s,
-            22.0 * s,
-            titles[self.tab],
-            17.0,
-            true,
-            self.th.text,
-        );
-        self.label(
-            (RAIL_W + PAD + 1.0) * s,
-            27.0 * s,
+            11.0 * s,
             220.0 * s,
-            10.0 * s,
-            "LOCAL / WINDOWS",
-            6.5,
+            24.0 * s,
+            titles[self.tab],
+            16.0,
             false,
-            self.th.faint,
+            self.th.text,
         );
 
         let [master, hide, close] = header_buttons(WIN_W, s);
@@ -419,10 +481,10 @@ impl<'a> Ui<'a> {
                 // A filled glass selection, like a source-list row: no left
                 // accent bar or outline, just a quiet tonal lift and tinted icon.
                 self.c
-                    .round_rect(r.x, r.y, r.w, r.h, 11.0 * s, with_alpha(self.th.text, 12));
+                    .round_rect(r.x, r.y, r.w, r.h, 10.0 * s, with_alpha(self.th.text, 13));
             } else if hot {
                 self.c
-                    .round_rect(r.x, r.y, r.w, r.h, 11.0 * s, with_alpha(self.th.text, 6));
+                    .round_rect(r.x, r.y, r.w, r.h, 10.0 * s, with_alpha(self.th.text, 6));
             }
             let tint = if active {
                 self.th.accent
@@ -436,8 +498,8 @@ impl<'a> Ui<'a> {
                 r.w - 34.0 * s,
                 r.h,
                 name,
-                10.0,
-                active,
+                10.5,
+                false,
                 if active { self.th.text } else { tint },
             );
             if self.pressed && hot {
@@ -447,7 +509,7 @@ impl<'a> Ui<'a> {
     }
 
     fn icon(&mut self, kind: u8, x: f32, y: f32, sz: f32, color: u32) {
-        let w = 1.25;
+        let w = 1.15 * self.scale;
         let cx = x + sz * 0.5;
         match kind {
             0 => {
@@ -574,12 +636,12 @@ impl<'a> Ui<'a> {
             r.y,
             r.w,
             r.h,
-            14.0 * s,
+            CARD_RADIUS * s,
             if on { self.th.card_on } else { self.th.card },
         );
         let color = if active { self.th.text } else { self.th.dim };
-        let tr = Rect::new(r.x + 12.0 * s, r.y + 4.0 * s, r.w - 60.0 * s, 17.0 * s);
-        self.label(tr.x, tr.y, tr.w, tr.h, title, 12.0, true, color);
+        let tr = Rect::new(r.x + 13.0 * s, r.y + 4.0 * s, r.w - 62.0 * s, 18.0 * s);
+        self.label(tr.x, tr.y, tr.w, tr.h, title, 12.0, false, color);
         if let Some(k) = toggle {
             let sw = Rect::new(r.x + r.w - 40.0 * s, r.y + 4.0 * s, 28.0 * s, 16.0 * s);
             self.switch(sw.x, sw.y, k, on);
@@ -813,12 +875,12 @@ impl<'a> Ui<'a> {
             0.0
         };
         self.c
-            .round_rect(tx, cy - 1.5 * s, tw, 3.0 * s, 1.5 * s, self.th.track);
+            .round_rect(tx, cy - 1.25 * s, tw, 2.5 * s, 1.25 * s, self.th.track);
         self.c
-            .round_rect(tx, cy - 1.5 * s, tw * t, 3.0 * s, 1.5 * s, self.th.accent);
+            .round_rect(tx, cy - 1.25 * s, tw * t, 2.5 * s, 1.25 * s, self.th.accent);
         self.c
-            .circle(tx + tw * t, cy, 6.5 * s, with_alpha(self.th.text, 16));
-        self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
+            .circle(tx + tw * t, cy, 5.5 * s, with_alpha(self.th.text, 15));
+        self.c.circle(tx + tw * t, cy, 3.6 * s, self.th.text);
         self.label_right(
             card.x + card.w - 10.0 * s - 36.0 * s,
             y,
@@ -886,7 +948,7 @@ impl<'a> Ui<'a> {
             self.c.circle(
                 x,
                 cy,
-                if selected { 4.0 * s } else { 2.4 * s },
+                if selected { 3.6 * s } else { 2.2 * s },
                 if selected {
                     self.th.text
                 } else {
@@ -1065,12 +1127,12 @@ impl<'a> Ui<'a> {
         let cy = y + ROW_H * 0.5 * s;
         let t = v as f32 / 255.0;
         self.c
-            .round_rect(tx, cy - 1.5 * s, tw, 3.0 * s, 1.5 * s, self.th.track);
+            .round_rect(tx, cy - 1.25 * s, tw, 2.5 * s, 1.25 * s, self.th.track);
         self.c
-            .round_rect(tx, cy - 1.5 * s, tw * t, 3.0 * s, 1.5 * s, color);
+            .round_rect(tx, cy - 1.25 * s, tw * t, 2.5 * s, 1.25 * s, color);
         self.c
-            .circle(tx + tw * t, cy, 6.5 * s, with_alpha(self.th.text, 16));
-        self.c.circle(tx + tw * t, cy, 4.0 * s, self.th.text);
+            .circle(tx + tw * t, cy, 5.5 * s, with_alpha(self.th.text, 15));
+        self.c.circle(tx + tw * t, cy, 3.6 * s, self.th.text);
         self.label_right(
             card.x + card.w - 10.0 * s - 36.0 * s,
             y,

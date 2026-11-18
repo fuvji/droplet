@@ -133,6 +133,9 @@ struct App {
 
     drag: Option<(i32, i32)>,
     back: Option<BackBuffer>,
+    /// Cached aurora backdrop for the current surface size. Recomputing it is
+    /// cheap, but a 1 MB copy is cheaper still on every repaint.
+    backdrop: Vec<u32>,
     canvas: Option<Canvas>,
     shown: bool,
     user_hidden: bool,
@@ -166,6 +169,7 @@ impl App {
             anim_timer: false,
             drag: None,
             back: None,
+            backdrop: Vec::new(),
             canvas: None,
             shown: false,
             user_hidden: false,
@@ -217,11 +221,22 @@ impl App {
             // allocations and their cleanup from every frame.
             self.canvas = None;
             self.back = BackBuffer::new(cw, ch);
+            self.backdrop = vec![0; (cw * ch) as usize];
+            unsafe { ui::backdrop(self.backdrop.as_mut_ptr(), cw, ch) };
         }
         let bdc = match self.back.as_ref() {
             Some(b) => b.dc,
             None => return,
         };
+        // Restore the static aurora backdrop every frame: the layered mask
+        // premultiplies the buffer in place, so the base has to be rebuilt
+        // before GDI+ lays the interface over it.
+        if let Some(back) = self.back.as_ref() {
+            let len = ((back.w * back.h) as usize).min(self.backdrop.len());
+            unsafe {
+                std::ptr::copy_nonoverlapping(self.backdrop.as_ptr(), back.bits, len);
+            }
+        }
         if self.canvas.is_none() {
             self.canvas = Canvas::new(bdc);
         }
@@ -284,7 +299,7 @@ impl App {
                 crate::layered::prepare(
                     back,
                     (ui::CORNER_RADIUS * scale).round() as i32,
-                    ACRYLIC_ALPHA,
+                    PANEL_ALPHA,
                 );
                 crate::layered::update(self.hwnd, back);
             }
@@ -1727,7 +1742,10 @@ pub fn run() {
         let engine = Arc::new(Engine::new(&settings));
         let _ = ENGINE.set(engine.clone());
 
-        let fonts = match Fonts::new("Segoe UI") {
+        // Segoe UI Light carries the thin, quiet type the panel now uses. The
+        // regular family is the fallback on the rare image where Light is not
+        // installed; weight is never bolded anywhere in the UI.
+        let fonts = match Fonts::new("Segoe UI Light").or_else(|| Fonts::new("Segoe UI")) {
             Some(f) => f,
             None => {
                 return;
@@ -1794,11 +1812,10 @@ pub fn run() {
             win::SWP_NOMOVE | win::SWP_NOZORDER | win::SWP_NOACTIVATE,
         );
 
-        // Desktop acrylic is composited by DWM, so it stays off the app's
-        // paint thread. The per-pixel alpha surface still owns the final
-        // pixels; this call keeps the material available where the platform
-        // supports it.
-        let _ = apply_acrylic(hwnd);
+        // The per-pixel layered surface is the material. Asking DWM for a
+        // system backdrop as well made the compositor paint an opaque dark
+        // layer behind the window, which cancelled the translucency; the
+        // alpha surface now composites straight onto the desktop.
 
         // The layered alpha surface is the primary silhouette on every Windows
         // version, including Windows 10 where DWM's newer corner attribute is
@@ -1845,63 +1862,11 @@ pub fn run() {
     }
 }
 
-const ACRYLIC_ALPHA: u8 = 250;
-const ACRYLIC_TINT: u32 = 0x5A0B_0A0C;
-
-unsafe fn apply_acrylic(hwnd: HWND) -> &'static str {
-    if system_backdrop(hwnd) {
-        return "backdrop";
-    }
-    if accent_policy(hwnd) {
-        return "accent";
-    }
-    "none"
-}
-
-/// Legacy Windows 10 accent path. Some newer builds no longer expose it, so
-/// it is the fallback after the supported DWM system-backdrop attribute.
-unsafe fn accent_policy(hwnd: HWND) -> bool {
-    let dll = win::dyn_load("user32.dll");
-    if dll == 0 {
-        return false;
-    }
-    let p = win::load_proc(dll, "SetWindowCompositionAttribute");
-    if p == 0 {
-        return false;
-    }
-    let f: unsafe extern "system" fn(HWND, *mut win::WindowCompositionAttributeData) -> i32 =
-        std::mem::transmute(p);
-    let mut accent = win::AccentPolicy {
-        state: win::ACCENT_ENABLE_ACRYLICBLURBEHIND,
-        flags: 0,
-        gradient: ACRYLIC_TINT,
-        animation: 0,
-    };
-    let mut data = win::WindowCompositionAttributeData {
-        attrib: win::WCA_ACCENT_POLICY,
-        data: &mut accent as *mut _ as *mut std::ffi::c_void,
-        size: std::mem::size_of::<win::AccentPolicy>(),
-    };
-    f(hwnd, &mut data) != 0
-}
-
-/// Windows 11 22H2+ system backdrop: DWMSBT_TRANSIENTWINDOW is the desktop
-/// acrylic material. The app still owns every pixel; DWM only supplies the
-/// blurred material behind the window, so this costs no app CPU.
-unsafe fn system_backdrop(hwnd: HWND) -> bool {
-    let dll = win::dyn_load("dwmapi.dll");
-    if dll == 0 {
-        return false;
-    }
-    let p = win::load_proc(dll, "DwmSetWindowAttribute");
-    if p == 0 {
-        return false;
-    }
-    let f: unsafe extern "system" fn(HWND, u32, *const std::ffi::c_void, u32) -> i32 =
-        std::mem::transmute(p);
-    let kind: i32 = 3; // DWMSBT_TRANSIENTWINDOW (desktop acrylic)
-    f(hwnd, 38, &kind as *const i32 as *const std::ffi::c_void, 4) == 0
-}
+// Panel opacity. At 84% the desktop reads through the graphite glass, while
+// warm-white text keeps its contrast on a bright wallpaper. DWM backdrop
+// materials are deliberately not requested: on a layered window they painted
+// an opaque layer behind the surface and cancelled this translucency.
+const PANEL_ALPHA: u8 = 214;
 
 /// Append one local diagnostic line. This is the same `%LOCALAPPDATA%\Droplet`
 /// directory as the config and goes nowhere else: no network, telemetry, or

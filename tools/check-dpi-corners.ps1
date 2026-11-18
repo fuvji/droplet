@@ -18,9 +18,9 @@ $ErrorActionPreference = "Stop"
 $rootPath = (Resolve-Path -LiteralPath $Root).Path
 $dirPath = Join-Path $rootPath $Directory
 $captures = @(
-    @{ Name = "droplet-core-100.png"; Width = 624; Height = 408; Radius = 12 },
-    @{ Name = "droplet-core-125.png"; Width = 780; Height = 510; Radius = 15 },
-    @{ Name = "droplet-core-150.png"; Width = 936; Height = 612; Radius = 18 }
+    @{ Name = "droplet-core-100.png"; Width = 624; Height = 408; Radius = 18 },
+    @{ Name = "droplet-core-125.png"; Width = 780; Height = 510; Radius = 23 },
+    @{ Name = "droplet-core-150.png"; Width = 936; Height = 612; Radius = 27 }
 )
 $failures = [System.Collections.Generic.List[string]]::new()
 $passes = 0

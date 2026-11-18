@@ -307,7 +307,7 @@ try {
         Click-Tab $hwnd ([int](50 * $scale)) ([int](69 * $scale))
         $width = [int][Math]::Round(624 * $scale)
         $height = [int][Math]::Round(408 * $scale)
-        $radius = [int][Math]::Round(12 * $scale)
+        $radius = [int][Math]::Round(18 * $scale)
         Save-Panel $hwnd "droplet-core-$percent.png" $dpiOut $width $height $radius
         Write-Output "Captured DPI $percent% at ${width}x${height}"
     }
@@ -327,7 +327,7 @@ try {
     Set-PanelDpi $hwnd 100
     foreach ($tab in $tabs) {
         Click-Tab $hwnd ([int]$tab.X) ([int]$tab.Y)
-        Save-Panel $hwnd $tab.Name $out 624 408 12
+        Save-Panel $hwnd $tab.Name $out 624 408 18
         Write-Output "Captured $($tab.Name)"
     }
 } finally {

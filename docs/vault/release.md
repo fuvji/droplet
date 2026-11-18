@@ -1,5 +1,18 @@
 # release
 
+## 2.10.17 — 2026-11-18
+
+- Portable exe: 561,152 B,
+  `601c1e60957f149949f61de0ddfb44d0513e1141b2c31e0e2a8ccd0460378027`.
+- Tests: 42 / 42.
+- Changes: a translucent 84% layered panel with a gray aurora wash and glass
+  rail, thin Segoe UI Light type with no bold weight, the `LOCAL / WINDOWS`
+  eyebrow removed, an 18 px window radius, 15 px cards, and a cached pixel
+  backdrop. DWM backdrop requests were removed because they made the layered
+  window opaque. The first GDI+ bloom path measured 81.45 ms; the cached
+  backdrop measures 5.32 ms for a full repaint. No network, telemetry, or input
+  path changed.
+
 ## 2.10.16 — 2026-11-18
 
 - Portable exe: 558,080 B,

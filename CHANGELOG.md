@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.10.17
+
+- Replace the near-black panel with an acrylic-style gray aurora: an
+  84%-opaque layered surface (the desktop shows through), a graphite wash with
+  low-alpha slate, indigo, and mauve blooms, and a glass rail. DWM backdrop
+  requests were removed because they painted an opaque layer behind the layered
+  window and cancelled the translucency.
+- Remove the `LOCAL / WINDOWS` eyebrow. The header is one 16 px light title.
+  All text uses Segoe UI Light (Segoe UI fallback) with no bold weight; sizes
+  and dim colors were retuned for thin stems.
+- Grow the window radius from 12 to 18 px and card corners to 15 px; thin the
+  sliders and separators; scale icon strokes with DPI. Rows are 22 px so the
+  four cards still fit the 624×408 panel without touching the layout.
+- Compose the aurora once per surface size into a cached buffer and copy it
+  into the DIB before each repaint. The first GDI+ bloom attempt measured
+  81.45 ms in the System readout; the cached backdrop measures 5.32 ms for a
+  full repaint here. That is a fix for the new material, not an end-to-end
+  speedup claim.
+- Tests: **42 / 42**. DPI corner regression: **9 / 9**. Portable executable:
+  **561,152 bytes**, SHA-256
+  `601c1e60957f149949f61de0ddfb44d0513e1141b2c31e0e2a8ccd0460378027`.
+
 ## 2.10.16
 
 - Add live DPI coverage at 100%, 125%, and 150%. `tools/capture-tabs.ps1`

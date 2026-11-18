@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.16 Core panel: Shield, Mace, Potion, Breach, Auto Use, and Dash with white sliding knob switches.">
+<img src="site/public/assets/droplet-core.png" width="624" alt="Droplet 2.10.17 Core panel: thin light type over translucent gray glass, with Shield, Mace, Potion, Breach, Auto Use, and Dash.">
 
 # droplet
 
@@ -19,7 +19,7 @@ capture.
 
 | Platform | Package | Size | Status |
 | --- | --- | ---: | --- |
-| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 558,080 B | **Available** |
+| Windows 10/11 x64 | [Portable exe](https://fuvji.github.io/droplet/downloads/droplet.exe) | 561,152 B | **Available** |
 | Linux | — | — | Port not started; the core is Win32/GDI+ |
 | macOS | — | — | Port not started; no Cocoa/Quartz layer |
 
@@ -28,28 +28,38 @@ The single executable is unsigned. There is no MSIX/AppX, installer, or ZIP
 package. No Linux `.deb`/AppImage/`.tar.gz` or macOS `.dmg`/`.zip`/`.img` is
 published because those builds do not exist.
 
-## What is in 2.10.16
+## What is in 2.10.17
 
+- **Translucent aurora glass (2.10.17)**: the layered panel now composites at
+  84% opacity, so the desktop reads through a smooth gray graphite wash with
+  low-alpha slate, indigo, and mauve blooms. The rail is a second pane of
+  glass. DWM backdrop requests were removed because they made this layered
+  window opaque.
+- **Thin type, no eyebrow (2.10.17)**: the `LOCAL / WINDOWS` line is gone and
+  the header is one light 16 px title. All text uses Segoe UI Light (Segoe UI
+  fallback) with no bold weight; dim labels were lifted so thin stems stay
+  legible on gray glass.
+- **Cleaner corners (2.10.17)**: the window radius grew from 12 to 18 px and
+  cards use 15 px, so every tile is a real curve instead of a thick tonal
+  wedge. Rows gained a pixel of breathing room; sliders and separators are
+  thinner, and icon strokes scale with DPI.
+- **Kept fast (2.10.17)**: the aurora is cached per surface size and copied
+  into the back buffer. A first GDI+ bloom version measured 81.45 ms in the
+  System readout and was replaced by the pixel backdrop, which measures
+  5.32 ms for a full repaint here. No end-to-end speedup is claimed.
 - **DPI corner regression (2.10.16)**: the live panel is captured at 100%,
   125%, and 150%. The PNG-level check requires all four alpha corners to be
   transparent, the corner boxes to mirror on both axes, and the straight edges
   to stay opaque. A unit test applies the same check at every scale, so a
   square corner cannot return silently.
-- **Cleaner glass hierarchy (2.10.16)**: a soft graphite wash replaces the flat
-  black surface, the active rail item is a filled rounded selection, and the
-  header and card titles use a stronger type hierarchy. Switches now use white
-  knobs with deeper accent tracks; sliders gain a small thumb halo.
-- **Kept fast (2.10.16)**: the frame and controls stay on the single
-  alpha/premultiply pass, and a card shadow path was removed after it raised
-  the render readout. No end-to-end speedup is claimed.
 - **Antialiased corners on the panel surface (2.10.15)**: the window now
   publishes a per-pixel alpha surface with `UpdateLayeredWindow`. All four
-  12 px quarter-circles use 4×4 coverage sampling, removing the spikes and
+  18 px quarter-circles use 4×4 coverage sampling, removing the spikes and
   binary staircase that still read as a square detail around the corner.
 - **Corrected corner geometry (2.10.15)**: the interim layered path put the
   right and bottom arc centres on the window edge instead of one radius inside
   it. The mirrored geometry now makes all four corners identical, and paint,
-  hit testing, window sizing, and capture use the same 12 px radius.
+  hit testing, window sizing, and capture use the same 18 px radius.
 - **Windows 10-safe silhouette (2.10.15)**: the layered surface is the visible
   clip on both Windows 10 and Windows 11; it does not depend on the Windows
   11-only DWM corner preference. The old GDI region is cleared on every DPI
@@ -147,7 +157,7 @@ published because those builds do not exist.
   settings snapshot or takes its lock.
 - **Click-through corners**: the transparent quarter-rounds return
   `HTTRANSPARENT` instead of swallowing clicks. The center and straight edges
-  still hit the panel; the layered alpha silhouette has the same 12 px radius.
+  still hit the panel; the layered alpha silhouette has the same 18 px radius.
 - **Less redundant presence work**: once the foreground window is the verified
   game, the watcher reuses that HWND instead of resolving its process image
   every 160 ms. Presence, focus, and the cold-discovery scan are unchanged.
@@ -166,7 +176,7 @@ published because those builds do not exist.
   held-repeat behavior.
 - **One portable exe**: MSIX/AppX, installer, and ZIP packaging are gone. The
   release is a single unsigned `droplet.exe` plus checksums.
-- **12 px shared corner**: paint, layered alpha surface, hit test, and capture
+- **18 px shared corner**: paint, layered alpha surface, hit test, and capture
   mask agree on the radius. There is no top accent strip or painted rim.
 - **Independent sliders and knob switches** remain from 2.9.2.
 - **No unrestricted-speed mode**. Other modules keep their configured delays;
@@ -176,12 +186,13 @@ published because those builds do not exist.
 
 ## GUI
 
-![Droplet 2.10.16 System panel](site/public/assets/droplet-system.png)
+![Droplet 2.10.17 System panel](site/public/assets/droplet-system.png)
 
-The panel is a native 624×408 acrylic surface. One 12 px radius paints and
-clips the window; a supersampled layered alpha mask supplies the rounded edge
-on every supported Windows version, and there is no outer stroke or top accent
-line. Painting is event-driven; an idle panel does not schedule animation
+The panel is a native 624×408 acrylic surface at 84% opacity. One 18 px radius
+paints and clips the window; a supersampled layered alpha mask supplies the
+rounded edge on every supported Windows version, and there is no outer stroke
+or top accent line. The gray aurora wash and its three blooms sit behind the
+cards, and the rail is a second pane of glass. Painting is event-driven; an idle panel does not schedule animation
 frames.
 Binding and slot chips borrow their labels instead of allocating a `String` per
 chip per frame.
@@ -223,15 +234,15 @@ name, not a latency claim. Details and reproduction:
 ## Verify
 
 - `cargo test --release`: **42 / 42**.
-- Portable executable: **558,080 bytes**,
-  `fff3199a95970a337c2967bfa198b94bb2a937404428aba7630d1b7bdbea24ed`.
+- Portable executable: **561,152 bytes**,
+  `601c1e60957f149949f61de0ddfb44d0513e1141b2c31e0e2a8ccd0460378027`.
 - Distribution: one direct `droplet.exe`; no MSIX/AppX, installer, or ZIP.
 - Four native 624×408 captures in `site/public/assets/`, regenerated from the
-  2.10.16 build with the layered alpha mask as their silhouette.
+  2.10.17 build with the layered alpha mask as their silhouette.
 - DPI evidence: 624×408, 780×510, and 936×612 captures in
   `site/public/assets/dpi/`; the checker validates their corner alpha.
 - No live Minecraft client is available here. The no-game footer was verified
-  from the 2.10.16 capture; live Anchor placement, Crystal Return injection,
+  from the 2.10.17 capture; live Anchor placement, Crystal Return injection,
   Java/Bedrock positive detection, and hit registration remain unverified in
   game. The input harness recorder now pumps `GetMessage` directly, but its
   Shield case still intermittently records no output here; a separate low-level

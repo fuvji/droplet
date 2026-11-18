@@ -11,6 +11,17 @@
 Machine: AMD Ryzen 7 5700G, Windows 11. Release profile: `opt-level=3`, fat LTO,
 one codegen unit, panic-abort, stripped.
 
+## 2.10.17 changes
+
+- Visual path: the layered panel is 84% opaque with a cached pixel aurora
+  behind it. The first GDI+ bloom version measured 81.45 ms in the System
+  render readout; the cached backdrop measures 5.32 ms for a full repaint on
+  the same machine. That is a fix for the new material, not an end-to-end
+  speedup claim.
+- Type and shape: Segoe UI Light with no bold weight, the `LOCAL / WINDOWS`
+  eyebrow removed, an 18 px window radius, 15 px cards, and thinner sliders.
+- Tests: 42 / 42. Portable exe: 561,152 B.
+
 ## 2.10.16 changes
 
 - DPI regression only on the visual path: the live panel is captured through
